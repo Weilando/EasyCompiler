@@ -17,6 +17,8 @@ void main() {
 ```
 This function handles the main flow of the program.
 
+Programs are saved in a file with `.easy`-suffix.
+The filename can contain letters, digits and underscores, but needs to begin with a letter.
 
 ## Functions
 Functions begin with their return type followed by a unique identifier and a pair of parenthesis.

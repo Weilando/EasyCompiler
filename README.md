@@ -7,3 +7,4 @@ One can track the project's progress in the [roadmap](/docs/Roadmap.md).
 
 ## Build and Run
 Gradle is used for dependency-management, building and testing the compiler.
+The compiler will be called via `java EasyCompiler -compile <Filename.easy>`.

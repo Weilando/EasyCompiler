@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Setup
+- [x] Setup
 - [ ] Stage 1: Parsing (basic functionality)
 - [ ] Stage 2: Type-checking (basic functionality)
 - [ ] Stage 3: Code-generation (basic functionality)
@@ -12,8 +12,8 @@
 - [x] Create git-repository and configure `.gitignore`
 - [x] Create language description of _Easy_
 - [x] Create gradle-project
-- [ ] Create main class and implement arguments
-- [ ] Setup testing
+- [x] Create main class and implement arguments
+- [x] Setup testing
 
 ## Stage 1: Parsing (basic functionality)
 - [ ] main method
