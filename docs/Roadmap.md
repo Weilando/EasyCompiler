@@ -16,8 +16,8 @@
 - [x] Setup testing
 
 ## Stage 1: Parsing (basic functionality)
-- [ ] open source file
-- [ ] write SableCC-grammar and generate parser
+- [ ] Open source file
+- [x] Setup SableCC
 ### Progress parsing
 - [ ] main method
 - [ ] comment

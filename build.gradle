@@ -25,3 +25,27 @@ test {
         events "passed", "skipped", "failed"
     }
 }
+
+task getSableCC(type: Copy) {
+    mkdir 'libs/'
+    from configurations.compile
+    into 'libs/'
+}
+
+task runSableCC(type: Exec) {
+    inputs.file('src/main/java/EasyCompiler.scc').withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.dirs(['src/main/java/analysis', 'src/main/java/lexer', 'src/main/java/node', 'src/main/java/parser'])
+
+    workingDir = "src/main/java"
+    commandLine 'java'
+    args = ['-jar', '../../../libs/sablecc-3.2-1.jar', 'EasyCompiler.scc']
+    doLast {
+        copy {
+            from 'src/main/java/lexer/lexer.dat'
+            into 'out/production/classes/lexer/'
+        }
+    }
+}
+
+runSableCC.dependsOn(getSableCC)
+compileJava.dependsOn(runSableCC)
