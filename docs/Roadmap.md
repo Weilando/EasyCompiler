@@ -16,6 +16,9 @@
 - [x] Setup testing
 
 ## Stage 1: Parsing (basic functionality)
+- [ ] open source file
+- [ ] write SableCC-grammar and generate parser
+### Progress parsing
 - [ ] main method
 - [ ] comment
 - [ ] literals
@@ -39,6 +42,11 @@
 - [ ] generate abstract syntax tree
 
 ## Stage 2: Type-checking (basic functionality)
+- [ ] Add type-checker
+- [ ] Add symbol table
+- [ ] Add line-evaluator
+- [ ] Add error-handler for type-errors
+### Progress type-checking
 - [ ] Detect missing declaration before first assignment
 - [ ] Detect repeated declarations
 - [ ] Evaluate type of expressions

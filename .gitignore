@@ -23,6 +23,7 @@ gradle-app.setting
 .project
 .settings
 .metadata
+/bin/
 bin
 
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
