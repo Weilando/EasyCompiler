@@ -1,0 +1,17 @@
+void main() {
+  boolean A = true && true;
+  boolean B = true && false;
+  boolean C = false && true;
+  boolean D = false && false;
+  println(A);
+  println(B);
+  println(C);
+  println(D);
+
+  A = A && true;
+  B = false && A;
+  C = true && false;
+  println(A);
+  println(B);
+  println(C);
+}

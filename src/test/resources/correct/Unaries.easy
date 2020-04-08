@@ -1,0 +1,29 @@
+void main() {
+  int a = -2;
+  int b = +3;
+  int c = -0;
+  int d = +0;
+  boolean A = !true;
+  boolean B = !false;
+  println(a);
+  println(b);
+  println(c);
+  println(d);
+  println(A);
+  println(B);;
+
+  a = -3;
+  b = 3 + -a;
+  c = +a;
+  d = -a;
+  println(a);
+  println(b);
+  println(c);
+  println(d);
+
+  A = !A;
+  B = !!A;
+  println(A);
+  println(B);
+  println(!!!A);
+}

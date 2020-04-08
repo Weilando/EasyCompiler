@@ -1,0 +1,14 @@
+void main() {
+  int a = 6;
+  if (a % 3 == 0)
+    a = 0;
+  else if (a % 5 == 1) {
+    a = 1;
+    println(a);
+  } else
+    a = 2;
+  println(a);
+
+  if (true) println(a);
+  else ;
+}

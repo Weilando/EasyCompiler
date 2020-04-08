@@ -1,6 +1,6 @@
 # Roadmap
 - [x] Setup
-- [ ] Stage 1: Parsing (basic functionality)
+- [x] Stage 1: Parsing (basic functionality)
 - [ ] Stage 2: Type-checking (basic functionality)
 - [ ] Stage 3: Code-generation (basic functionality)
 - [ ] Stage 4: Implementation of floats
@@ -21,25 +21,25 @@
 ### Progress parsing
 - [x] main method
 - [x] comment
-- [ ] literals
-- [ ] operators
-  - [ ] unary
-  - [ ] arithmetic
-  - [ ] comparison
-  - [ ] logical
-- [ ] expressions
-  - [ ] unary
-  - [ ] arithmetic
-  - [ ] comparison
-  - [ ] logical
-- [ ] operator precedence
-- [ ] assignment
-- [ ] blocks
-- [ ] control structure (without Dangling-Else!)
-  - [ ] if-else
-  - [ ] while
-- [ ] print
-- [ ] generate abstract syntax tree
+- [x] literals
+- [x] operators
+  - [x] unary
+  - [x] arithmetic
+  - [x] comparison
+  - [x] logical
+- [x] expressions
+  - [x] unary
+  - [x] arithmetic
+  - [x] comparison
+  - [x] logical
+- [x] operator precedence
+- [x] assignment
+- [x] blocks
+- [x] control structure (without Dangling-Else!)
+  - [x] if-else
+  - [x] while
+- [x] print
+- [x] generate abstract syntax tree
 
 ## Stage 2: Type-checking (basic functionality)
 - [ ] Add type-checker

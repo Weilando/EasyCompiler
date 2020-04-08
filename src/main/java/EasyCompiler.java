@@ -61,8 +61,10 @@ public class EasyCompiler {
   // Compilation
   //------------
   public void compile() {
-    System.out.println(String.format("Compiling %s", fileName));
-    System.out.println("Successful!");
+    if (this.ast != null) {
+      System.out.println(String.format("Compiling %s", fileName));
+      System.out.println("Successful!");
+    }
   }
 
   static boolean isValidFileName(String fileName) {

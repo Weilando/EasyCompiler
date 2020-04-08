@@ -1,0 +1,5 @@
+void main() {
+  int number = 42;
+  int anotherNumber;
+  anotherNumber = 7;
+}

@@ -1,0 +1,12 @@
+void main() {
+  int a = 5;
+  boolean truthy = true;
+  while (a > 0) {
+    a = a - 1;
+    println(a);
+  }
+  while (truthy)
+    a = a % 2;
+
+  while (false) ;
+}

@@ -1,0 +1,20 @@
+void main() {
+  boolean A = true;
+  boolean B = false;
+
+  println(true == true); // true
+  println(false == true); // false
+  println(true == false); // false
+  println(false == false); // true
+  println(A == B); // false
+  println(A == true); // true
+  println(false == A); // false
+
+  println(true != true); // false
+  println(false != true); // true
+  println(true != false); // true
+  println(false != false); // false
+  println(B != A); // true
+  println(A != false); // true
+  println(true != A); // false
+}

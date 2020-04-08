@@ -1,0 +1,38 @@
+void main() {
+  int x = 42;
+  int y = 7;
+  int z = 3;
+
+  println(42 == 42); // true
+  println(3 == -3); // false
+  println(x == y); // false
+  println(x == 42); // true
+  println(2 == z); // false
+
+  println(1 != 0); // true
+  println(2 != -2);  // true
+  println(3 != 3); // false
+  println(y != z); // true
+  println(z != 2); // true
+  println(3 != z); // false
+
+  println(-3 < 3); // true
+  println(y < z); // false
+  println(x < 42); // false
+  println(2 < z); // true
+
+  println(3 > -3); // true
+  println(z > y); // false
+  println(x > 42); // false
+  println(2 > z); // false
+
+  println(-3 <= 3); // true
+  println(y <= z); // false
+  println(x <= 42); // true
+  println(2 <= z); // true
+
+  println(3 >= -3); // true
+  println(z >= y); // false
+  println(x >= 42); // true
+  println(2 >= z); // false
+}

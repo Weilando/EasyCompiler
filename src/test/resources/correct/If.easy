@@ -1,0 +1,7 @@
+void main() {
+  int a = 6;
+  if(a >= 5) {
+    a = 10;
+  }
+  println(a);
+}

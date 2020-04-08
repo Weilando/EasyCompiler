@@ -1,0 +1,6 @@
+void main() {
+  print(4);
+  println(42);
+  print(false);
+  println(true);
+}

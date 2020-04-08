@@ -1,0 +1,16 @@
+void main() {
+  boolean a = true;
+  int b = 2;
+  if(b < 3)
+    while(b < 10)
+      b = b+1;
+  if(a)
+    a = false;
+
+  if(b>2)
+    while(a==true)
+      if(b>3)
+        b = b - 1;
+      else
+        a = !a;
+}

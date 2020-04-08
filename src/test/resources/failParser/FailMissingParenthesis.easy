@@ -1,0 +1,6 @@
+void main() {
+  int a = 42;
+  int b = a - 1;
+  a = (b + 3 % a)) / 2;
+  b = a * 4 - b;
+}

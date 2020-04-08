@@ -1,0 +1,5 @@
+void main() {
+  boolean works = true;
+  boolean thisIsAToaster;
+  thisIsAToaster = false;
+}
