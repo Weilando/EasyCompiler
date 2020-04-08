@@ -39,15 +39,46 @@ task runSableCC(type: Exec) {
     workingDir = "src/main/java"
     commandLine 'java'
     args = ['-jar', '../../../libs/sablecc-3.2-1.jar', 'EasyCompiler.scc']
-    doLast {
-        copy {
-            from 'src/main/java/lexer/lexer.dat'
-            into 'out/production/classes/lexer/'
-            from 'src/main/java/parser/parser.dat'
-            into 'out/production/classes/parser/'
-        }
-    }
+}
+
+task copyLexerDatToOut(type: Copy) {
+    inputs.file('src/main/java/lexer/lexer.dat')withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.file('out/production/classes/lexer/lexer.dat')
+
+    from 'src/main/java/lexer/lexer.dat'
+    into 'out/production/classes/lexer'
+}
+
+task copyParserDatToOut(type: Copy) {
+    inputs.file('src/main/java/parser/parser.dat')withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.file('out/production/classes/parser/parser.dat')
+
+    from 'src/main/java/parser/parser.dat'
+    into 'out/production/classes/parser'
+}
+
+task copyLexerDatToBuild(type: Copy) {
+    inputs.file('src/main/java/parser/parser.dat')withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.file('build/classes/java/main/lexer/lexer.dat')
+
+    from 'src/main/java/lexer/lexer.dat'
+    into 'build/classes/java/main/lexer'
+}
+
+task copyParserDatToBuild(type: Copy) {
+    inputs.file('src/main/java/parser/parser.dat')withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.file('build/classes/java/main/parser/parser.dat')
+
+    from 'src/main/java/parser/parser.dat'
+    into 'build/classes/java/main/parser'
 }
 
 runSableCC.dependsOn(getSableCC)
 compileJava.dependsOn(runSableCC)
+compileTestJava.dependsOn(runSableCC)
+test.dependsOn(copyLexerDatToBuild)
+test.dependsOn(copyParserDatToBuild)
+copyLexerDatToOut.dependsOn(runSableCC, compileJava, compileTestJava)
+copyParserDatToOut.dependsOn(runSableCC, compileJava, compileTestJava)
+copyLexerDatToBuild.dependsOn(copyLexerDatToOut)
+copyParserDatToBuild.dependsOn(copyParserDatToOut)
