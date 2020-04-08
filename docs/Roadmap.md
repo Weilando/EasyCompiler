@@ -16,11 +16,11 @@
 - [x] Setup testing
 
 ## Stage 1: Parsing (basic functionality)
-- [ ] Open source file
+- [x] Open source file
 - [x] Setup SableCC
 ### Progress parsing
-- [ ] main method
-- [ ] comment
+- [x] main method
+- [x] comment
 - [ ] literals
 - [ ] operators
   - [ ] unary

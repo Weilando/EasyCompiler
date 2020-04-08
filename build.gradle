@@ -43,6 +43,8 @@ task runSableCC(type: Exec) {
         copy {
             from 'src/main/java/lexer/lexer.dat'
             into 'out/production/classes/lexer/'
+            from 'src/main/java/parser/parser.dat'
+            into 'out/production/classes/parser/'
         }
     }
 }
