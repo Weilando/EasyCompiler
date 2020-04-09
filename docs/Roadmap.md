@@ -43,9 +43,9 @@
 
 ## Stage 2: Type-checking (basic functionality)
 - [ ] Add type-checker
-- [ ] Add symbol table
-- [ ] Add line-evaluator
-- [ ] Add error-handler for type-errors
+- [x] Add symbol table
+- [x] Add line-evaluator
+- [x] Add error-handler for type-errors
 ### Progress type-checking
 - [ ] Detect missing declaration before first assignment
 - [ ] Detect repeated declarations
