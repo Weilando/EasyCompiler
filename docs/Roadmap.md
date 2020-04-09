@@ -1,7 +1,7 @@
 # Roadmap
 - [x] Setup
 - [x] Stage 1: Parsing (basic functionality)
-- [ ] Stage 2: Type-checking (basic functionality)
+- [x] Stage 2: Type-checking (basic functionality)
 - [ ] Stage 3: Code-generation (basic functionality)
 - [ ] Stage 4: Implementation of floats
 - [ ] Stage 5: Implementation of strings
@@ -42,21 +42,21 @@
 - [x] generate abstract syntax tree
 
 ## Stage 2: Type-checking (basic functionality)
-- [ ] Add type-checker
-- [ ] Add symbol table
-- [ ] Add line-evaluator
-- [ ] Add error-handler for type-errors
+- [x] Add type-checker
+- [x] Add symbol table
+- [x] Add line-evaluator
+- [x] Add error-handler for type-errors
 ### Progress type-checking
-- [ ] Detect missing declaration before first assignment
-- [ ] Detect repeated declarations
-- [ ] Evaluate type of expressions
-  - [ ] unary
-  - [ ] arithmetic
-  - [ ] comparison
-  - [ ] logical
-- [ ] Detect assignments of incompatible types
-- [ ] Check conditions of control structures (while and if need boolean expressions)
-- [ ] Check content of print statements
+- [x] Detect missing declaration before first assignment
+- [x] Detect repeated declarations
+- [x] Evaluate type of expressions
+  - [x] unary
+  - [x] arithmetic
+  - [x] comparison
+  - [x] logical
+- [x] Detect assignments of incompatible types
+- [x] Check conditions of control structures (while and if need boolean expressions)
+- [x] Check content of print/println statements
 
 ## Stage 3: Code-generation (basic functionality)
 - [ ] tests

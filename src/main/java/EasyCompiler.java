@@ -1,8 +1,12 @@
 import lexer.Lexer;
 import lexer.LexerException;
+import lineevaluation.LineEvaluator;
 import node.Start;
 import parser.Parser;
 import parser.ParserException;
+import typecheck.ExpressionCache;
+import typecheck.SymbolTable;
+import typecheck.TypeChecker;
 
 import java.io.File;
 import java.io.FileReader;
@@ -14,6 +18,8 @@ public class EasyCompiler {
   private final String fileNameAndPath;
   final private String fileName;
   private Start ast;
+  private SymbolTable symbolTable;
+  private ExpressionCache expressionCache;
 
   public EasyCompiler(String fileName) {
     if (!isValidFileName(fileName)) {
@@ -27,11 +33,12 @@ public class EasyCompiler {
     try {
       this.ast = generateAST(fileNameAndPath);
       printAST();
+      LineEvaluator.setLines(this.ast);
     } catch (IOException e) {
-      System.out.println(String.format("Input-Error: An error occured while reading input file \"%s\".", fileNameAndPath));
+      System.out.println(String.format("Input-Error: An error occurred while reading input file \"%s\".", fileNameAndPath));
       System.out.println(e.toString());
     } catch (LexerException e) {
-      System.out.println("Lexer-Error: An error occured while initializing the lexer.\n");
+      System.out.println("Lexer-Error: An error occurred while initializing the lexer.\n");
       System.out.println(e.toString());
     } catch (ParserException e) {
       System.out.println(String.format("Parser-Error: %s", e.toString()));
@@ -61,15 +68,34 @@ public class EasyCompiler {
   // Compilation
   //------------
   public void compile() {
-    if (this.ast != null) {
+    if ((this.ast != null) && typeCheck()) {
       System.out.println(String.format("Compiling %s", fileName));
       System.out.println("Successful!");
     }
   }
 
-  static boolean isValidFileName(String fileName) {
-    File file = new File(fileName);
-    return file.getName().matches("[a-zA-Z]\\w*\\.easy");
+  //---------
+  // Analysis
+  //---------
+  public boolean typeCheck() {
+    if (this.ast == null) {
+      return false;
+    } else if (this.symbolTable != null) {
+      return true;
+    }
+
+    TypeChecker typeChecker = new TypeChecker();
+    this.ast.apply(typeChecker);
+
+    if (!typeChecker.errorsOccurred()) {
+      if (DEBUG) {
+        typeChecker.printSymbolTable();
+      }
+      this.symbolTable = typeChecker.getSymbolTable();
+      this.expressionCache = typeChecker.getExpressionCache();
+      return true;
+    }
+    return false;
   }
 
   //--------
@@ -77,6 +103,11 @@ public class EasyCompiler {
   //--------
   static String extractFileName(String fileName) { // removes path to the input-file
     return new File(fileName).getName().replaceAll(".easy", "");
+  }
+
+  static boolean isValidFileName(String fileName) {
+    File file = new File(fileName);
+    return file.getName().matches("[a-zA-Z]\\w*\\.easy");
   }
 
   static Start generateAST(String fileName) throws IOException, LexerException, ParserException {
