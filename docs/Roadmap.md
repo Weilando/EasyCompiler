@@ -2,7 +2,7 @@
 - [x] Setup
 - [x] Stage 1: Parsing (basic functionality)
 - [x] Stage 2: Type-checking (basic functionality)
-- [ ] Stage 3: Code-generation (basic functionality)
+- [x] Stage 3: Code-generation (basic functionality)
 - [ ] Stage 4: Implementation of floats
 - [ ] Stage 5: Implementation of strings
 - [ ] Stage 6: Implementation of functions
@@ -61,19 +61,19 @@
 ## Stage 3: Code-generation (basic functionality)
 - [x] Setup Jasmin
 - [x] Setup mocked filesystem 
-- [ ] Test of functionality of compiled correct programs
+- [x] Test of functionality of compiled correct programs
 ### Progress code-generation
-- [ ] main method
-- [ ] declarations, initializations and assignments
-- [ ] expressions
-  - [ ] unary
-  - [ ] arithmetic
-  - [ ] comparison
-  - [ ] logical
-- [ ] statements
-  - [ ] if and else
-  - [ ] while
-  - [ ] print
+- [x] main method
+- [x] declarations, initializations and assignments
+- [x] expressions
+  - [x] unary
+  - [x] arithmetic
+  - [x] comparison
+  - [x] logical
+- [x] statements
+  - [x] if and else
+  - [x] while
+  - [x] print
     
 ## Stage 4: Implementation of floats
 - [ ] extend grammar to parse `float` keyword and literals

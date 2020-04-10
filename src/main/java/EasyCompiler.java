@@ -1,3 +1,5 @@
+import codegeneration.CodeCache;
+import codegeneration.CodeGenerator;
 import lexer.Lexer;
 import lexer.LexerException;
 import lineevaluation.LineEvaluator;
@@ -12,6 +14,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PushbackReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class EasyCompiler {
@@ -71,7 +77,11 @@ public class EasyCompiler {
 
   boolean generateCode() {
     if (parse() && typeCheck()) {
-      System.out.println(String.format("Compiling %s", fileName));
+      CodeCache codeCache = new CodeCache();
+      CodeGenerator codeGenerator = new CodeGenerator(codeCache, this.expressionCache, this.fileName, this.symbolTable);
+      ast.apply(codeGenerator);
+      this.code = codeCache.getCode();
+
       return true;
     }
     return false;
@@ -132,6 +142,10 @@ public class EasyCompiler {
     return new File(fileName).getName().replaceAll(".easy", "");
   }
 
+  static String getJasminFileName(String filename) {
+    return filename.replace(".easy", ".j");
+  }
+
   static boolean isValidFileName(String fileName) {
     File file = new File(fileName);
     return file.getName().matches("[a-zA-Z]\\w*\\.easy");
@@ -158,6 +172,15 @@ public class EasyCompiler {
       return false;
     }
 
+    try {
+      String jasminFilePathAndName = getJasminFileName(fileNameAndPath);
+      Path jasminFile = Paths.get(jasminFilePathAndName);
+      Files.write(jasminFile, this.code, StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      System.out.println("An error occurred while writing the output file.");
+      e.printStackTrace();
+      return false;
+    }
     return true;
   }
 }

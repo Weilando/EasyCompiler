@@ -24,9 +24,6 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    testLogging {
-        events "passed", "skipped", "failed"
-    }
 }
 
 task getSableCC(type: Copy) {
@@ -79,8 +76,7 @@ task copyParserDatToBuild(type: Copy) {
 runSableCC.dependsOn(getSableCC)
 compileJava.dependsOn(runSableCC)
 compileTestJava.dependsOn(runSableCC)
-test.dependsOn(copyLexerDatToBuild)
-test.dependsOn(copyParserDatToBuild)
+test.dependsOn(copyLexerDatToBuild, copyParserDatToBuild)
 copyLexerDatToOut.dependsOn(runSableCC, compileJava, compileTestJava)
 copyParserDatToOut.dependsOn(runSableCC, compileJava, compileTestJava)
 copyLexerDatToBuild.dependsOn(copyLexerDatToOut)

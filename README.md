@@ -8,3 +8,9 @@ One can track the project's progress in the [roadmap](/docs/Roadmap.md).
 ## Build and Run
 Gradle is used for dependency-management, building and testing the compiler.
 The compiler will be called via `java EasyCompiler -compile <Filename.easy>`.
+
+## Installation
+Simply run `gradle build` to install most dependencies.
+
+Jasmin is not available on MavenCentral yet, but I will work on a solution using Gradle soon.
+Please download Jasmin 2.4 from [SourceForge](https://sourceforge.net/projects/jasmin/files/jasmin/jasmin-2.4/) and put the jar into `/libs`.
