@@ -38,3 +38,4 @@ bin
 /libs
 .DS_Store
 *.class
+*.j

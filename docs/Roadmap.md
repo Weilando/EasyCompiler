@@ -59,22 +59,21 @@
 - [x] Check content of print/println statements
 
 ## Stage 3: Code-generation (basic functionality)
-- [ ] tests
-  - [ ] setup 
-  - [ ] test of functionality of compiled correct snippets
-  - [ ] test of functionality of compiled correct algorithms
-- [ ] implementation code-generation
-  - [ ] main method
-  - [ ] declarations, initializations and assignments
-  - [ ] expressions
-    - [ ] unary
-    - [ ] arithmetic
-    - [ ] comparison
-    - [ ] logical
-  - [ ] statements
-    - [ ] if and else
-    - [ ] while
-    - [ ] print
+- [x] Setup Jasmin
+- [x] Setup mocked filesystem 
+- [ ] Test of functionality of compiled correct programs
+### Progress code-generation
+- [ ] main method
+- [ ] declarations, initializations and assignments
+- [ ] expressions
+  - [ ] unary
+  - [ ] arithmetic
+  - [ ] comparison
+  - [ ] logical
+- [ ] statements
+  - [ ] if and else
+  - [ ] while
+  - [ ] print
     
 ## Stage 4: Implementation of floats
 - [ ] extend grammar to parse `float` keyword and literals
