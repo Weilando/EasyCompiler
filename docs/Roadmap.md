@@ -60,7 +60,6 @@
 
 ## Stage 3: Code-generation (basic functionality)
 - [x] Setup Jasmin
-- [x] Setup mocked filesystem 
 - [x] Test of functionality of compiled correct programs
 ### Progress code-generation
 - [x] main method
@@ -74,6 +73,12 @@
   - [x] if and else
   - [x] while
   - [x] print
+  
+It was planned to use a mocked filesystem for generated Jasmin-files and class-files during tests.
+Unfortunately it is impossible to call jasmin.jar and the produced class-files via `Runtime.getRuntime.exec`, as the command starts a new process.
+An in-memory filesystem would work great, if one could use all functions in one process.
+
+As a trade-off the generated files are deleted after tests.  
     
 ## Stage 4: Implementation of floats
 - [ ] extend grammar to parse `float` keyword and literals

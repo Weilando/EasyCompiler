@@ -3,10 +3,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EasyCompilerTest {
   private final String correctCall = "java EasyCompiler [-compile|-typeCheck|-parse] <Filename.easy>";
@@ -118,11 +118,5 @@ public class EasyCompilerTest {
   public void validFileName() {
     String validFileName = "Program_1.easy";
     assertTrue(EasyCompiler.isValidFileName(validFileName));
-  }
-
-  @Test
-  public void shouldThrowExceptionForInvalidFileName() {
-    String invalidFileName = "1.e";
-    assertThrows(FileNotFoundException.class, () -> EasyCompiler.generateAST(invalidFileName));
   }
 }

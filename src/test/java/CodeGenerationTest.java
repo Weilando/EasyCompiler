@@ -13,16 +13,35 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CodeGenerationTest {
   private final String pathTestFilesCorrect = "src/test/resources/correct/";
-  private final File workingDictionary = new File(pathTestFilesCorrect);
+  private final File workingDirectory = new File(pathTestFilesCorrect);
 
   private final Runtime runtime = Runtime.getRuntime();
+  private Process classProcess;
+  private String inputStreamString;
 
-  private void generateClassFromJasmin(String fileName) {
+  private void generateJasminFile(String testName) {
+    String testFilePath = String.format("%s%s.easy", pathTestFilesCorrect, testName);
+    EasyCompiler easyCompiler = new EasyCompiler(testFilePath);
+    easyCompiler.compile();
+  }
+
+  private void generateClassFromJasminFile(String testName) {
     try {
-      String command = String.format("java -jar ../../../../libs/Jasmin.jar %s.j", fileName);
-      Process pr = runtime.exec(command, null, workingDictionary);
-      pr.waitFor();
+      String command = String.format("java -jar ../../../../libs/jasmin.jar %s.j", testName);
+      Process generateProcess = runtime.exec(command, null, workingDirectory);
+      generateProcess.waitFor();
     } catch (IOException | InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void setupClassExecutionProcess(String testName) {
+    try {
+      String command = String.format("java %s", testName);
+      classProcess = runtime.exec(command, null, workingDirectory);
+      inputStreamString = new BufferedReader(new InputStreamReader(classProcess.getInputStream()))
+          .lines().collect(Collectors.joining("\n"));
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }
@@ -30,8 +49,8 @@ public class CodeGenerationTest {
   @AfterAll
   public void cleanTestFiles() {
     try {
-      Process pr = runtime.exec("sh clean.sh", null, workingDictionary);
-      pr.waitFor();
+      Process process = runtime.exec("sh clean.sh", null, workingDirectory);
+      process.waitFor();
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();
     }
@@ -41,193 +60,144 @@ public class CodeGenerationTest {
   // Test correct snippets
   //----------------------
   @Test
-  public void resultArithmeticComparisons() throws IOException, InterruptedException {
+  public void resultArithmeticComparisons() throws InterruptedException {
     String testName = "ArithmeticComparisons";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("true\nfalse\nfalse\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue\nfalse\nfalse\ntrue\ntrue\nfalse\nfalse\nfalse\ntrue\nfalse\ntrue\ntrue\ntrue\nfalse\ntrue\nfalse", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("true\nfalse\nfalse\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue\nfalse\nfalse\ntrue\ntrue\nfalse\nfalse\nfalse\ntrue\nfalse\ntrue\ntrue\ntrue\nfalse\ntrue\nfalse", inputStreamString);
   }
 
   @Test
-  public void resultMinimalExample() throws IOException, InterruptedException {
+  public void resultMinimalExample() throws InterruptedException, IOException {
     String testName = "Minimal";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    assertEquals(0, pr.waitFor());
+    Process minimalProcess = runtime.exec(String.format("java %s", testName), null, workingDirectory);
+    assertEquals(0, minimalProcess.waitFor());
   }
 
   @Test
-  public void resultBooleanAnd() throws IOException, InterruptedException {
+  public void resultBooleanAnd() throws InterruptedException {
     String testName = "BooleanAnd";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("true\nfalse\nfalse\nfalse\ntrue\nfalse\nfalse", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("true\nfalse\nfalse\nfalse\ntrue\nfalse\nfalse", inputStreamString);
   }
 
   @Test
-  public void resultBooleanComparisons() throws IOException, InterruptedException {
+  public void resultBooleanComparisons() throws InterruptedException {
     String testName = "BooleanComparisons";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("true\nfalse\nfalse\ntrue\nfalse\ntrue\nfalse\nfalse\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("true\nfalse\nfalse\ntrue\nfalse\ntrue\nfalse\nfalse\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse", inputStreamString);
   }
 
   @Test
-  public void resultBooleanExpressions() throws IOException, InterruptedException {
+  public void resultBooleanExpressions() throws InterruptedException {
     String testName = "BooleanExpressions";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("true\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\nfalse\ntrue\nfalse", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("true\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\nfalse\ntrue\nfalse", inputStreamString);
   }
 
   @Test
-  public void resultBooleanOr() throws IOException, InterruptedException {
+  public void resultBooleanOr() throws InterruptedException {
     String testName = "BooleanOr";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("true\ntrue\ntrue\nfalse\ntrue\ntrue\ntrue", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("true\ntrue\ntrue\nfalse\ntrue\ntrue\ntrue", inputStreamString);
   }
 
   @Test
-  public void resultIf() throws IOException, InterruptedException {
+  public void resultIf() throws InterruptedException {
     String testName = "If";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("10", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("10", inputStreamString);
   }
 
   @Test
-  public void resultIfElse() throws IOException, InterruptedException {
+  public void resultIfElse() throws InterruptedException {
     String testName = "IfElse";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("0", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("0", inputStreamString);
   }
 
   @Test
-  public void resultIfElseComplex() throws IOException, InterruptedException {
+  public void resultIfElseComplex() throws InterruptedException {
     String testName = "IfElseComplex";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("0\n0", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("0\n0", inputStreamString);
   }
 
   @Test
-  public void resultIntCalculations() throws IOException, InterruptedException {
+  public void resultIntCalculations() throws InterruptedException {
     String testName = "IntCalculations";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("42\n41\n-1\n-19\n35\n35", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("42\n41\n-1\n-19\n35\n35", inputStreamString);
   }
 
   @Test
-  public void resultUnaries() throws IOException, InterruptedException {
+  public void resultUnaries() throws InterruptedException {
     String testName = "Unaries";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("-2\n3\n0\n0\nfalse\ntrue\n-3\n6\n-3\n3\ntrue\ntrue\nfalse", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("-2\n3\n0\n0\nfalse\ntrue\n-3\n6\n-3\n3\ntrue\ntrue\nfalse", inputStreamString);
   }
 
   @Test
-  public void resultPrint() throws IOException, InterruptedException {
+  public void resultPrint() throws InterruptedException {
     String testName = "Print";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("42\nfalsetrue", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("42\nfalsetrue", inputStreamString);
   }
 
   @Test
-  public void resultWhile() throws IOException, InterruptedException {
+  public void resultWhile() throws InterruptedException {
     String testName = "While";
-    EasyCompiler easyCompiler = new EasyCompiler(String.format("%s%s%s", pathTestFilesCorrect, testName, ".easy"));
-    easyCompiler.compile();
-    generateClassFromJasmin(testName);
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process pr = runtime.exec(String.format("java %s", testName), null, workingDictionary);
-    String inputStream = new BufferedReader(new InputStreamReader(pr.getInputStream()))
-        .lines().collect(Collectors.joining("\n"));
-
-    assertEquals(0, pr.waitFor());
-    assertEquals("4\n3\n2\n1\n0", inputStream);
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("4\n3\n2\n1\n0", inputStreamString);
   }
 }

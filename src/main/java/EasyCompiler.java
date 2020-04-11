@@ -20,24 +20,24 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import static java.nio.file.StandardOpenOption.CREATE;
+
 public class EasyCompiler {
   final private boolean DEBUG = false;
-  private final String fileNameAndPath;
-  final private String fileName;
+  final private Path sourceFilePath;
   private Start ast;
   private SymbolTable symbolTable;
   private ArrayList<String> code;
   private ExpressionCache expressionCache;
   private boolean parseErrorOccurred = false;
 
-  public EasyCompiler(String fileName) {
-    if (!isValidFileName(fileName)) {
+  public EasyCompiler(String sourceFilePath) {
+    if (!isValidFileName(sourceFilePath)) {
       System.out.println("Invalid file name.");
       System.exit(0);
     }
 
-    this.fileNameAndPath = fileName;
-    this.fileName = extractFileName(fileName);
+    this.sourceFilePath = Paths.get(sourceFilePath);
   }
 
   public static void main(String[] args) {
@@ -69,16 +69,16 @@ public class EasyCompiler {
   // Compilation
   //------------
   void compile() {
-    if (generateCode()) {
-      writeOutputFile();
+    if (generateCode() && writeOutputFile()) {
       System.out.println("Successful!");
     }
   }
 
   boolean generateCode() {
     if (parse() && typeCheck()) {
+      String programName = this.sourceFilePath.getFileName().toString().replaceAll(".easy", "");
       CodeCache codeCache = new CodeCache();
-      CodeGenerator codeGenerator = new CodeGenerator(codeCache, this.expressionCache, this.fileName, this.symbolTable);
+      CodeGenerator codeGenerator = new CodeGenerator(codeCache, this.expressionCache, programName, this.symbolTable);
       ast.apply(codeGenerator);
       this.code = codeCache.getCode();
 
@@ -96,11 +96,11 @@ public class EasyCompiler {
     }
 
     try {
-      this.ast = generateAST(fileNameAndPath);
+      this.ast = generateAST();
       printAST();
       LineEvaluator.setLines(this.ast);
     } catch (IOException e) {
-      System.out.println(String.format("Input-Error: An error occurred while reading input file \"%s\".", fileNameAndPath));
+      System.out.println(String.format("Input-Error: An error occurred while reading input file \"%s\".", this.sourceFilePath.toString()));
       System.out.println(e.toString());
       return false;
     } catch (LexerException e) {
@@ -138,12 +138,8 @@ public class EasyCompiler {
   //--------
   // Helpers
   //--------
-  static String extractFileName(String fileName) { // removes path to the input-file
-    return new File(fileName).getName().replaceAll(".easy", "");
-  }
-
-  static String getJasminFileName(String filename) {
-    return filename.replace(".easy", ".j");
+  String getJasminFileName(String fileName) {
+    return fileName.replace(".easy", ".j");
   }
 
   static boolean isValidFileName(String fileName) {
@@ -151,8 +147,8 @@ public class EasyCompiler {
     return file.getName().matches("[a-zA-Z]\\w*\\.easy");
   }
 
-  static Start generateAST(String fileName) throws IOException, LexerException, ParserException {
-    FileReader fileReader = new FileReader(fileName);
+  Start generateAST() throws IOException, LexerException, ParserException {
+    FileReader fileReader = new FileReader(this.sourceFilePath.toFile());
     PushbackReader pushbackReader = new PushbackReader(fileReader);
     Lexer lexer = new Lexer(pushbackReader);
     Parser parser = new Parser(lexer);
@@ -173,9 +169,10 @@ public class EasyCompiler {
     }
 
     try {
-      String jasminFilePathAndName = getJasminFileName(fileNameAndPath);
-      Path jasminFile = Paths.get(jasminFilePathAndName);
-      Files.write(jasminFile, this.code, StandardCharsets.UTF_8);
+      String jasminFileNameAndPath = getJasminFileName(this.sourceFilePath.toString());
+      Path jasminFile = Paths.get(jasminFileNameAndPath);
+
+      Files.write(jasminFile, this.code, StandardCharsets.UTF_8, CREATE);
     } catch (IOException e) {
       System.out.println("An error occurred while writing the output file.");
       e.printStackTrace();
