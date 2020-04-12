@@ -3,6 +3,7 @@ package codegeneration;
 import analysis.DepthFirstAdapter;
 import lineevaluation.LineEvaluator;
 import node.*;
+import stackdepthevaluation.StackDepthEvaluator;
 import typecheck.ExpressionCache;
 import typecheck.SymbolTable;
 
@@ -47,9 +48,17 @@ public class CodeGenerator extends DepthFirstAdapter {
 
   @Override
   public void caseAMain(AMain node) {
+    StackDepthEvaluator stackDepthEvaluator = new StackDepthEvaluator();
+    for (PStat currDecl : node.getDeclarations()) {
+      currDecl.apply(stackDepthEvaluator);
+    }
+    for (PStat currStat : node.getStatements()) {
+      currStat.apply(stackDepthEvaluator);
+    }
+
     String[] beginMainMethod = {
         ".method public static main([Ljava/lang/String;)V",
-        "\t.limit stack 256",
+        String.format("\t.limit stack %d", stackDepthEvaluator.getMaxDepthCounter()),
         String.format("\t.limit locals %d", symbolTable.countSymbols() + 1), // all type-checked symbols and args[]
         ""};
     String[] endMainMethod = {

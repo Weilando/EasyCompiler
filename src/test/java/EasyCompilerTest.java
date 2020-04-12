@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EasyCompilerTest {
   private final String correctCall = "java EasyCompiler [-compile|-typeCheck|-parse] <Filename.easy>";
@@ -118,5 +117,20 @@ public class EasyCompilerTest {
   public void validFileName() {
     String validFileName = "Program_1.easy";
     assertTrue(EasyCompiler.isValidFileName(validFileName));
+  }
+
+  //--------------------
+  // Test helper methods
+  //--------------------
+  @Test
+  public void generateCorrectJasminFileNameAndPath() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathMinimalProgram);
+    assertEquals("src/test/resources/correct/Minimal.j", easyCompiler.getJasminFileNameAndPath());
+  }
+
+  @Test
+  public void extractCorrectProgramName() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathMinimalProgram);
+    assertEquals("Minimal", easyCompiler.getProgramName());
   }
 }

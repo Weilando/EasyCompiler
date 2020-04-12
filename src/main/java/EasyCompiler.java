@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 public class EasyCompiler {
   final private boolean DEBUG = false;
@@ -76,9 +77,8 @@ public class EasyCompiler {
 
   boolean generateCode() {
     if (parse() && typeCheck()) {
-      String programName = this.sourceFilePath.getFileName().toString().replaceAll(".easy", "");
       CodeCache codeCache = new CodeCache();
-      CodeGenerator codeGenerator = new CodeGenerator(codeCache, this.expressionCache, programName, this.symbolTable);
+      CodeGenerator codeGenerator = new CodeGenerator(codeCache, this.expressionCache, getProgramName(), this.symbolTable);
       ast.apply(codeGenerator);
       this.code = codeCache.getCode();
 
@@ -109,6 +109,7 @@ public class EasyCompiler {
       return false;
     } catch (ParserException e) {
       System.out.println(String.format("Parser-Error: %s", e.toString()));
+      parseErrorOccurred = true;
       return false;
     }
     return true;
@@ -138,8 +139,12 @@ public class EasyCompiler {
   //--------
   // Helpers
   //--------
-  String getJasminFileName(String fileName) {
-    return fileName.replace(".easy", ".j");
+  String getProgramName() {
+    return this.sourceFilePath.getFileName().toString().replaceAll(".easy", "");
+  }
+
+  String getJasminFileNameAndPath() {
+    return this.sourceFilePath.toString().replace(".easy", ".j");
   }
 
   static boolean isValidFileName(String fileName) {
@@ -169,10 +174,8 @@ public class EasyCompiler {
     }
 
     try {
-      String jasminFileNameAndPath = getJasminFileName(this.sourceFilePath.toString());
-      Path jasminFile = Paths.get(jasminFileNameAndPath);
-
-      Files.write(jasminFile, this.code, StandardCharsets.UTF_8, CREATE);
+      Path jasminFile = Paths.get(getJasminFileNameAndPath());
+      Files.write(jasminFile, this.code, StandardCharsets.UTF_8, CREATE, TRUNCATE_EXISTING);
     } catch (IOException e) {
       System.out.println("An error occurred while writing the output file.");
       e.printStackTrace();
