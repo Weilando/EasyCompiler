@@ -49,7 +49,7 @@ public class CodeGenerationTest {
   @AfterAll
   public void cleanTestFiles() {
     try {
-      Process process = runtime.exec("sh clean.sh", null, workingDirectory);
+      Process process = runtime.exec("sh clean.sh", null, new File("src/test/resources"));
       process.waitFor();
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();

@@ -8,7 +8,7 @@ import java.io.PrintStream;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EasyCompilerTest {
-  private final String correctCall = "java EasyCompiler [-compile|-typeCheck|-parse] <Filename.easy>";
+  private final String correctCall = "java EasyCompiler [-compile|-liveness|-typeCheck|-parse] <Filename.easy>";
 
   private final String pathMinimalProgram = "src/test/resources/correct/Minimal.easy";
 
@@ -51,6 +51,14 @@ public class EasyCompilerTest {
     String[] args = {"-compile", "src/test/resources/failParser/FailMissingBrace.easy"}; // An incorrect file was chosen to avoid output-files
     EasyCompiler.main(args);
     assertFalse(outContent.toString().contains(correctCall));
+  }
+
+  @Test
+  public void callWithLivenessFlagAndFilenameShouldWork() {
+    String[] args = {"-liveness", pathMinimalProgram}; // An incorrect file was chosen to avoid output-files
+    EasyCompiler.main(args);
+    assertFalse(outContent.toString().contains(correctCall));
+    assertTrue(outContent.toString().contains("Registers: 0"));
   }
 
   @Test

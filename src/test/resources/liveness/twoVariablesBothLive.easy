@@ -1,0 +1,7 @@
+void main() {
+  int a = 0;
+  int b = 3;
+  while (a < 10) {
+    a = a + b;
+  }
+}

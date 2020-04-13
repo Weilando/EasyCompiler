@@ -3,6 +3,7 @@ import codegeneration.CodeGenerator;
 import lexer.Lexer;
 import lexer.LexerException;
 import lineevaluation.LineEvaluator;
+import livenessanalysis.LivenessAnalyzer;
 import node.Start;
 import parser.Parser;
 import parser.ParserException;
@@ -42,7 +43,7 @@ public class EasyCompiler {
   }
 
   public static void main(String[] args) {
-    final String correctCall = "java EasyCompiler [-compile|-typeCheck|-parse] <Filename.easy>";
+    final String correctCall = "java EasyCompiler [-compile|-liveness|-typeCheck|-parse] <Filename.easy>";
     EasyCompiler easyCompiler;
 
     if (args.length == 2) {
@@ -51,6 +52,9 @@ public class EasyCompiler {
       switch (args[0]) {
         case "-compile":
           easyCompiler.compile();
+          break;
+        case "-liveness":
+          easyCompiler.liveness();
           break;
         case "-typeCheck":
           easyCompiler.typeCheck();
@@ -90,6 +94,18 @@ public class EasyCompiler {
   //---------
   // Analysis
   //---------
+  void liveness() {
+    if (parse() && typeCheck()) {
+      LivenessAnalyzer analyzer = new LivenessAnalyzer(ast, symbolTable);
+
+      if (DEBUG) {
+        analyzer.printGraph();
+      }
+
+      System.out.println(String.format("Registers: %d", analyzer.getMinimumRegisters()));
+    }
+  }
+
   boolean parse() {
     if ((ast == null) && parseErrorOccurred) {
       return false;

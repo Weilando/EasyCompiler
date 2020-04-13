@@ -1,0 +1,15 @@
+// print fibonacci-numbers from 0 to N
+void main() {
+  int fib1 = 0;
+  int fib2 = 1;
+  int N = 100;
+  int newFib;
+
+  println(fib1);
+  while (fib2 <= N) {
+    println(fib2);
+    newFib = fib1 + fib2;
+    fib1 = fib2;
+    fib2 = newFib;
+  }
+}
