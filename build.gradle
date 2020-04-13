@@ -12,18 +12,15 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.1")
-
     // https://mvnrepository.com/artifact/sablecc/sablecc
     compile group: 'sablecc', name: 'sablecc', version: '3.2-1'
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.1")
 }
 
 test {
     useJUnitPlatform()
-    testLogging {
-        events "passed", "skipped", "failed"
-    }
 }
 
 task getSableCC(type: Copy) {
@@ -76,8 +73,7 @@ task copyParserDatToBuild(type: Copy) {
 runSableCC.dependsOn(getSableCC)
 compileJava.dependsOn(runSableCC)
 compileTestJava.dependsOn(runSableCC)
-test.dependsOn(copyLexerDatToBuild)
-test.dependsOn(copyParserDatToBuild)
+test.dependsOn(copyLexerDatToBuild, copyParserDatToBuild)
 copyLexerDatToOut.dependsOn(runSableCC, compileJava, compileTestJava)
 copyParserDatToOut.dependsOn(runSableCC, compileJava, compileTestJava)
 copyLexerDatToBuild.dependsOn(copyLexerDatToOut)

@@ -1,6 +1,6 @@
 void main() {
   print(4);
-  println(42);
+  println(2);
   print(false);
   println(true);
 }

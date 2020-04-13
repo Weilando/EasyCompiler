@@ -2,7 +2,7 @@
 - [x] Setup
 - [x] Stage 1: Parsing (basic functionality)
 - [x] Stage 2: Type-checking (basic functionality)
-- [ ] Stage 3: Code-generation (basic functionality)
+- [x] Stage 3: Code-generation (basic functionality)
 - [ ] Stage 4: Implementation of floats
 - [ ] Stage 5: Implementation of strings
 - [ ] Stage 6: Implementation of functions
@@ -59,22 +59,26 @@
 - [x] Check content of print/println statements
 
 ## Stage 3: Code-generation (basic functionality)
-- [ ] tests
-  - [ ] setup 
-  - [ ] test of functionality of compiled correct snippets
-  - [ ] test of functionality of compiled correct algorithms
-- [ ] implementation code-generation
-  - [ ] main method
-  - [ ] declarations, initializations and assignments
-  - [ ] expressions
-    - [ ] unary
-    - [ ] arithmetic
-    - [ ] comparison
-    - [ ] logical
-  - [ ] statements
-    - [ ] if and else
-    - [ ] while
-    - [ ] print
+- [x] Setup Jasmin
+- [x] Test of functionality of compiled correct programs
+### Progress code-generation
+- [x] main method
+- [x] declarations, initializations and assignments
+- [x] expressions
+  - [x] unary
+  - [x] arithmetic
+  - [x] comparison
+  - [x] logical
+- [x] statements
+  - [x] if and else
+  - [x] while
+  - [x] print
+  
+It was planned to use a mocked filesystem for generated Jasmin-files and class-files during tests.
+Unfortunately it is impossible to call jasmin.jar and the produced class-files via `Runtime.getRuntime.exec`, as the command starts a new process.
+An in-memory filesystem would work great, if one could use all functions in one process.
+
+As a trade-off the generated files are deleted after tests.  
     
 ## Stage 4: Implementation of floats
 - [ ] extend grammar to parse `float` keyword and literals

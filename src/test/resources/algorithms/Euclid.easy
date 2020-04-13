@@ -1,0 +1,43 @@
+// reduce fraction
+void main() {
+  int a = 42;
+  int b = 56;
+  int c;
+  int numerator = a;
+  int denominator = b;
+
+  if(denominator == 0) { // check zero-division
+    println(false);
+  } else { // reduce fraction
+    // calculate abs(a) and abs(b)
+    if(a<0) {
+      a = -a;
+    }
+    if(b<0) {
+      b = -b;
+    }
+
+    // use Euclid's algoritm to find gcd(a,b)
+    if(a <= 0 || b <= 0) {
+      a = -1;
+    } else {
+      while(b > 0) {
+        c = a % b;
+        a = b;
+        b = c;
+      }
+    }
+
+    println(a); // print result
+    /* Reduce fraction numerator/denominator.
+    Print false, if gcd could not be calculated.
+    Print true and the reduced fraction, otherwise. */
+    if(a == -1) {
+      println(false);
+    } else {
+      println(true);
+      println(numerator / a);
+      println(denominator / a);
+    }
+  }
+}

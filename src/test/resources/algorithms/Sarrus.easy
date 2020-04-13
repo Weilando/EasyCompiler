@@ -1,0 +1,14 @@
+void main() {
+  /* Calculate the determinant of a given 2x2-matrix using Sarrus' rule.
+  / a11 a12 \
+  \ a21 a22 / */
+
+  int a11 = 2;
+  int a21 = 3;
+
+  int a12 = 6;
+  int a22 = 5;
+
+  int result = a11*a22 - a12*a21;
+  println(result);
+}

@@ -1,0 +1,8 @@
+void main() {
+  boolean A;
+  int b;
+  A = true;
+  b = 2;
+  println(A);
+}
+

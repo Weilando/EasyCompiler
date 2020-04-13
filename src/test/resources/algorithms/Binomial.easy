@@ -1,0 +1,31 @@
+// binomial coefficient n over k
+void main() {
+  int n = 10;
+  int k = 6;
+
+  int numerator = 1;
+  int denominator = 1;
+  int i = 1;
+
+  if((n <= 0) || (k <= 0))
+    println(false);
+  else {
+    while(i<=n) {
+      numerator = numerator * i;
+      i = i + 1;
+    }
+
+    i = 1;
+    while(i<=k) {
+      denominator = denominator * i;
+      i = i + 1;
+    }
+    i = n - k;
+    while(i>1) {
+      denominator = denominator * i;
+      i = i - 1;
+    }
+
+    println(numerator / denominator);
+  }
+}

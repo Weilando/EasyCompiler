@@ -1,5 +1,7 @@
 package typecheck;
 
+import livenessanalysis.InterferenceGraphNode;
+
 import java.util.HashMap;
 
 public class SymbolTable {
@@ -37,5 +39,11 @@ public class SymbolTable {
 
   void printTable() {
     System.out.println(String.format("Symbol table:\n%s\n", this.table));
+  }
+
+  public HashMap<Symbol, InterferenceGraphNode> generateInterferenceGraphNodes() {
+    HashMap<Symbol, InterferenceGraphNode> nodes = new HashMap<>();
+    table.forEach((name, symbol) -> nodes.put(symbol, new InterferenceGraphNode(symbol)));
+    return nodes;
   }
 }
