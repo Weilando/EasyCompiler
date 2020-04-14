@@ -59,6 +59,18 @@ public class ParsingTest {
   }
 
   @Test
+  public void parseFloatCalculations() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatCalculations.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseFloatVariable() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatVariable.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
   public void parseIf() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "If.easy");
     assertTrue(easyCompiler.parse());

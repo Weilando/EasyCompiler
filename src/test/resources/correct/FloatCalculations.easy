@@ -1,0 +1,14 @@
+void main() {
+  float a = 3.141592654;
+  float b = a * 2;
+  float c = -1;
+  println(a);
+  println(b);
+  println(c);
+  a = ((b + c) * 3.21 - 1) / 2.5;
+  b = a * 4 - +b;
+  c = b;
+  println(-a);
+  println(+b);
+  println(c);
+}
