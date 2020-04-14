@@ -8,6 +8,7 @@ Please check the status in the project's [roadmap](Roadmap.md).
 ## General concepts
 Each line ends with a semicolon `;`.
 Programs do not have a specific header.
+Declarations are only allowed at the beginning of any function.
 
 A correct program requires a main function of the following form once:
 ```
@@ -179,7 +180,7 @@ operator | description
 ### String
 operator | description
 ----------|------------
-`§` | Concatenation of two strings (e.g. `"One " § "string"` results in _One string_). Concatenations of strings with other datatypes result in strings, e.g. `"Count=" § 4` results in _Count=4_.
+`§` | Concatenation of two strings (e.g. `"One " § "string"` results in _One string_). Concatenations of strings with other data types result in strings, e.g. `"Count=" § 4` results in _Count=4_.
 
 ### Parenthesis
 Pairs of parenthesis (i.e. `(...)`) can be used to highlight the precedences inside expressions.
