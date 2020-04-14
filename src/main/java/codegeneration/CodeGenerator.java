@@ -6,6 +6,7 @@ import node.*;
 import stackdepthevaluation.StackDepthEvaluator;
 import typecheck.ExpressionCache;
 import typecheck.SymbolTable;
+import typecheck.Type;
 
 import java.util.Arrays;
 
@@ -135,7 +136,7 @@ public class CodeGenerator extends DepthFirstAdapter {
   public void caseAPrintStat(APrintStat node) {
     addLineNumber(node, "print statement");
     PExpr expr = node.getExpr();
-    String type = expressionCache.getType(expr);
+    Type type = expressionCache.getType(expr);
 
     expr.apply(this); // put expression value on the stack
 
@@ -144,9 +145,9 @@ public class CodeGenerator extends DepthFirstAdapter {
         "swap"};
     cache.addIndentedLines(Arrays.asList(preparePrint));
 
-    if (type.equals("int")) { //  simply print value
+    if (type.equals(Type.INT)) { //  simply print value
       cache.addIndentedLine("invokevirtual java/io/PrintStream/print(I)V");
-    } else if (type.equals("boolean")) { // convert internal 0 to "false" or 1 to "true"
+    } else if (type.equals(Type.BOOLEAN)) { // convert internal 0 to "false" or 1 to "true"
       cache.addIndentedLine("invokevirtual java/io/PrintStream/print(Z)V");
     }
   }
@@ -155,7 +156,7 @@ public class CodeGenerator extends DepthFirstAdapter {
   public void caseAPrintlnStat(APrintlnStat node) {
     addLineNumber(node, "println statement");
     PExpr expr = node.getExpr();
-    String type = expressionCache.getType(expr);
+    Type type = expressionCache.getType(expr);
 
     expr.apply(this); // put expression value on the stack
 
@@ -164,9 +165,9 @@ public class CodeGenerator extends DepthFirstAdapter {
         "swap"};
     cache.addIndentedLines(Arrays.asList(preparePrint));
 
-    if (type.equals("int")) { //  simply print value
+    if (type.equals(Type.INT)) { //  simply print value
       cache.addIndentedLine("invokevirtual java/io/PrintStream/println(I)V");
-    } else if (type.equals("boolean")) { // convert internal 0 to "false" or 1 to "true"
+    } else if (type.equals(Type.BOOLEAN)) { // convert internal 0 to "false" or 1 to "true"
       cache.addIndentedLine("invokevirtual java/io/PrintStream/println(Z)V");
     }
   }

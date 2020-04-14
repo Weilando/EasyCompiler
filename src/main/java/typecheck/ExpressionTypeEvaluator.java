@@ -5,23 +5,28 @@ import node.*;
 
 public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   final private SymbolTable symbolTable;
-  private String type;
+  private Type type;
 
   public ExpressionTypeEvaluator(SymbolTable symbolTable) {
     this.symbolTable = symbolTable;
-    this.type = "error"; // initial "result-value"
+    this.type = Type.ERROR; // initial "result-value"
   }
 
 
   // Simple type expressions ("Leafs")
   @Override
-  public void caseAIntExpr(AIntExpr node) {
-    type = "int";
+  public void caseABooleanExpr(ABooleanExpr node) {
+    type = Type.BOOLEAN;
   }
 
   @Override
-  public void caseABooleanExpr(ABooleanExpr node) {
-    type = "boolean";
+  public void caseAFloatExpr(AFloatExpr node) {
+    type = Type.FLOAT;
+  }
+
+  @Override
+  public void caseAIntExpr(AIntExpr node) {
+    type = Type.INT;
   }
 
   @Override
@@ -34,39 +39,47 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   }
 
 
-  // Arithmetic expressions (->only int allowed)
+  // Arithmetic expressions (->float and int allowed)
   @Override
   public void caseAPlusExpr(APlusExpr node) {
-    if (bothOfType(node.getLeft(), node.getRight(), "int")) {
-      type = "int";
+    if (bothOfType(node.getLeft(), node.getRight(), Type.INT)) {
+      type = Type.INT;
+    } else if (bothNumerical(node.getLeft(), node.getRight())) {
+      type = Type.FLOAT;
     }
   }
 
   @Override
   public void caseAMinusExpr(AMinusExpr node) {
-    if (bothOfType(node.getLeft(), node.getRight(), "int")) {
-      type = "int";
+    if (bothOfType(node.getLeft(), node.getRight(), Type.INT)) {
+      type = Type.INT;
+    } else if (bothNumerical(node.getLeft(), node.getRight())) {
+      type = Type.FLOAT;
     }
   }
 
   @Override
   public void caseAMultExpr(AMultExpr node) {
-    if (bothOfType(node.getLeft(), node.getRight(), "int")) {
-      type = "int";
+    if (bothOfType(node.getLeft(), node.getRight(), Type.INT)) {
+      type = Type.INT;
+    } else if (bothNumerical(node.getLeft(), node.getRight())) {
+      type = Type.FLOAT;
     }
   }
 
   @Override
   public void caseADivExpr(ADivExpr node) {
-    if (bothOfType(node.getLeft(), node.getRight(), "int")) {
-      type = "int";
+    if (bothOfType(node.getLeft(), node.getRight(), Type.INT)) {
+      type = Type.INT;
+    } else if (bothNumerical(node.getLeft(), node.getRight())) {
+      type = Type.FLOAT;
     }
   }
 
   @Override
-  public void caseAModExpr(AModExpr node) {
-    if (bothOfType(node.getLeft(), node.getRight(), "int")) {
-      type = "int";
+  public void caseAModExpr(AModExpr node) { // only defined for integers!
+    if (bothOfType(node.getLeft(), node.getRight(), Type.INT)) {
+      type = Type.INT;
     }
   }
 
@@ -74,61 +87,61 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   // Boolean expressions (->only boolean allowed)
   @Override
   public void caseAAndExpr(AAndExpr node) {
-    if (bothOfType(node.getLeft(), node.getRight(), "boolean")) {
-      type = "boolean";
+    if (bothOfType(node.getLeft(), node.getRight(), Type.BOOLEAN)) {
+      type = Type.BOOLEAN;
     }
   }
 
   @Override
   public void caseAOrExpr(AOrExpr node) {
-    if (bothOfType(node.getLeft(), node.getRight(), "boolean")) {
-      type = "boolean";
+    if (bothOfType(node.getLeft(), node.getRight(), Type.BOOLEAN)) {
+      type = Type.BOOLEAN;
     }
   }
 
 
-  // Comparison expressions (many work with ints, but result always is boolean)
+  // Comparison expressions (many work with floats and ints, but result always is boolean)
   @Override
   public void caseAEqExpr(AEqExpr node) {
-    // Both ints and booleans can be compared, but the type needs to be the same
-    if (haveSameType(node.getLeft(), node.getRight())) {
-      type = "boolean";
+    // Booleans, floats and ints can be compared, but the type needs to be the same
+    if (haveSameType(node.getLeft(), node.getRight()) || bothNumerical(node.getLeft(), node.getRight())) {
+      type = Type.BOOLEAN;
     }
   }
 
   @Override
   public void caseANeqExpr(ANeqExpr node) {
-    // Both ints and booleans can be compared, but the type needs to be the same
-    if (haveSameType(node.getLeft(), node.getRight())) {
-      type = "boolean";
+    // Booleans, floats and ints can be compared, but the type needs to be the same
+    if (haveSameType(node.getLeft(), node.getRight()) || bothNumerical(node.getLeft(), node.getRight())) {
+      type = Type.BOOLEAN;
     }
   }
 
   @Override
   public void caseALtExpr(ALtExpr node) {
-    if (bothOfType(node.getLeft(), node.getRight(), "int")) {
-      type = "boolean";
+    if (bothNumerical(node.getLeft(), node.getRight())) {
+      type = Type.BOOLEAN;
     }
   }
 
   @Override
   public void caseAGtExpr(AGtExpr node) {
-    if (bothOfType(node.getLeft(), node.getRight(), "int")) {
-      type = "boolean";
+    if (bothNumerical(node.getLeft(), node.getRight())) {
+      type = Type.BOOLEAN;
     }
   }
 
   @Override
   public void caseALteqExpr(ALteqExpr node) {
-    if (bothOfType(node.getLeft(), node.getRight(), "int")) {
-      type = "boolean";
+    if (bothNumerical(node.getLeft(), node.getRight())) {
+      type = Type.BOOLEAN;
     }
   }
 
   @Override
   public void caseAGteqExpr(AGteqExpr node) {
-    if (bothOfType(node.getLeft(), node.getRight(), "int")) {
-      type = "boolean";
+    if (bothNumerical(node.getLeft(), node.getRight())) {
+      type = Type.BOOLEAN;
     }
   }
 
@@ -136,28 +149,36 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   // Unary expressions
   @Override
   public void caseANotExpr(ANotExpr node) {
-    if (hasType(node.getExpr(), "boolean")) {
-      type = "boolean";
+    if (hasType(node.getExpr(), Type.BOOLEAN)) {
+      type = Type.BOOLEAN;
     }
   }
 
   @Override
   public void caseAUplusExpr(AUplusExpr node) {
-    if (hasType(node.getExpr(), "int")) {
-      type = "int";
+    if (hasType(node.getExpr(), Type.FLOAT)) {
+      type = Type.FLOAT;
+    } else if (hasType(node.getExpr(), Type.INT)) {
+      type = Type.INT;
     }
   }
 
   @Override
   public void caseAUminusExpr(AUminusExpr node) {
-    if (hasType(node.getExpr(), "int")) {
-      type = "int";
+    if (hasType(node.getExpr(), Type.FLOAT)) {
+      type = Type.FLOAT;
+    } else if (hasType(node.getExpr(), Type.INT)) {
+      type = Type.INT;
     }
   }
 
 
   // Helpers
-  private boolean bothOfType(Node leftNode, Node rightNode, String type) {
+  private boolean bothNumerical(Node leftNode, Node rightNode) {
+    return isNumerical(leftNode) && isNumerical(rightNode);
+  }
+
+  private boolean bothOfType(Node leftNode, Node rightNode, Type type) {
     ExpressionTypeEvaluator leftEv = new ExpressionTypeEvaluator(symbolTable);
     ExpressionTypeEvaluator rightEv = new ExpressionTypeEvaluator(symbolTable);
 
@@ -177,13 +198,17 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
     return leftEv.getType().equals(rightEv.getType());
   }
 
-  private boolean hasType(Node node, String type) {
+  private boolean hasType(Node node, Type type) {
     ExpressionTypeEvaluator exprEv = new ExpressionTypeEvaluator(symbolTable);
     node.apply(exprEv);
     return exprEv.getType().equals(type);
   }
 
-  public String getType() {
+  private boolean isNumerical(Node node) {
+    return hasType(node, Type.FLOAT) || hasType(node, Type.INT);
+  }
+
+  public Type getType() {
     return type;
   }
 }

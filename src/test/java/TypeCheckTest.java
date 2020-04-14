@@ -1,69 +1,155 @@
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TypeCheckTest {
+  private final String pathTestFilesCorrect = "src/test/resources/correct/";
   private final String pathTestFilesFailTypeCheck = "src/test/resources/failTypeCheck/";
+
+  //-----------------------------------
+  // Check correct files without errors
+  //-----------------------------------
+  @Test
+  public void checkMinimalExample() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Minimal.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkArithmeticComparisons() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "ArithmeticComparisons.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkBooleanComparisons() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "BooleanComparisons.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkBooleanExpressions() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "BooleanExpressions.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkBooleanAnd() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "BooleanAnd.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkBooleanOr() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "BooleanOr.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkBooleanVariable() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "BooleanVariable.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkEmptyStatements() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "EmptyStatements.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkFloatCalculations() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatCalculations.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkFloatVariable() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatVariable.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkIf() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "If.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkIfElse() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IfElse.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkIfElseComplex() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IfElseComplex.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkIfWhileIf() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IfWhileIf.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkIntVariable() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IntVariable.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkIntCalculations() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IntCalculations.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkPrint() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Print.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkUnaries() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Unaries.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkWhile() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "While.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkWhileComplex() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "WhileComplex.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
 
   //---------------------------------------------------------
   // Throw type-errors while parsing files with invalid types
   //---------------------------------------------------------
   @Test
-  public void errorDuplicateDeclaration() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailDuplicateDeclaration.easy");
+  public void errorBadConditions() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadConditions.easy");
     assertFalse(easyCompiler.typeCheck());
+    assertEquals(8, easyCompiler.getTypeErrorNumber());
   }
 
   @Test
-  public void errorNoDeclaration() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailNoDeclaration.easy");
+  public void errorBadExpressions() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadExpressions.easy");
     assertFalse(easyCompiler.typeCheck());
+    assertEquals(16, easyCompiler.getTypeErrorNumber());
   }
 
   @Test
-  public void errorSeveralTypes() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailSeveralTypes.easy");
+  public void errorBadVariableOperations() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadVariableOperations.easy");
     assertFalse(easyCompiler.typeCheck());
-  }
-
-  @Test
-  public void errorIfConditionIsIntVariable() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailIFConditionIsIntVariable.easy");
-    assertFalse(easyCompiler.typeCheck());
-  }
-
-  @Test
-  public void errorWhileConditionIsInt() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailWhileConditionIsInt.easy");
-    assertFalse(easyCompiler.typeCheck());
-  }
-
-  @Test
-  public void errorWrongAssignment() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailWrongAssignment.easy");
-    assertFalse(easyCompiler.typeCheck());
-  }
-
-  @Test
-  public void multipleTypeErrors() {
-    final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
-    final PrintStream originalOut = System.out;
-    final PrintStream originalErr = System.err;
-    System.setOut(new PrintStream(outContent));
-    System.setErr(new PrintStream(errContent));
-
-    String[] args = {"-compile", pathTestFilesFailTypeCheck + "FailMultipleTypeErrors.easy"};
-    EasyCompiler.main(args);
-
-    assertTrue(outContent.toString().contains("Type-Error"));
-    assertFalse(outContent.toString().contains("Successful!"));
-    assertEquals(9, (outContent.toString().split("Type-Error", -1).length) - 1);
-
-    System.setOut(originalOut);
-    System.setErr(originalErr);
+    assertEquals(16, easyCompiler.getTypeErrorNumber());
   }
 }

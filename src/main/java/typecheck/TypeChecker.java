@@ -18,11 +18,13 @@ public class TypeChecker extends DepthFirstAdapter {
   public void outAInitStat(AInitStat node) {
     TIdentifier id = node.getId();
     String key = id.getText();
-    String varType = "";
-    if (node.getType() instanceof AIntTp) {
-      varType = "int";
-    } else if (node.getType() instanceof ABooleanTp) {
-      varType = "boolean";
+    Type varType = Type.ERROR;
+    if (node.getType() instanceof ABooleanTp) {
+      varType = Type.BOOLEAN;
+    } else if (node.getType() instanceof AFloatTp) {
+      varType = Type.FLOAT;
+    } else if (node.getType() instanceof AIntTp) {
+      varType = Type.INT;
     } else { // Should never happen
       errorHandler.throwInternalError(id);
     }
@@ -33,23 +35,20 @@ public class TypeChecker extends DepthFirstAdapter {
       symbolTable.add(key, varType);
     }
 
-    String exprType = evaluateType(node.getExpr());
-
-    if (exprType.equals("error")) {
-      errorHandler.throwFlawedExpressionError(id);
-    } else if (!exprType.equals(varType)) {
-      errorHandler.throwIncompatibleError(id, varType, exprType);
-    }
+    Type exprType = evaluateType(node.getExpr());
+    checkAssignment(id, varType, exprType);
   }
 
   public void outADeclStat(ADeclStat node) {
     TIdentifier id = node.getId();
     String key = id.getText();
-    String type = "";
-    if (node.getType() instanceof AIntTp) {
-      type = "int";
-    } else if (node.getType() instanceof ABooleanTp) {
-      type = "boolean";
+    Type type = Type.ERROR;
+    if (node.getType() instanceof ABooleanTp) {
+      type = Type.BOOLEAN;
+    } else if (node.getType() instanceof AFloatTp) {
+      type = Type.FLOAT;
+    } else if (node.getType() instanceof AIntTp) {
+      type = Type.INT;
     }
 
     if (symbolTable.contains(key)) {
@@ -68,38 +67,33 @@ public class TypeChecker extends DepthFirstAdapter {
       return;
     }
 
-    String varType = symbolTable.getType(key);
-    String exprType = evaluateType(node.getExpr());
-
-    if (exprType.equals("error")) {
-      errorHandler.throwFlawedExpressionError(id);
-    } else if (!exprType.equals(varType)) {
-      errorHandler.throwIncompatibleError(id, varType, exprType);
-    }
+    Type varType = symbolTable.getType(key);
+    Type exprType = evaluateType(node.getExpr());
+    checkAssignment(id, varType, exprType);
   }
 
 
   // Control statements
   @Override
   public void outAWhileStat(AWhileStat node) {
-    String headType = evaluateType(node.getExpr());
-    if (!headType.equals("boolean")) {
+    Type headType = evaluateType(node.getExpr());
+    if (!headType.equals(Type.BOOLEAN)) {
       errorHandler.throwConditionError(node, "while", headType);
     }
   }
 
   @Override
   public void outAIfStat(AIfStat node) {
-    String headType = evaluateType(node.getExpr());
-    if (!headType.equals("boolean")) {
+    Type headType = evaluateType(node.getExpr());
+    if (!headType.equals(Type.BOOLEAN)) {
       errorHandler.throwConditionError(node, "if", headType);
     }
   }
 
   @Override
   public void outAIfelseStat(AIfelseStat node) {
-    String headType = evaluateType(node.getExpr());
-    if (!headType.equals("boolean")) {
+    Type headType = evaluateType(node.getExpr());
+    if (!headType.equals(Type.BOOLEAN)) {
       errorHandler.throwConditionError(node, "if", headType);
     }
   }
@@ -109,8 +103,8 @@ public class TypeChecker extends DepthFirstAdapter {
   @Override
   public void outAPrintStat(APrintStat node) {
     PExpr expr = node.getExpr();
-    String contentType = evaluateType(expr);
-    if (!(contentType.equals("boolean") || contentType.equals("int"))) {
+    Type contentType = evaluateType(expr);
+    if (contentType.equals(Type.ERROR)) {
       errorHandler.throwPrintError(node);
     }
     expressionCache.add(expr, contentType);
@@ -119,22 +113,38 @@ public class TypeChecker extends DepthFirstAdapter {
   @Override
   public void outAPrintlnStat(APrintlnStat node) {
     PExpr expr = node.getExpr();
-    String contentType = evaluateType(expr);
-    if (!(contentType.equals("boolean") || contentType.equals("int"))) {
+    Type contentType = evaluateType(expr);
+    if (contentType.equals(Type.ERROR)) {
       errorHandler.throwPrintlnError(node);
     }
     expressionCache.add(expr, contentType);
   }
 
   // Helpers
-  private String evaluateType(PExpr expr) {
+  private Type evaluateType(PExpr expr) {
     ExpressionTypeEvaluator typeEvaluator = new ExpressionTypeEvaluator(symbolTable);
     expr.apply(typeEvaluator);
     return typeEvaluator.getType();
   }
 
+  private void checkAssignment(TIdentifier id, Type varType, Type exprType) {
+    if (exprType.equals(Type.ERROR)) {
+      errorHandler.throwFlawedExpressionError(id);
+    } else if (varType.equals(Type.FLOAT)) {
+      if (!(exprType.equals(Type.FLOAT) || exprType.equals(Type.INT))) {
+        errorHandler.throwIncompatibleError(id, varType, exprType);
+      }
+    } else if (!varType.equals(exprType)) {
+      errorHandler.throwIncompatibleError(id, varType, exprType);
+    }
+  }
+
   public boolean errorsOccurred() {
     return this.errorHandler.errorsOccurred();
+  }
+
+  public int getErrorNumber() {
+    return this.errorHandler.getErrorNumber();
   }
 
   public ExpressionCache getExpressionCache() {

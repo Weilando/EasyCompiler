@@ -1,10 +1,10 @@
 package typecheck;
 
 public class Symbol {
-  private final String type;
+  private final Type type;
   private final int variableNumber;
 
-  public Symbol(String type, int variableNumber) {
+  public Symbol(Type type, int variableNumber) {
     this.type = type;
     this.variableNumber = variableNumber;
   }
@@ -13,7 +13,7 @@ public class Symbol {
     return variableNumber;
   }
 
-  public String getType() {
+  public Type getType() {
     return type;
   }
 

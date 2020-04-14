@@ -13,7 +13,7 @@ public class SymbolTable {
     lastSymbolNumber = 0;
   }
 
-  void add(String id, String type) {
+  void add(String id, Type type) {
     table.put(id, new Symbol(type, ++lastSymbolNumber));
   }
 
@@ -21,7 +21,7 @@ public class SymbolTable {
     return table.containsKey(id);
   }
 
-  public String getType(String id) {
+  public Type getType(String id) {
     return table.get(id).getType();
   }
 

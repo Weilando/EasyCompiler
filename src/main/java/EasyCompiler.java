@@ -7,8 +7,6 @@ import livenessanalysis.LivenessAnalyzer;
 import node.Start;
 import parser.Parser;
 import parser.ParserException;
-import typecheck.ExpressionCache;
-import typecheck.SymbolTable;
 import typecheck.TypeChecker;
 
 import java.io.File;
@@ -28,9 +26,8 @@ public class EasyCompiler {
   final private boolean DEBUG = false;
   final private Path sourceFilePath;
   private Start ast;
-  private SymbolTable symbolTable;
   private ArrayList<String> code;
-  private ExpressionCache expressionCache;
+  private TypeChecker typeChecker;
   private boolean parseErrorOccurred = false;
 
   public EasyCompiler(String sourceFilePath) {
@@ -82,7 +79,7 @@ public class EasyCompiler {
   boolean generateCode() {
     if (parse() && typeCheck()) {
       CodeCache codeCache = new CodeCache();
-      CodeGenerator codeGenerator = new CodeGenerator(codeCache, this.expressionCache, getProgramName(), this.symbolTable);
+      CodeGenerator codeGenerator = new CodeGenerator(codeCache, this.typeChecker.getExpressionCache(), getProgramName(), this.typeChecker.getSymbolTable());
       ast.apply(codeGenerator);
       this.code = codeCache.getCode();
 
@@ -96,7 +93,7 @@ public class EasyCompiler {
   //---------
   void liveness() {
     if (parse() && typeCheck()) {
-      LivenessAnalyzer analyzer = new LivenessAnalyzer(ast, symbolTable);
+      LivenessAnalyzer analyzer = new LivenessAnalyzer(ast, this.typeChecker.getSymbolTable());
 
       if (DEBUG) {
         analyzer.printGraph();
@@ -134,22 +131,25 @@ public class EasyCompiler {
   boolean typeCheck() {
     if (!parse()) {
       return false;
-    } else if (this.symbolTable != null) {
+    } else if (this.typeChecker != null) {
       return true;
     }
 
-    TypeChecker typeChecker = new TypeChecker();
-    this.ast.apply(typeChecker);
+    this.typeChecker = new TypeChecker();
+    this.ast.apply(this.typeChecker);
 
-    if (!typeChecker.errorsOccurred()) {
+    if (!this.typeChecker.errorsOccurred()) {
       if (DEBUG) {
-        typeChecker.printSymbolTable();
+        this.typeChecker.printSymbolTable();
       }
-      this.symbolTable = typeChecker.getSymbolTable();
-      this.expressionCache = typeChecker.getExpressionCache();
       return true;
     }
     return false;
+  }
+
+  int getTypeErrorNumber() {
+    typeCheck();
+    return this.typeChecker.getErrorNumber();
   }
 
   //--------
