@@ -3,7 +3,7 @@
 - [x] Stage 1: Parsing (basic functionality)
 - [x] Stage 2: Type-checking (basic functionality)
 - [x] Stage 3: Code-generation (basic functionality)
-- [ ] Stage 4: Implementation of floats
+- [x] Stage 4: Implementation of floats
 - [ ] Stage 5: Implementation of strings
 - [ ] Stage 6: Implementation of functions
 - [ ] Stage 7: Implementation of arrays

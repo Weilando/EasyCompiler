@@ -4,12 +4,10 @@ import analysis.DepthFirstAdapter;
 import node.*;
 
 public class ExpressionTypeEvaluator extends DepthFirstAdapter {
-  final private ExpressionTypeCache expressionTypeCache;
   final private SymbolTable symbolTable;
   private Type type;
 
-  public ExpressionTypeEvaluator(ExpressionTypeCache expressionTypeCache, SymbolTable symbolTable) {
-    this.expressionTypeCache = expressionTypeCache;
+  public ExpressionTypeEvaluator(SymbolTable symbolTable) {
     this.symbolTable = symbolTable;
     this.type = Type.UNDEFINED;
   }
@@ -17,19 +15,19 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   // Simple type expressions ("Leafs")
   @Override
   public void caseABooleanExpr(ABooleanExpr node) {
-    this.expressionTypeCache.add(node, Type.BOOLEAN);
+    node.setType(Type.BOOLEAN);
     type = Type.BOOLEAN;
   }
 
   @Override
   public void caseAFloatExpr(AFloatExpr node) {
-    this.expressionTypeCache.add(node, Type.FLOAT);
+    node.setType(Type.FLOAT);
     type = Type.FLOAT;
   }
 
   @Override
   public void caseAIntExpr(AIntExpr node) {
-    this.expressionTypeCache.add(node, Type.INT);
+    node.setType(Type.INT);
     type = Type.INT;
   }
 
@@ -42,57 +40,57 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
     } else {
       type = Type.ERROR;
     }
-    this.expressionTypeCache.add(node, type);
+    node.setType(type);
   }
 
 
   // Arithmetic expressions (->float and int allowed)
   @Override
-  public void caseAPlusExpr(APlusExpr node) {
-    type = this.expressionTypeCache.getType(node);
+  public void caseAAddExpr(AAddExpr node) {
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenArithmetic(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
-  public void caseAMinusExpr(AMinusExpr node) {
-    type = this.expressionTypeCache.getType(node);
+  public void caseASubExpr(ASubExpr node) {
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenArithmetic(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
-  public void caseAMultExpr(AMultExpr node) {
-    type = this.expressionTypeCache.getType(node);
+  public void caseAMulExpr(AMulExpr node) {
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenArithmetic(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
   public void caseADivExpr(ADivExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenArithmetic(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
   public void caseAModExpr(AModExpr node) { // only defined for integers!
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       if (bothOfType(node.getLeft(), node.getRight(), Type.INT)) {
         type = Type.INT;
       } else {
         type = Type.ERROR;
       }
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
@@ -100,19 +98,19 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   // Boolean expressions (->only boolean allowed)
   @Override
   public void caseAAndExpr(AAndExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenBoolean(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
   public void caseAOrExpr(AOrExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenBoolean(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
@@ -120,55 +118,55 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   // Comparison expressions (many work with floats and ints, but result always is boolean)
   @Override
   public void caseAEqExpr(AEqExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenEqualityComparison(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
   public void caseANeqExpr(ANeqExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenEqualityComparison(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
   public void caseALtExpr(ALtExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenArithmeticComparison(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
   public void caseAGtExpr(AGtExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenArithmeticComparison(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
   public void caseALteqExpr(ALteqExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenArithmeticComparison(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
   public void caseAGteqExpr(AGteqExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildrenArithmeticComparison(node.getLeft(), node.getRight());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
@@ -176,32 +174,32 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   // Unary expressions
   @Override
   public void caseANotExpr(ANotExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       if (hasType(node.getExpr(), Type.BOOLEAN)) {
         type = Type.BOOLEAN;
       } else {
         type = Type.ERROR;
       }
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
   public void caseAUplusExpr(AUplusExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildArithmeticUnary(node.getExpr());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
   @Override
   public void caseAUminusExpr(AUminusExpr node) {
-    type = this.expressionTypeCache.getType(node);
+    type = node.getType();
     if (type.equals(Type.UNDEFINED)) {
       type = evaluateChildArithmeticUnary(node.getExpr());
-      this.expressionTypeCache.add(node, type);
+      node.setType(type);
     }
   }
 
@@ -212,8 +210,8 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   }
 
   private boolean bothOfType(Node leftNode, Node rightNode, Type type) {
-    ExpressionTypeEvaluator leftEv = new ExpressionTypeEvaluator(expressionTypeCache, symbolTable);
-    ExpressionTypeEvaluator rightEv = new ExpressionTypeEvaluator(expressionTypeCache, symbolTable);
+    ExpressionTypeEvaluator leftEv = new ExpressionTypeEvaluator(symbolTable);
+    ExpressionTypeEvaluator rightEv = new ExpressionTypeEvaluator(symbolTable);
 
     leftNode.apply(leftEv);
     rightNode.apply(rightEv);
@@ -223,7 +221,7 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
 
   private Type evaluateChildArithmeticUnary(PExpr expr) {
     if (isNumerical(expr)) {
-      ExpressionTypeEvaluator exprEv = new ExpressionTypeEvaluator(expressionTypeCache, symbolTable);
+      ExpressionTypeEvaluator exprEv = new ExpressionTypeEvaluator(symbolTable);
       expr.apply(exprEv);
       return exprEv.getType();
     }
@@ -262,8 +260,8 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   }
 
   private boolean haveSameType(Node leftNode, Node rightNode) {
-    ExpressionTypeEvaluator leftEv = new ExpressionTypeEvaluator(expressionTypeCache, symbolTable);
-    ExpressionTypeEvaluator rightEv = new ExpressionTypeEvaluator(expressionTypeCache, symbolTable);
+    ExpressionTypeEvaluator leftEv = new ExpressionTypeEvaluator(symbolTable);
+    ExpressionTypeEvaluator rightEv = new ExpressionTypeEvaluator(symbolTable);
 
     leftNode.apply(leftEv);
     rightNode.apply(rightEv);
@@ -272,7 +270,7 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   }
 
   private boolean hasType(Node node, Type type) {
-    ExpressionTypeEvaluator exprEv = new ExpressionTypeEvaluator(expressionTypeCache, symbolTable);
+    ExpressionTypeEvaluator exprEv = new ExpressionTypeEvaluator(symbolTable);
     node.apply(exprEv);
     return exprEv.getType().equals(type);
   }

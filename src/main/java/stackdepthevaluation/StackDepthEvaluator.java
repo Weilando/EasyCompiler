@@ -94,17 +94,17 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
 
   // Arithmetic operations
   @Override
-  public void outAPlusExpr(APlusExpr node) {
+  public void outAAddExpr(AAddExpr node) {
     decrementDepthCounter(); // iadd pops 2 arguments and pushes 1 result
   }
 
   @Override
-  public void outAMinusExpr(AMinusExpr node) {
+  public void outASubExpr(ASubExpr node) {
     decrementDepthCounter(); // isub pops 2 arguments and pushes 1 result
   }
 
   @Override
-  public void outAMultExpr(AMultExpr node) {
+  public void outAMulExpr(AMulExpr node) {
     decrementDepthCounter(); // imul pops 2 arguments and pushes 1 result
   }
 

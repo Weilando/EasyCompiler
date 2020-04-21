@@ -38,6 +38,14 @@ task runSableCC(type: Exec) {
     args = ['-jar', '../../../libs/sablecc-3.2-1.jar', 'EasyCompiler.scc']
 }
 
+task copyExpressionNode(type: Copy) {
+    inputs.file('src/main/resources/PExpr.java')
+    outputs.file('src/main/java/node/PExpr.java')
+
+    from 'src/main/resources/PExpr.java'
+    into 'src/main/java/node/'
+}
+
 task copyLexerDatToOut(type: Copy) {
     inputs.file('src/main/java/lexer/lexer.dat')withPathSensitivity(PathSensitivity.RELATIVE)
     outputs.file('out/production/classes/lexer/lexer.dat')
@@ -71,7 +79,8 @@ task copyParserDatToBuild(type: Copy) {
 }
 
 runSableCC.dependsOn(getSableCC)
-compileJava.dependsOn(runSableCC)
+copyExpressionNode.dependsOn(runSableCC)
+compileJava.dependsOn(runSableCC, copyExpressionNode)
 compileTestJava.dependsOn(runSableCC)
 test.dependsOn(copyLexerDatToBuild, copyParserDatToBuild)
 copyLexerDatToOut.dependsOn(runSableCC, compileJava, compileTestJava)

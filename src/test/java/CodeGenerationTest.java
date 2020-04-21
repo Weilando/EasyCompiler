@@ -147,7 +147,7 @@ public class CodeGenerationTest {
     setupClassExecutionProcess(testName);
 
     assertEquals(0, classProcess.waitFor());
-    assertEquals("3.0\n-2.0\n3.0\n1.5\n6.4\n3.5\n5.0\n-4.0\n10.0\n-0.5", inputStreamString);
+    assertEquals("3.0\n-2.0\n3.0\n1.5\n6.4\n3.5\n5.0\n-4.0\n10.0\n-0.5\n1414.014.014.014.014.014.014.0", inputStreamString);
   }
 
   @Test

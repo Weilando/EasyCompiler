@@ -169,14 +169,14 @@ Productions
       | {term} term {-> term.expr};
 
     additive_expression {-> expr} =
-        {plus}  [left]:additive_expression plus  [right]:multiplicative_expression {-> New expr.plus(left.expr, right.expr)}
-      | {minus} [left]:additive_expression minus [right]:multiplicative_expression {-> New expr.minus(left.expr, right.expr)}
-      | {multiplicative_expression} multiplicative_expression {-> multiplicative_expression.expr};
+        {add} [left]:additive_expression plus  [right]:multiplicative_expression {-> New expr.add(left.expr, right.expr)}
+      | {sub} [left]:additive_expression minus [right]:multiplicative_expression {-> New expr.sub(left.expr, right.expr)}
+      | {multiplicative} multiplicative_expression {-> multiplicative_expression.expr};
 
     multiplicative_expression {-> expr} =
-        {mod}  [left]:multiplicative_expression mod  [right]:unary_expression {-> New expr.mod(left.expr, right.expr)}
-      | {mult} [left]:multiplicative_expression mult [right]:unary_expression {-> New expr.mult(left.expr, right.expr)}
-      | {div}  [left]:multiplicative_expression div  [right]:unary_expression {-> New expr.div(left.expr, right.expr)}
+        {mod} [left]:multiplicative_expression mod  [right]:unary_expression {-> New expr.mod(left.expr, right.expr)}
+      | {mul} [left]:multiplicative_expression mult [right]:unary_expression {-> New expr.mul(left.expr, right.expr)}
+      | {div} [left]:multiplicative_expression div  [right]:unary_expression {-> New expr.div(left.expr, right.expr)}
       | {unary} unary_expression {-> unary_expression.expr};
 
     comparison_expression {-> expr} =
@@ -227,10 +227,10 @@ Abstract Syntax Tree
       | {empty}   ;
 
     expr =
-        {plus}    [left]:expr [right]:expr
-      | {minus}   [left]:expr [right]:expr
+        {add}     [left]:expr [right]:expr
+      | {sub}     [left]:expr [right]:expr
       | {mod}     [left]:expr [right]:expr
-      | {mult}    [left]:expr [right]:expr
+      | {mul}     [left]:expr [right]:expr
       | {div}     [left]:expr [right]:expr
       | {or}      [left]:expr [right]:expr
       | {and}     [left]:expr [right]:expr
