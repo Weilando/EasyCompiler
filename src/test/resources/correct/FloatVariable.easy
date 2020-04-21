@@ -1,5 +1,0 @@
-void main() {
-  float pi = 3.14159265;
-  float absoluteZero;
-  absoluteZero = -273.15;
-}

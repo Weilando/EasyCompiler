@@ -4,7 +4,7 @@ import analysis.DepthFirstAdapter;
 import lineevaluation.LineEvaluator;
 import node.*;
 import stackdepthevaluation.StackDepthEvaluator;
-import typecheck.ExpressionCache;
+import typecheck.ExpressionTypeCache;
 import typecheck.SymbolTable;
 import typecheck.Type;
 
@@ -12,16 +12,16 @@ import java.util.Arrays;
 
 public class CodeGenerator extends DepthFirstAdapter {
   private final CodeCache cache;
-  private final ExpressionCache expressionCache;
+  private final ExpressionTypeCache expressionTypeCache;
   private final String programName;
   private final SymbolTable symbolTable;
   private int lastCLabel; // "Continue" label
   private int lastHLabel; // "Head" label
   private int lastTLabel; // "True" label
 
-  public CodeGenerator(CodeCache cache, ExpressionCache expressionCache, String programName, SymbolTable symbolTable) {
+  public CodeGenerator(CodeCache cache, ExpressionTypeCache expressionTypeCache, String programName, SymbolTable symbolTable) {
     this.cache = cache;
-    this.expressionCache = expressionCache;
+    this.expressionTypeCache = expressionTypeCache;
     this.programName = programName;
     this.symbolTable = symbolTable;
     this.lastCLabel = 0;
@@ -136,7 +136,7 @@ public class CodeGenerator extends DepthFirstAdapter {
   public void caseAPrintStat(APrintStat node) {
     addLineNumber(node, "print statement");
     PExpr expr = node.getExpr();
-    Type type = expressionCache.getType(expr);
+    Type type = expressionTypeCache.getType(expr);
 
     expr.apply(this); // put expression value on the stack
 
@@ -145,10 +145,15 @@ public class CodeGenerator extends DepthFirstAdapter {
         "swap"};
     cache.addIndentedLines(Arrays.asList(preparePrint));
 
-    if (type.equals(Type.INT)) { //  simply print value
-      cache.addIndentedLine("invokevirtual java/io/PrintStream/print(I)V");
-    } else if (type.equals(Type.BOOLEAN)) { // convert internal 0 to "false" or 1 to "true"
+    if (type.equals(Type.BOOLEAN)) {
       cache.addIndentedLine("invokevirtual java/io/PrintStream/print(Z)V");
+    } else if (type.equals(Type.FLOAT)) {
+      if (this.expressionTypeCache.getType(node.getExpr()).equals(Type.INT)) {
+        cache.addIndentedLine("i2f");
+      }
+      cache.addIndentedLine("invokevirtual java/io/PrintStream/print(F)V");
+    } else if (type.equals(Type.INT)) {
+      cache.addIndentedLine("invokevirtual java/io/PrintStream/print(I)V");
     }
   }
 
@@ -156,7 +161,7 @@ public class CodeGenerator extends DepthFirstAdapter {
   public void caseAPrintlnStat(APrintlnStat node) {
     addLineNumber(node, "println statement");
     PExpr expr = node.getExpr();
-    Type type = expressionCache.getType(expr);
+    Type type = expressionTypeCache.getType(expr);
 
     expr.apply(this); // put expression value on the stack
 
@@ -165,10 +170,15 @@ public class CodeGenerator extends DepthFirstAdapter {
         "swap"};
     cache.addIndentedLines(Arrays.asList(preparePrint));
 
-    if (type.equals(Type.INT)) { //  simply print value
-      cache.addIndentedLine("invokevirtual java/io/PrintStream/println(I)V");
-    } else if (type.equals(Type.BOOLEAN)) { // convert internal 0 to "false" or 1 to "true"
+    if (type.equals(Type.BOOLEAN)) {
       cache.addIndentedLine("invokevirtual java/io/PrintStream/println(Z)V");
+    } else if (type.equals(Type.FLOAT)) {
+      if (this.expressionTypeCache.getType(node.getExpr()).equals(Type.INT)) {
+        cache.addIndentedLine("i2f");
+      }
+      cache.addIndentedLine("invokevirtual java/io/PrintStream/println(F)V");
+    } else if (type.equals(Type.INT)) {
+      cache.addIndentedLine("invokevirtual java/io/PrintStream/println(I)V");
     }
   }
 
@@ -187,8 +197,7 @@ public class CodeGenerator extends DepthFirstAdapter {
   @Override
   public void outAInitStat(AInitStat node) {
     String id = node.getId().getText();
-    int varNumber = symbolTable.getVariableNumber(id);
-    cache.addIndentedLine(String.format("istore %s", varNumber));
+    generateAssignCode(id, this.expressionTypeCache.getType(node.getExpr()).equals(Type.INT));
   }
 
   @Override
@@ -199,30 +208,53 @@ public class CodeGenerator extends DepthFirstAdapter {
   @Override
   public void outAAssignStat(AAssignStat node) {
     String id = node.getId().getText();
-    int varNumber = symbolTable.getVariableNumber(id);
-    cache.addIndentedLine(String.format("istore %s", varNumber));
+    generateAssignCode(id, this.expressionTypeCache.getType(node.getExpr()).equals(Type.INT));
   }
 
 
   // Arithmetic operations
   @Override
-  public void outAPlusExpr(APlusExpr node) {
-    cache.addIndentedLine("iadd");
+  public void caseAPlusExpr(APlusExpr node) {
+    if (this.expressionTypeCache.getType(node).equals(Type.FLOAT)) {
+      generateArithmeticChildren(node.getLeft(), node.getRight(), true);
+      cache.addIndentedLine("fadd");
+    } else if (this.expressionTypeCache.getType(node).equals(Type.INT)) {
+      generateArithmeticChildren(node.getLeft(), node.getRight(), false);
+      cache.addIndentedLine("iadd");
+    }
   }
 
   @Override
-  public void outAMinusExpr(AMinusExpr node) {
-    cache.addIndentedLine("isub");
+  public void caseAMinusExpr(AMinusExpr node) {
+    if (this.expressionTypeCache.getType(node).equals(Type.FLOAT)) {
+      generateArithmeticChildren(node.getLeft(), node.getRight(), true);
+      cache.addIndentedLine("fsub");
+    } else if (this.expressionTypeCache.getType(node).equals(Type.INT)) {
+      generateArithmeticChildren(node.getLeft(), node.getRight(), false);
+      cache.addIndentedLine("isub");
+    }
   }
 
   @Override
-  public void outAMultExpr(AMultExpr node) {
-    cache.addIndentedLine("imul");
+  public void caseAMultExpr(AMultExpr node) {
+    if (this.expressionTypeCache.getType(node).equals(Type.FLOAT)) {
+      generateArithmeticChildren(node.getLeft(), node.getRight(), true);
+      cache.addIndentedLine("fmul");
+    } else if (this.expressionTypeCache.getType(node).equals(Type.INT)) {
+      generateArithmeticChildren(node.getLeft(), node.getRight(), false);
+      cache.addIndentedLine("imul");
+    }
   }
 
   @Override
-  public void outADivExpr(ADivExpr node) {
-    cache.addIndentedLine("idiv");
+  public void caseADivExpr(ADivExpr node) {
+    if (this.expressionTypeCache.getType(node).equals(Type.FLOAT)) {
+      generateArithmeticChildren(node.getLeft(), node.getRight(), true);
+      cache.addIndentedLine("fdiv");
+    } else if (this.expressionTypeCache.getType(node).equals(Type.INT)) {
+      generateArithmeticChildren(node.getLeft(), node.getRight(), false);
+      cache.addIndentedLine("idiv");
+    }
   }
 
   @Override
@@ -247,8 +279,14 @@ public class CodeGenerator extends DepthFirstAdapter {
   // Unary plus has no effect and does not need to be processed.
   @Override
   public void outAUminusExpr(AUminusExpr node) {
-    cache.addIndentedLine("ldc -1");
-    cache.addIndentedLine("imul");
+    if (this.expressionTypeCache.getType(node).equals(Type.FLOAT)) {
+      if (this.expressionTypeCache.getType(node.getExpr()).equals(Type.INT)) {
+        cache.addIndentedLine("i2f");
+      }
+      cache.addIndentedLine("fneg");
+    } else if (this.expressionTypeCache.getType(node).equals(Type.INT)) {
+      cache.addIndentedLine("ineg");
+    }
   }
 
   @Override
@@ -292,11 +330,6 @@ public class CodeGenerator extends DepthFirstAdapter {
 
   // Literal expressions
   @Override
-  public void outAIntExpr(AIntExpr node) {
-    cache.addIndentedLine(String.format("ldc %s", node.getLit().getText()));
-  }
-
-  @Override
   public void outABooleanExpr(ABooleanExpr node) {
     String value = node.getLit().getText();
 
@@ -308,10 +341,25 @@ public class CodeGenerator extends DepthFirstAdapter {
   }
 
   @Override
+  public void outAFloatExpr(AFloatExpr node) {
+    cache.addIndentedLine(String.format("ldc %s", node.getLit().getText()));
+  }
+
+  @Override
   public void outAIdExpr(AIdExpr node) {
     String id = node.getId().getText();
     int varNumber = symbolTable.getVariableNumber(id);
-    cache.addIndentedLine(String.format("iload %d", varNumber));
+
+    if (this.symbolTable.getType(id).equals(Type.FLOAT)) {
+      cache.addIndentedLine(String.format("fload %s", varNumber));
+    } else { // boolean and int are represented as int
+      cache.addIndentedLine(String.format("iload %s", varNumber));
+    }
+  }
+
+  @Override
+  public void outAIntExpr(AIntExpr node) {
+    cache.addIndentedLine(String.format("ldc %s", node.getLit().getText()));
   }
 
 
@@ -339,6 +387,30 @@ public class CodeGenerator extends DepthFirstAdapter {
         String.format("%s:", TLabel),
         "ldc 1",
         String.format("%s:", CLabel)};
+  }
+
+  void generateAssignCode(String id, boolean castInt) {
+    int varNumber = symbolTable.getVariableNumber(id);
+
+    if (this.symbolTable.getType(id).equals(Type.FLOAT)) {
+      if (castInt) {
+        cache.addIndentedLine("i2f");
+      }
+      cache.addIndentedLine(String.format("fstore %s", varNumber));
+    } else { // boolean and int are represented as int
+      cache.addIndentedLine(String.format("istore %s", varNumber));
+    }
+  }
+
+  void generateArithmeticChildren(PExpr left, PExpr right, boolean cast) {
+    left.apply(this);
+    if (cast && this.expressionTypeCache.getType(left).equals(Type.INT)) {
+      cache.addIndentedLine("i2f");
+    }
+    right.apply(this);
+    if (cast && this.expressionTypeCache.getType(right).equals(Type.INT)) {
+      cache.addIndentedLine("i2f");
+    }
   }
 
   void addLineNumber(Node node, String description) {

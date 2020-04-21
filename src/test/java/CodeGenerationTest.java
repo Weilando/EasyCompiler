@@ -41,6 +41,10 @@ public class CodeGenerationTest {
       classProcess = runtime.exec(command, null, workingDirectory);
       inputStreamString = new BufferedReader(new InputStreamReader(classProcess.getInputStream()))
           .lines().collect(Collectors.joining("\n"));
+
+      /*String error = new BufferedReader(new InputStreamReader(classProcess.getErrorStream()))
+          .lines().collect(Collectors.joining("\n"));
+      System.out.println(error);*/
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -125,6 +129,28 @@ public class CodeGenerationTest {
   }
 
   @Test
+  public void resultFloat() throws InterruptedException {
+    String testName = "Float";
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
+
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("3.1415927\n-2.0\n2.0\n2.0\n3.4\n-1.6\n7.0\n3.5\n-5.4\n3.2\n16.74\n2.7", inputStreamString);
+  }
+
+  @Test
+  public void resultFloatWithCast() throws InterruptedException {
+    String testName = "FloatWithCast";
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
+
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("3.0\n-2.0\n3.0\n1.5\n6.4\n3.5\n5.0\n-4.0\n10.0\n-0.5", inputStreamString);
+  }
+
+  @Test
   public void resultIf() throws InterruptedException {
     String testName = "If";
     generateJasminFile(testName);
@@ -158,14 +184,14 @@ public class CodeGenerationTest {
   }
 
   @Test
-  public void resultIntCalculations() throws InterruptedException {
-    String testName = "IntCalculations";
+  public void resultInt() throws InterruptedException {
+    String testName = "Int";
     generateJasminFile(testName);
     generateClassFromJasminFile(testName);
     setupClassExecutionProcess(testName);
 
     assertEquals(0, classProcess.waitFor());
-    assertEquals("42\n41\n-1\n-19\n35\n35", inputStreamString);
+    assertEquals("42-1421\n-21-224-3", inputStreamString);
   }
 
   @Test
@@ -187,7 +213,7 @@ public class CodeGenerationTest {
     setupClassExecutionProcess(testName);
 
     assertEquals(0, classProcess.waitFor());
-    assertEquals("42\nfalsetrue", inputStreamString);
+    assertEquals("falsetrue\n3.14162.1\n42", inputStreamString);
   }
 
   @Test

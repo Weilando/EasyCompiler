@@ -5,12 +5,12 @@ import node.*;
 
 public class TypeChecker extends DepthFirstAdapter {
   final private TypeErrorHandler errorHandler;
-  final private ExpressionCache expressionCache;
+  final private ExpressionTypeCache expressionTypeCache;
   final private SymbolTable symbolTable;
 
   public TypeChecker() {
     this.errorHandler = new TypeErrorHandler();
-    this.expressionCache = new ExpressionCache();
+    this.expressionTypeCache = new ExpressionTypeCache();
     this.symbolTable = new SymbolTable();
   }
 
@@ -107,7 +107,7 @@ public class TypeChecker extends DepthFirstAdapter {
     if (contentType.equals(Type.ERROR)) {
       errorHandler.throwPrintError(node);
     }
-    expressionCache.add(expr, contentType);
+    expressionTypeCache.add(expr, contentType);
   }
 
   @Override
@@ -117,12 +117,12 @@ public class TypeChecker extends DepthFirstAdapter {
     if (contentType.equals(Type.ERROR)) {
       errorHandler.throwPrintlnError(node);
     }
-    expressionCache.add(expr, contentType);
+    expressionTypeCache.add(expr, contentType);
   }
 
   // Helpers
   private Type evaluateType(PExpr expr) {
-    ExpressionTypeEvaluator typeEvaluator = new ExpressionTypeEvaluator(symbolTable);
+    ExpressionTypeEvaluator typeEvaluator = new ExpressionTypeEvaluator(expressionTypeCache, symbolTable);
     expr.apply(typeEvaluator);
     return typeEvaluator.getType();
   }
@@ -147,8 +147,8 @@ public class TypeChecker extends DepthFirstAdapter {
     return this.errorHandler.getErrorNumber();
   }
 
-  public ExpressionCache getExpressionCache() {
-    return this.expressionCache;
+  public ExpressionTypeCache getExpressionTypeCache() {
+    return this.expressionTypeCache;
   }
 
   public SymbolTable getSymbolTable() {

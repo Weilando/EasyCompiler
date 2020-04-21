@@ -1,5 +1,5 @@
 package typecheck;
 
 public enum Type {
-  BOOLEAN, ERROR, FLOAT, INT
+  BOOLEAN, ERROR, FLOAT, INT, UNDEFINED
 }

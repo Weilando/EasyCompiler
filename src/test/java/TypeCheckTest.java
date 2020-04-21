@@ -46,26 +46,20 @@ public class TypeCheckTest {
   }
 
   @Test
-  public void checkBooleanVariable() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "BooleanVariable.easy");
-    assertTrue(easyCompiler.typeCheck());
-  }
-
-  @Test
   public void checkEmptyStatements() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "EmptyStatements.easy");
     assertTrue(easyCompiler.typeCheck());
   }
 
   @Test
-  public void checkFloatCalculations() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatCalculations.easy");
+  public void checkFloat() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Float.easy");
     assertTrue(easyCompiler.typeCheck());
   }
 
   @Test
-  public void checkFloatVariable() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatVariable.easy");
+  public void checkFloatWithCast() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatWithCast.easy");
     assertTrue(easyCompiler.typeCheck());
   }
 
@@ -94,14 +88,8 @@ public class TypeCheckTest {
   }
 
   @Test
-  public void checkIntVariable() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IntVariable.easy");
-    assertTrue(easyCompiler.typeCheck());
-  }
-
-  @Test
-  public void checkIntCalculations() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IntCalculations.easy");
+  public void checkInt() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Int.easy");
     assertTrue(easyCompiler.typeCheck());
   }
 

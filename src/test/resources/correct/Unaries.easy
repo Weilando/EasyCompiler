@@ -10,7 +10,7 @@ void main() {
   println(c);
   println(d);
   println(A);
-  println(B);;
+  println(B);
 
   a = -3;
   b = 3 + -a;

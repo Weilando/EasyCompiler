@@ -79,7 +79,7 @@ public class EasyCompiler {
   boolean generateCode() {
     if (parse() && typeCheck()) {
       CodeCache codeCache = new CodeCache();
-      CodeGenerator codeGenerator = new CodeGenerator(codeCache, this.typeChecker.getExpressionCache(), getProgramName(), this.typeChecker.getSymbolTable());
+      CodeGenerator codeGenerator = new CodeGenerator(codeCache, this.typeChecker.getExpressionTypeCache(), getProgramName(), this.typeChecker.getSymbolTable());
       ast.apply(codeGenerator);
       this.code = codeCache.getCode();
 

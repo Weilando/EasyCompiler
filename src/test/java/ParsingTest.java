@@ -50,26 +50,20 @@ public class ParsingTest {
   }
 
   @Test
-  public void parseBooleanVariable() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "BooleanVariable.easy");
-    assertTrue(easyCompiler.parse());
-  }
-
-  @Test
   public void parseEmptyStatements() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "EmptyStatements.easy");
     assertTrue(easyCompiler.parse());
   }
 
   @Test
-  public void parseFloatCalculations() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatCalculations.easy");
+  public void parseFloat() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Float.easy");
     assertTrue(easyCompiler.parse());
   }
 
   @Test
-  public void parseFloatVariable() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatVariable.easy");
+  public void parseFloatWithCast() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatWithCast.easy");
     assertTrue(easyCompiler.parse());
   }
 
@@ -98,14 +92,8 @@ public class ParsingTest {
   }
 
   @Test
-  public void parseIntVariable() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IntVariable.easy");
-    assertTrue(easyCompiler.parse());
-  }
-
-  @Test
-  public void parseIntCalculations() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IntCalculations.easy");
+  public void parseInt() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Int.easy");
     assertTrue(easyCompiler.parse());
   }
 

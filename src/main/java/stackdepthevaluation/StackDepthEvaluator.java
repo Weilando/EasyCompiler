@@ -182,18 +182,23 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
 
   // Literal expressions
   @Override
-  public void outAIntExpr(AIntExpr node) {
-    incrementDepthCounter(); // ldc pushes 1
-  }
-
-  @Override
   public void outABooleanExpr(ABooleanExpr node) {
     incrementDepthCounter(); // ldc pushes 1
   }
 
   @Override
+  public void outAFloatExpr(AFloatExpr node) {
+    incrementDepthCounter(); // ldc pushes 1
+  }
+
+  @Override
+  public void outAIntExpr(AIntExpr node) {
+    incrementDepthCounter(); // ldc pushes 1
+  }
+
+  @Override
   public void outAIdExpr(AIdExpr node) {
-    incrementDepthCounter(); // iload pushes 1
+    incrementDepthCounter(); // iload/fload pushes 1
   }
 
 

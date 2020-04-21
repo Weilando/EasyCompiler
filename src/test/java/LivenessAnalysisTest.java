@@ -74,11 +74,11 @@ public class LivenessAnalysisTest {
   }
 
   @Test
-  public void IntCalculationsNeeds3Registers() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IntCalculations.easy");
+  public void IntNeeds4Registers() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Int.easy");
     easyCompiler.liveness();
     assertFalse(outContent.toString().contains("Type-Error"));
-    assertTrue(outContent.toString().contains("Registers: 3\n"));
+    assertTrue(outContent.toString().contains("Registers: 4\n"));
   }
 
   @Test

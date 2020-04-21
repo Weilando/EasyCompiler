@@ -4,10 +4,10 @@ import node.PExpr;
 
 import java.util.HashMap;
 
-public class ExpressionCache {
+public class ExpressionTypeCache {
   private final HashMap<PExpr, Type> table;
 
-  public ExpressionCache() {
+  public ExpressionTypeCache() {
     this.table = new HashMap<>();
   }
 
@@ -16,6 +16,9 @@ public class ExpressionCache {
   }
 
   public Type getType(PExpr expr) {
-    return table.get(expr);
+    if (table.containsKey(expr)) {
+      return table.get(expr);
+    }
+    return Type.UNDEFINED;
   }
 }

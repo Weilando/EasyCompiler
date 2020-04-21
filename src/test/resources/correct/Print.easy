@@ -1,6 +1,11 @@
 void main() {
-  print(4);
-  println(2);
+  boolean b = true;
+  float f = 2.1;
+  int i = 4;
   print(false);
-  println(true);
+  println(b);
+  print(3.1416);
+  println(f);
+  print(i);
+  println(2);
 }
