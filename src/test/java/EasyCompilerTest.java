@@ -80,9 +80,10 @@ public class EasyCompilerTest {
   //--------------------
   @Test
   public void typeErrorMessageShouldBePrinted() {
-    String[] args = {"-compile", "src/test/resources/failTypeCheck/FailNoDeclaration.easy"};
+    String[] args = {"-compile", "src/test/resources/failTypeCheck/FailBadConditions.easy"};
     EasyCompiler.main(args);
-    assertTrue(outContent.toString().contains("Type-Error at (2,3): "));
+    assertTrue(outContent.toString().contains("Type-Error at (6,6): "));
+    assertTrue(outContent.toString().contains("Type-Error at (13,9): "));
     assertFalse(outContent.toString().contains("Successful!"));
   }
 

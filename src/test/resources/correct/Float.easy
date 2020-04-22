@@ -1,0 +1,25 @@
+void main() {
+  float a = 3.141592654;
+  float b = -2.0;
+  float c = b;
+  float d;
+  d = -b;
+  println(a);   // 3.1415927
+  println(b);   // -2.0
+  println(-c);  // 2.0
+  println(d);   // 2.0
+
+  println(1.1 + 2.3);   // 3.4
+  println(1.4 - 3.0);   // -1.6
+  println(3.5 * 2.0);   // 7.0
+  println(14.7 / 4.2);  // 3.5
+
+  a = d + 3.4;
+  b = 1.2 - c;
+  c = a * 3.1;
+  d = a / d;
+  println(-a);  // -5.4
+  println(+b);  // 3.2
+  println(c);   // 16.74
+  println(d);   // 2.7
+}

@@ -1,0 +1,20 @@
+void main() {
+  int a = 42;
+  int b = -1;
+  int c = a;
+  int d;
+  d = -b;
+  print(a);   // 42
+  print(b);   // -1
+  print(c);   // 42
+  println(d); // 1\n
+
+  a = c / 2;
+  b = 2 * b;
+  c = a + 4 - d;
+  d = (+9 + -(23 % a)) / b;
+  print(-a);  // -21
+  print(+b);  // -2
+  print(c);   // 45
+  println(d); // -3\n
+}

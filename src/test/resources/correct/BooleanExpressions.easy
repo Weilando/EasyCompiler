@@ -2,25 +2,26 @@ void main() {
   boolean A = true && false || true;
   boolean B = false || false || true && true;
   boolean C = !false || false;
-  boolean D = true && !false;
-  println(A);
-  println(B);
-  println(C);
-  println(D);
+  boolean D;
+  D = true && !false;
+  println(A); // true
+  println(B); // true
+  println(C); // true
+  println(D); // true
 
   A = A || B && C;
   B = A && (C || (D != B));
-  println(A);
-  println(B);
-  println(C);
-  println(D);
+  println(A); // true
+  println(B); // true
+  println(C); // true
+  println(D); // true
 
   A = A && !true != C;
   B = !B && !((A || C) != (A && !true));
   C = (A && true || (false && C && (true == B))) || false;
   D = A && B || C != D;
-  println(A);
-  println(B);
-  println(C);
-  println(D);
+  println(A); // true
+  println(B); // false
+  println(C); // true
+  println(D); // false
 }

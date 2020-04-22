@@ -1,0 +1,14 @@
+void main() { // 8 type-errors
+  int i = 1;
+  float f = 2.3;
+
+  // bad conditions (8)
+  if(i) {}
+  while(i) {}
+  if(f) {}
+  while(f) {}
+  if(0) {}
+  while(0) {}
+  if(1.0) {}
+  while(1.0) {}
+}

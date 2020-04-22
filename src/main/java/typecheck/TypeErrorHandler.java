@@ -28,14 +28,18 @@ public class TypeErrorHandler {
     System.out.println(generateErrorHeadId(id) + "could not be assigned, because the expression contains incompatible types.");
   }
 
-  void throwIncompatibleError(TIdentifier id, String varType, String exprType) {
+  void throwIncompatibleError(TIdentifier id, Type varType, Type exprType) {
     errorNumberIncrement();
-    System.out.println(generateErrorHeadId(id) + "could not be assigned, because the given expression's type is incompatible. Expected \"" + varType + "\", but found \"" + exprType + "\".");
+    System.out.println(generateErrorHeadId(id) + "could not be assigned, because the given expression's type is incompatible. Expected \"" + varType.toString().toLowerCase() + "\", but found \"" + exprType.toString().toLowerCase() + "\".");
   }
 
-  void throwConditionError(Node node, String statementType, String wrongType) {
+  void throwConditionError(Node node, String statementName, Type wrongType) {
     errorNumberIncrement();
-    System.out.println(generateErrorHeadNode(node) + "Expression in " + statementType + " condition has incompatible type. Expected: \"boolean\", but found \"" + wrongType + "\".");
+    if (wrongType.equals(Type.ERROR)) {
+      System.out.println(generateErrorHeadNode(node) + "Expression in " + statementName + " condition contains type errors.");
+    } else {
+      System.out.println(generateErrorHeadNode(node) + "Expression in " + statementName + " condition has incompatible type. Expected: \"boolean\", but found \"" + wrongType.toString().toLowerCase() + "\".");
+    }
   }
 
   void throwPrintError(Node node) {
@@ -67,11 +71,11 @@ public class TypeErrorHandler {
     this.errorNumber++;
   }
 
-  public int getErrorNumber() {
+  int getErrorNumber() {
     return this.errorNumber;
   }
 
-  public boolean errorsOccurred() {
+  boolean errorsOccurred() {
     return getErrorNumber() > 0;
   }
 }

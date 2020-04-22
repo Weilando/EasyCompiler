@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ParsingTest {
+  private final String pathAlgorithms = "src/test/resources/algorithms/";
   private final String pathTestFilesCorrect = "src/test/resources/correct/";
   private final String pathTestFilesFailParser = "src/test/resources/failParser/";
+  private final String pathTestFilesFailTypeCheck = "src/test/resources/failTypeCheck/";
+  private final String pathTestFilesLiveness = "src/test/resources/liveness/";
 
   //-----------------------------------
   // Parse correct files without errors
@@ -47,14 +50,20 @@ public class ParsingTest {
   }
 
   @Test
-  public void parseBooleanVariable() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "BooleanVariable.easy");
+  public void parseEmptyStatements() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "EmptyStatements.easy");
     assertTrue(easyCompiler.parse());
   }
 
   @Test
-  public void parseEmptyStatements() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "EmptyStatements.easy");
+  public void parseFloat() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Float.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseFloatWithCast() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatWithCast.easy");
     assertTrue(easyCompiler.parse());
   }
 
@@ -83,14 +92,8 @@ public class ParsingTest {
   }
 
   @Test
-  public void parseIntVariable() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IntVariable.easy");
-    assertTrue(easyCompiler.parse());
-  }
-
-  @Test
-  public void parseIntCalculations() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "IntCalculations.easy");
+  public void parseInt() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Int.easy");
     assertTrue(easyCompiler.parse());
   }
 
@@ -118,18 +121,87 @@ public class ParsingTest {
     assertTrue(easyCompiler.parse());
   }
 
+  //--------------------------------
+  // Parse algorithms without errors
+  //--------------------------------
+  @Test
+  public void parseBinomial() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathAlgorithms + "Binomial.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseEuclid() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathAlgorithms + "Euclid.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseFibonacci() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathAlgorithms + "Fibonacci.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseSarrus() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathAlgorithms + "Sarrus.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  //--------------------------------------
+  // Parse type-check tests without errors
+  //--------------------------------------
+  @Test
+  public void parseFailBadConditions() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadConditions.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseFailBadExpressions() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadExpressions.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseFailBadVariableOperations() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadVariableOperations.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  //------------------------------------
+  // Parse liveness tests without errors
+  //------------------------------------
+  @Test
+  public void parseNoVariable() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "noVariable.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseOneVariable() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "oneVariable.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseTwoVariablesBothLive() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "twoVariablesBothLive.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseTwoVariablesOneLive() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "twoVariablesOneLive.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
   //----------------------------------------------------
   // Throw parser-errors while parsing files with errors
   //----------------------------------------------------
   @Test
   public void errorMissingBrace() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMissingBrace.easy");
-    assertFalse(easyCompiler.parse());
-  }
-
-  @Test
-  public void errorMissingBraces() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMissingBraces.easy");
     assertFalse(easyCompiler.parse());
   }
 

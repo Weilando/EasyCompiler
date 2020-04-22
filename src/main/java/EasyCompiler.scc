@@ -15,7 +15,8 @@ Helpers
     digit           = ['0' .. '9'];
     non_zero_digit  = ['1' .. '9'];
 
-    easy_number           = '0' | non_zero_digit digit*;
+    easy_float            = digit+ '.' digit+;
+    easy_int              = '0' | non_zero_digit digit*;
     easy_letter           = letter | '$' | '_';
     easy_letter_or_digit  = easy_letter | digit;
 
@@ -25,12 +26,13 @@ Helpers
 
 Tokens
     // Keywords
-    void_key    = 'void';
-    int_key     = 'int';
     boolean_key = 'boolean';
-    while_key   = 'while';
+    float_key   = 'float';
+    int_key     = 'int';
+    void_key    = 'void';
     if_key      = 'if';
     else_key    = 'else';
+    while_key   = 'while';
 
     // Identifiers
     main_id     = 'main';
@@ -39,10 +41,10 @@ Tokens
 
     // Basic tokens
     blank       = (space | line_terminator)+;
-    r_par       = ')';
     l_par       = '(';
-    r_brace     = '}';
+    r_par       = ')';
     l_brace     = '{';
+    r_brace     = '}';
     equals      = '=';
     semicolon   = ';';
     comma       = ',';
@@ -70,8 +72,9 @@ Tokens
     dnot  = '!!'; // double not, can be ignored
 
     // Literals
-    int_literal     = easy_number;
     boolean_literal = 'true' | 'false';
+    float_literal   = easy_float;
+    int_literal     = easy_int;
 
     // Comments
     comment = traditional_comment | end_of_line_comment;
@@ -99,11 +102,13 @@ Productions
     // Literals
     literal {-> expr} =
         {boolean} boolean_literal {-> New expr.boolean(boolean_literal)}
+      | {float} float_literal {-> New expr.float(float_literal)}
       | {int} int_literal {-> New expr.int(int_literal)};
 
     // Types
     type {-> tp} =
         {boolean} boolean_key {-> New tp.boolean()}
+      | {float} float_key {-> New tp.float()}
       | {int} int_key {-> New tp.int()};
 
     // Main method
@@ -164,14 +169,14 @@ Productions
       | {term} term {-> term.expr};
 
     additive_expression {-> expr} =
-        {plus}  [left]:additive_expression plus  [right]:multiplicative_expression {-> New expr.plus(left.expr, right.expr)}
-      | {minus} [left]:additive_expression minus [right]:multiplicative_expression {-> New expr.minus(left.expr, right.expr)}
-      | {multiplicative_expression} multiplicative_expression {-> multiplicative_expression.expr};
+        {add} [left]:additive_expression plus  [right]:multiplicative_expression {-> New expr.add(left.expr, right.expr)}
+      | {sub} [left]:additive_expression minus [right]:multiplicative_expression {-> New expr.sub(left.expr, right.expr)}
+      | {multiplicative} multiplicative_expression {-> multiplicative_expression.expr};
 
     multiplicative_expression {-> expr} =
-        {mod}  [left]:multiplicative_expression mod  [right]:unary_expression {-> New expr.mod(left.expr, right.expr)}
-      | {mult} [left]:multiplicative_expression mult [right]:unary_expression {-> New expr.mult(left.expr, right.expr)}
-      | {div}  [left]:multiplicative_expression div  [right]:unary_expression {-> New expr.div(left.expr, right.expr)}
+        {mod} [left]:multiplicative_expression mod  [right]:unary_expression {-> New expr.mod(left.expr, right.expr)}
+      | {mul} [left]:multiplicative_expression mult [right]:unary_expression {-> New expr.mul(left.expr, right.expr)}
+      | {div} [left]:multiplicative_expression div  [right]:unary_expression {-> New expr.div(left.expr, right.expr)}
       | {unary} unary_expression {-> unary_expression.expr};
 
     comparison_expression {-> expr} =
@@ -195,9 +200,10 @@ Productions
       | {and} and_expression {-> and_expression.expr};
 
     term {-> expr} =
-        {number} int_literal {-> New expr.int(int_literal)}
-      | {boolean} boolean_literal {-> New expr.boolean(boolean_literal)}
-      | {variable_id} [id]:identifier {-> New expr.id(id)}
+        {boolean} boolean_literal {-> New expr.boolean(boolean_literal)}
+      | {float} float_literal {-> New expr.float(float_literal)}
+      | {int} int_literal {-> New expr.int(int_literal)}
+      | {var_id} [id]:identifier {-> New expr.id(id)}
       | {expr} l_par expression r_par {-> expression.expr};
 
 
@@ -206,7 +212,7 @@ Abstract Syntax Tree
 
     main = [declarations]:stat* [statements]:stat*;
 
-    tp = {boolean} | {int};
+    tp = {boolean} | {float} | {int};
 
     stat =
         {decl}    [type]:tp [id]:identifier
@@ -221,10 +227,10 @@ Abstract Syntax Tree
       | {empty}   ;
 
     expr =
-        {plus}    [left]:expr [right]:expr
-      | {minus}   [left]:expr [right]:expr
+        {add}     [left]:expr [right]:expr
+      | {sub}     [left]:expr [right]:expr
       | {mod}     [left]:expr [right]:expr
-      | {mult}    [left]:expr [right]:expr
+      | {mul}     [left]:expr [right]:expr
       | {div}     [left]:expr [right]:expr
       | {or}      [left]:expr [right]:expr
       | {and}     [left]:expr [right]:expr
@@ -238,5 +244,6 @@ Abstract Syntax Tree
       | {uplus}   [expr]:expr
       | {uminus}  [expr]:expr
       | {boolean} [lit]:boolean_literal
+      | {float}   [lit]:float_literal
       | {int}     [lit]:int_literal
       | {id}      [id]:identifier;

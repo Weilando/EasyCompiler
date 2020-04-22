@@ -1,0 +1,28 @@
+void main() { // 16 type-errors
+  int i;
+  float f;
+  boolean b;
+
+  // duplicate declarations (3)
+  int i = 0;
+  float f = 0.0;
+  boolean b = true;
+
+  print(v); // no declaration (1)
+
+  // bad assignments (12)
+  b = 0.0;
+  b = 1;
+  b = f;
+  b = i;
+
+  f = true;
+  f = false;
+  f = b;
+
+  i = true;
+  i = false;
+  i = b;
+  i = 2.1;
+  i = f;
+}
