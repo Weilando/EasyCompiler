@@ -5,7 +5,7 @@ plugins {
 group 'org.example'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 1.17
 
 repositories {
     mavenCentral()
@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     // https://mvnrepository.com/artifact/sablecc/sablecc
-    compile group: 'sablecc', name: 'sablecc', version: '3.2-1'
+    implementation group: 'sablecc', name: 'sablecc', version: '3.2-1'
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.1")
@@ -25,7 +25,7 @@ test {
 
 task getSableCC(type: Copy) {
     mkdir 'libs/'
-    from configurations.compile
+    from configurations.runtimeClasspath
     into 'libs/'
 }
 
@@ -78,6 +78,15 @@ task copyParserDatToBuild(type: Copy) {
     into 'build/classes/java/main/parser'
 }
 
+jar {
+    manifest {
+        attributes(
+            "Main-Class": "EasyCompiler"
+        )
+    }
+    archiveFileName.set("EasyCompiler.jar")
+}
+
 runSableCC.dependsOn(getSableCC)
 copyExpressionNode.dependsOn(runSableCC)
 compileJava.dependsOn(runSableCC, copyExpressionNode)
@@ -87,3 +96,4 @@ copyLexerDatToOut.dependsOn(runSableCC, compileJava, compileTestJava)
 copyParserDatToOut.dependsOn(runSableCC, compileJava, compileTestJava)
 copyLexerDatToBuild.dependsOn(copyLexerDatToOut)
 copyParserDatToBuild.dependsOn(copyParserDatToOut)
+jar.dependsOn(copyLexerDatToBuild, copyParserDatToBuild)

@@ -1,0 +1,15 @@
+void main() {
+  int a = 1;
+  int b = 2;
+  int c = 3;
+  int d = 4;
+  int e = 5;
+  int f = 6;
+
+  println(a);  // should print 1
+  // should not print 2 println(b);
+  println(c); /* should print 3 and 5,
+  println(d);
+  but not 4 */ println(e);
+  println(f);  // should print 6
+}

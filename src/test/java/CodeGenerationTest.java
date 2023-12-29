@@ -41,10 +41,6 @@ public class CodeGenerationTest {
       classProcess = runtime.exec(command, null, workingDirectory);
       inputStreamString = new BufferedReader(new InputStreamReader(classProcess.getInputStream()))
           .lines().collect(Collectors.joining("\n"));
-
-      /*String error = new BufferedReader(new InputStreamReader(classProcess.getErrorStream()))
-          .lines().collect(Collectors.joining("\n"));
-      System.out.println(error);*/
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -60,9 +56,9 @@ public class CodeGenerationTest {
     }
   }
 
-  //----------------------
+  // ----------------------
   // Test correct snippets
-  //----------------------
+  // ----------------------
   @Test
   public void resultArithmeticComparisons() throws InterruptedException {
     String testName = "ArithmeticComparisons";
@@ -71,7 +67,9 @@ public class CodeGenerationTest {
     setupClassExecutionProcess(testName);
 
     assertEquals(0, classProcess.waitFor());
-    assertEquals("true\nfalse\nfalse\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue\nfalse\nfalse\ntrue\ntrue\nfalse\nfalse\nfalse\ntrue\nfalse\ntrue\ntrue\ntrue\nfalse\ntrue\nfalse", inputStreamString);
+    assertEquals(
+        "true\nfalse\nfalse\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue\nfalse\nfalse\ntrue\ntrue\nfalse\nfalse\nfalse\ntrue\nfalse\ntrue\ntrue\ntrue\nfalse\ntrue\nfalse",
+        inputStreamString);
   }
 
   @Test
@@ -103,7 +101,8 @@ public class CodeGenerationTest {
     setupClassExecutionProcess(testName);
 
     assertEquals(0, classProcess.waitFor());
-    assertEquals("true\nfalse\nfalse\ntrue\nfalse\ntrue\nfalse\nfalse\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse", inputStreamString);
+    assertEquals("true\nfalse\nfalse\ntrue\nfalse\ntrue\nfalse\nfalse\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse",
+        inputStreamString);
   }
 
   @Test
@@ -129,6 +128,17 @@ public class CodeGenerationTest {
   }
 
   @Test
+  public void resultComments() throws InterruptedException {
+    String testName = "Comments";
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
+
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("1\n3\n5\n6", inputStreamString);
+  }
+
+  @Test
   public void resultFloat() throws InterruptedException {
     String testName = "Float";
     generateJasminFile(testName);
@@ -147,7 +157,8 @@ public class CodeGenerationTest {
     setupClassExecutionProcess(testName);
 
     assertEquals(0, classProcess.waitFor());
-    assertEquals("3.0\n-2.0\n3.0\n1.5\n6.4\n3.5\n5.0\n-4.0\n10.0\n-0.5\n1414.014.014.014.014.014.014.0", inputStreamString);
+    assertEquals("3.0\n-2.0\n3.0\n1.5\n6.4\n3.5\n5.0\n-4.0\n10.0\n-0.5\n1414.014.014.014.014.014.014.0",
+        inputStreamString);
   }
 
   @Test
