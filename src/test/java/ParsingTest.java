@@ -10,9 +10,9 @@ public class ParsingTest {
   private final String pathTestFilesFailTypeCheck = "src/test/resources/failTypeCheck/";
   private final String pathTestFilesLiveness = "src/test/resources/liveness/";
 
-  //-----------------------------------
+  // -----------------------------------
   // Parse correct files without errors
-  //-----------------------------------
+  // -----------------------------------
   @Test
   public void parseMinimalExample() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Minimal.easy");
@@ -46,6 +46,12 @@ public class ParsingTest {
   @Test
   public void parseBooleanOr() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "BooleanOr.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseComments() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Comments.easy");
     assertTrue(easyCompiler.parse());
   }
 
@@ -121,9 +127,9 @@ public class ParsingTest {
     assertTrue(easyCompiler.parse());
   }
 
-  //--------------------------------
+  // --------------------------------
   // Parse algorithms without errors
-  //--------------------------------
+  // --------------------------------
   @Test
   public void parseBinomial() {
     EasyCompiler easyCompiler = new EasyCompiler(pathAlgorithms + "Binomial.easy");
@@ -148,9 +154,9 @@ public class ParsingTest {
     assertTrue(easyCompiler.parse());
   }
 
-  //--------------------------------------
+  // --------------------------------------
   // Parse type-check tests without errors
-  //--------------------------------------
+  // --------------------------------------
   @Test
   public void parseFailBadConditions() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadConditions.easy");
@@ -169,9 +175,9 @@ public class ParsingTest {
     assertTrue(easyCompiler.parse());
   }
 
-  //------------------------------------
+  // ------------------------------------
   // Parse liveness tests without errors
-  //------------------------------------
+  // ------------------------------------
   @Test
   public void parseNoVariable() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "noVariable.easy");
@@ -196,9 +202,9 @@ public class ParsingTest {
     assertTrue(easyCompiler.parse());
   }
 
-  //----------------------------------------------------
+  // ----------------------------------------------------
   // Throw parser-errors while parsing files with errors
-  //----------------------------------------------------
+  // ----------------------------------------------------
   @Test
   public void errorMissingBrace() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMissingBrace.easy");
