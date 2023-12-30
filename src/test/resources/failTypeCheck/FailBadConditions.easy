@@ -1,8 +1,9 @@
 void main() { // 8 type-errors
   int i = 1;
   float f = 2.3;
+  string s = "s";
 
-  // bad conditions (8)
+  // bad conditions (12)
   if(i) {}
   while(i) {}
   if(f) {}
@@ -11,4 +12,8 @@ void main() { // 8 type-errors
   while(0) {}
   if(1.0) {}
   while(1.0) {}
+  if(s) {}
+  while(s) {}
+  if("s") {}
+  while("s") {}
 }

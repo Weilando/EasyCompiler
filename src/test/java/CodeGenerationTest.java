@@ -228,6 +228,17 @@ public class CodeGenerationTest {
   }
 
   @Test
+  public void resultStringExpressions() throws InterruptedException {
+    String testName = "StringExpressions";
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
+
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("Hello world!", inputStreamString);
+  }
+
+  @Test
   public void resultWhile() throws InterruptedException {
     String testName = "While";
     generateJasminFile(testName);

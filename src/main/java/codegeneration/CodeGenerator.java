@@ -26,6 +26,18 @@ public class CodeGenerator extends DepthFirstAdapter {
     this.lastTLabel = 0;
   }
 
+  private String getJVMType(Type type) {
+    switch (type) {
+      case BOOLEAN:
+        return "Z";
+      case FLOAT:
+        return "F";
+      case INT:
+        return "I";
+      default:
+        return "Ljava/lang/String;";
+    }
+  }
 
   // Basic structure
   @Override
@@ -33,13 +45,13 @@ public class CodeGenerator extends DepthFirstAdapter {
     String[] fileHead = {
         String.format(".source %s.java", this.programName),
         String.format(".class %s", this.programName),
-        ".super java/lang/Object"};
+        ".super java/lang/Object" };
     String[] objectInit = {
         ".method public <init>()V",
         "\taload_0",
         "\tinvokespecial java/lang/Object/<init>()V",
         "\treturn",
-        ".end method", ""};
+        ".end method", "" };
     cache.addLines(Arrays.asList(fileHead));
     cache.addLines(Arrays.asList(objectInit));
   }
@@ -57,8 +69,9 @@ public class CodeGenerator extends DepthFirstAdapter {
     String[] beginMainMethod = {
         ".method public static main([Ljava/lang/String;)V",
         String.format("\t.limit stack %d", stackDepthEvaluator.getMaxDepthCounter()),
-        String.format("\t.limit locals %d", symbolTable.countSymbols() + 1), // all type-checked symbols and args[]
-        ""};
+        String.format("\t.limit locals %d",
+            symbolTable.countSymbols() + 1), // all type-checked symbols and args[]
+        "" };
     String[] endMainMethod = {
         "", "\treturn",
         ".end method"
@@ -76,20 +89,19 @@ public class CodeGenerator extends DepthFirstAdapter {
     cache.addLines(Arrays.asList(endMainMethod));
   }
 
-
   // Statements
   @Override
   public void caseAIfStat(AIfStat node) {
     addLineNumber(node, "if statement");
     String CLabel = getNewCLabel();
 
-    // generate condition
+    // generate condition and skip then-body if false (i.e., equal to 0)
     node.getExpr().apply(this);
-    cache.addIndentedLine(String.format("ifeq %s", CLabel)); // "Skip" then-body, if condition is false (i.e. equal to 0)
+    cache.addIndentedLine(String.format("ifeq %s", CLabel));
 
-    // generate body
+    // generate body (failed condition jumps to end of body)
     node.getThenBlock().apply(this);
-    cache.addIndentedLine(String.format("%s:", CLabel)); // generate end of body (this is where a failed condition jumps to
+    cache.addIndentedLine(String.format("%s:", CLabel));
   }
 
   @Override
@@ -98,9 +110,9 @@ public class CodeGenerator extends DepthFirstAdapter {
     String CLabelElse = getNewCLabel();
     String CLabelEnd = getNewCLabel();
 
-    // generate condition
+    // generate condition and skip then-body if false (i.e., equal to 0)
     node.getExpr().apply(this);
-    cache.addIndentedLine(String.format("ifeq %s", CLabelElse)); // "Skip" then-body, if condition is false (i.e. equal to 0)
+    cache.addIndentedLine(String.format("ifeq %s", CLabelElse));
 
     // generate then-body
     node.getThenBlock().apply(this);
@@ -118,10 +130,10 @@ public class CodeGenerator extends DepthFirstAdapter {
     String HLabel = getNewHLabel();
     String CLabel = getNewCLabel();
 
-    // generate head
+    // generate head and skip while-body if false (i.e., equal to 0)
     cache.addIndentedLine(String.format("%s:", HLabel));
     node.getExpr().apply(this);
-    cache.addIndentedLine(String.format("ifeq %s", CLabel)); // "Skip" while-body, if condition is false (i.e. equal to 0)
+    cache.addIndentedLine(String.format("ifeq %s", CLabel));
 
     // generate body
     node.getBody().apply(this);
@@ -139,19 +151,17 @@ public class CodeGenerator extends DepthFirstAdapter {
 
     String[] preparePrint = {
         "getstatic java/lang/System/out Ljava/io/PrintStream;",
-        "swap"};
+        "swap" };
     cache.addIndentedLines(Arrays.asList(preparePrint));
 
-    if (type.equals(Type.BOOLEAN)) {
-      cache.addIndentedLine("invokevirtual java/io/PrintStream/print(Z)V");
-    } else if (type.equals(Type.FLOAT)) {
-      if (node.getExpr().getType().equals(Type.INT)) {
-        cache.addIndentedLine("i2f");
-      }
-      cache.addIndentedLine("invokevirtual java/io/PrintStream/print(F)V");
-    } else if (type.equals(Type.INT)) {
-      cache.addIndentedLine("invokevirtual java/io/PrintStream/print(I)V");
+    if (type.equals(Type.FLOAT) && node.getExpr().getType().equals(Type.INT)) {
+      cache.addIndentedLine("i2f");
     }
+
+    String printCommand = String.format(
+        "invokevirtual java/io/PrintStream/print(%s)V",
+        getJVMType(type));
+    cache.addIndentedLine(printCommand);
   }
 
   @Override
@@ -164,21 +174,18 @@ public class CodeGenerator extends DepthFirstAdapter {
 
     String[] preparePrint = {
         "getstatic java/lang/System/out Ljava/io/PrintStream;",
-        "swap"};
+        "swap" };
     cache.addIndentedLines(Arrays.asList(preparePrint));
 
-    if (type.equals(Type.BOOLEAN)) {
-      cache.addIndentedLine("invokevirtual java/io/PrintStream/println(Z)V");
-    } else if (type.equals(Type.FLOAT)) {
-      if (node.getExpr().getType().equals(Type.INT)) {
-        cache.addIndentedLine("i2f");
-      }
-      cache.addIndentedLine("invokevirtual java/io/PrintStream/println(F)V");
-    } else if (type.equals(Type.INT)) {
-      cache.addIndentedLine("invokevirtual java/io/PrintStream/println(I)V");
+    if (type.equals(Type.FLOAT) && node.getExpr().getType().equals(Type.INT)) {
+      cache.addIndentedLine("i2f");
     }
-  }
 
+    String printCommand = String.format(
+        "invokevirtual java/io/PrintStream/println(%s)V",
+        getJVMType(type));
+    cache.addIndentedLine(printCommand);
+  }
 
   // Variable statements
   @Override
@@ -207,7 +214,6 @@ public class CodeGenerator extends DepthFirstAdapter {
     String id = node.getId().getText();
     generateAssignCode(id, node.getExpr().getType().equals(Type.INT));
   }
-
 
   // Arithmetic operations
   @Override
@@ -259,7 +265,6 @@ public class CodeGenerator extends DepthFirstAdapter {
     cache.addIndentedLine("irem");
   }
 
-
   // Boolean operations
   @Override
   public void outAAndExpr(AAndExpr node) {
@@ -270,7 +275,6 @@ public class CodeGenerator extends DepthFirstAdapter {
   public void outAOrExpr(AOrExpr node) {
     cache.addIndentedLine("ior");
   }
-
 
   // Unary operations
   // Unary plus has no effect and does not need to be processed.
@@ -288,10 +292,10 @@ public class CodeGenerator extends DepthFirstAdapter {
 
   @Override
   public void outANotExpr(ANotExpr node) {
-    String[] lines = {"ldc 1", "iadd", "ldc 2", "irem"}; // logic not behaves like adding 1 mod 2
+    // logic of "not" behaves like adding 1 mod 2
+    String[] lines = { "ldc 1", "iadd", "ldc 2", "irem" };
     cache.addIndentedLines(Arrays.asList(lines));
   }
-
 
   // Comparison expressions (calculate a boolean value with true=1, false=0)
   @Override
@@ -324,7 +328,6 @@ public class CodeGenerator extends DepthFirstAdapter {
     cache.addIndentedLines(Arrays.asList(getComparisonCode("ifgt")));
   }
 
-
   // Literal expressions
   @Override
   public void outABooleanExpr(ABooleanExpr node) {
@@ -346,12 +349,20 @@ public class CodeGenerator extends DepthFirstAdapter {
   public void outAIdExpr(AIdExpr node) {
     String id = node.getId().getText();
     int varNumber = symbolTable.getVariableNumber(id);
+    String loadCommand = "";
 
-    if (this.symbolTable.getType(id).equals(Type.FLOAT)) {
-      cache.addIndentedLine(String.format("fload %s", varNumber));
-    } else { // boolean and int are represented as int
-      cache.addIndentedLine(String.format("iload %s", varNumber));
+    switch (this.symbolTable.getType(id)) {
+      case FLOAT:
+        loadCommand = "fload";
+        break;
+      case STRING:
+        loadCommand = "aload";
+        break;
+      default: // boolean and int are stored as int
+        loadCommand = "iload";
     }
+
+    cache.addIndentedLine(String.format("%s %s", loadCommand, varNumber));
   }
 
   @Override
@@ -359,6 +370,10 @@ public class CodeGenerator extends DepthFirstAdapter {
     cache.addIndentedLine(String.format("ldc %s", node.getLit().getText()));
   }
 
+  @Override
+  public void outAStringExpr(AStringExpr node) {
+    cache.addIndentedLine(String.format("ldc %s", node.getLit().getText()));
+  }
 
   // Helpers
   String getNewCLabel() {
@@ -376,27 +391,35 @@ public class CodeGenerator extends DepthFirstAdapter {
   String[] getComparisonCode(String operand) {
     String CLabel = getNewCLabel();
     String TLabel = getNewTLabel();
-    return new String[]{
+    return new String[] {
         "isub",
         String.format("%s %s", operand, TLabel),
         "ldc 0",
         String.format("goto %s", CLabel),
         String.format("%s:", TLabel),
         "ldc 1",
-        String.format("%s:", CLabel)};
+        String.format("%s:", CLabel) };
   }
 
   void generateAssignCode(String id, boolean castInt) {
     int varNumber = symbolTable.getVariableNumber(id);
+    String storeCommand = "";
 
-    if (this.symbolTable.getType(id).equals(Type.FLOAT)) {
-      if (castInt) {
-        cache.addIndentedLine("i2f");
-      }
-      cache.addIndentedLine(String.format("fstore %s", varNumber));
-    } else { // boolean and int are represented as int
-      cache.addIndentedLine(String.format("istore %s", varNumber));
+    switch (this.symbolTable.getType(id)) {
+      case FLOAT:
+        if (castInt) {
+          cache.addIndentedLine("i2f");
+        }
+        storeCommand = "fstore";
+        break;
+      case STRING:
+        storeCommand = "astore";
+        break;
+      default: // boolean and int are stored as int
+        storeCommand = "istore";
     }
+
+    cache.addIndentedLine(String.format("%s %s", storeCommand, varNumber));
   }
 
   void generateArithmeticChildren(PExpr left, PExpr right, boolean cast) {

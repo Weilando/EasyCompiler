@@ -4,7 +4,7 @@ import analysis.DepthFirstAdapter;
 import node.*;
 
 public class ExpressionTypeEvaluator extends DepthFirstAdapter {
-  final private SymbolTable symbolTable;
+  private final SymbolTable symbolTable;
   private Type type;
 
   public ExpressionTypeEvaluator(SymbolTable symbolTable) {
@@ -32,6 +32,12 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   }
 
   @Override
+  public void caseAStringExpr(AStringExpr node) {
+    node.setType(Type.STRING);
+    type = Type.STRING;
+  }
+
+  @Override
   public void outAIdExpr(AIdExpr node) {
     String id = node.getId().getText();
 
@@ -42,7 +48,6 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
     }
     node.setType(type);
   }
-
 
   // Arithmetic expressions (->float and int allowed)
   @Override
@@ -94,7 +99,6 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
     }
   }
 
-
   // Boolean expressions (->only boolean allowed)
   @Override
   public void caseAAndExpr(AAndExpr node) {
@@ -114,8 +118,7 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
     }
   }
 
-
-  // Comparison expressions (many work with floats and ints, but result always is boolean)
+  // Comparison expressions (many work with numbers, but result always is boolean)
   @Override
   public void caseAEqExpr(AEqExpr node) {
     type = node.getType();
@@ -170,7 +173,6 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
     }
   }
 
-
   // Unary expressions
   @Override
   public void caseANotExpr(ANotExpr node) {
@@ -202,7 +204,6 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
       node.setType(type);
     }
   }
-
 
   // Helpers
   private boolean bothNumerical(Node leftNode, Node rightNode) {

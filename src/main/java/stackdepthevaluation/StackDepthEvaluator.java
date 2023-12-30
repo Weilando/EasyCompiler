@@ -20,7 +20,6 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
     }
   }
 
-
   // Statements
   @Override
   public void caseAIfStat(AIfStat node) {
@@ -77,7 +76,6 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
     decrementDepthCounter();
   }
 
-
   // Variable statements
   // no stack-operations for declaration
 
@@ -90,7 +88,6 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
   public void outAAssignStat(AAssignStat node) {
     decrementDepthCounter(); // istore pops 1
   }
-
 
   // Arithmetic operations
   @Override
@@ -118,7 +115,6 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
     decrementDepthCounter(); // irem pops 2 arguments and pushes 1 result
   }
 
-
   // Boolean operations
   @Override
   public void outAAndExpr(AAndExpr node) {
@@ -129,7 +125,6 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
   public void outAOrExpr(AOrExpr node) {
     decrementDepthCounter(); // ior pops 2 arguments and pushes 1 result
   }
-
 
   // Unary operations
   // Unary plus has no effect and does not need to be processed.
@@ -146,7 +141,6 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
     incrementDepthCounter(); // ldc pushes 1
     decrementDepthCounter(); // irem pops 2 arguments and pushes 1 result
   }
-
 
   // Comparison expressions (calculate a boolean value with true=1, false=0)
   @Override
@@ -179,7 +173,6 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
     decrementDepthCounter(); // ifgt pops 1
   }
 
-
   // Literal expressions
   @Override
   public void outABooleanExpr(ABooleanExpr node) {
@@ -197,10 +190,14 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
   }
 
   @Override
+  public void outAStringExpr(AStringExpr node) {
+    incrementDepthCounter(); // ldc pushes 1
+  }
+
+  @Override
   public void outAIdExpr(AIdExpr node) {
     incrementDepthCounter(); // iload/fload pushes 1
   }
-
 
   // Counter-logic
   public int getMaxDepthCounter() {

@@ -6,9 +6,9 @@ public class TypeCheckTest {
   private final String pathTestFilesCorrect = "src/test/resources/correct/";
   private final String pathTestFilesFailTypeCheck = "src/test/resources/failTypeCheck/";
 
-  //-----------------------------------
+  // -----------------------------------
   // Check correct files without errors
-  //-----------------------------------
+  // -----------------------------------
   @Test
   public void checkMinimalExample() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Minimal.easy");
@@ -42,6 +42,12 @@ public class TypeCheckTest {
   @Test
   public void checkBooleanOr() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "BooleanOr.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkComments() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Comments.easy");
     assertTrue(easyCompiler.typeCheck());
   }
 
@@ -100,6 +106,12 @@ public class TypeCheckTest {
   }
 
   @Test
+  public void checkStringExpressions() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "StringExpressions.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
   public void checkUnaries() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Unaries.easy");
     assertTrue(easyCompiler.typeCheck());
@@ -117,21 +129,21 @@ public class TypeCheckTest {
     assertTrue(easyCompiler.typeCheck());
   }
 
-  //---------------------------------------------------------
+  // ---------------------------------------------------------
   // Throw type-errors while parsing files with invalid types
-  //---------------------------------------------------------
+  // ---------------------------------------------------------
   @Test
   public void errorBadConditions() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadConditions.easy");
     assertFalse(easyCompiler.typeCheck());
-    assertEquals(8, easyCompiler.getTypeErrorNumber());
+    assertEquals(12, easyCompiler.getTypeErrorNumber());
   }
 
   @Test
   public void errorBadExpressions() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadExpressions.easy");
     assertFalse(easyCompiler.typeCheck());
-    assertEquals(16, easyCompiler.getTypeErrorNumber());
+    assertEquals(22, easyCompiler.getTypeErrorNumber());
   }
 
   @Test

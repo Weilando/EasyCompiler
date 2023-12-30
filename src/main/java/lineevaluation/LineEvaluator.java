@@ -8,21 +8,21 @@ import node.Token;
 import java.util.HashMap;
 
 public class LineEvaluator extends ReversedDepthFirstAdapter {
-  static private final HashMap<Node, Integer> lines = new HashMap<>();
-  static private final HashMap<Node, Integer> positions = new HashMap<>();
-  static private int last_line = -1;
-  static private int last_pos = -1;
+  private static final HashMap<Node, Integer> lines = new HashMap<>();
+  private static final HashMap<Node, Integer> positions = new HashMap<>();
+  private static int last_line = -1;
+  private static int last_pos = -1;
 
   public static void setLines(Start ast) {
     LineEvaluator lineEvaluator = new LineEvaluator();
     ast.apply(lineEvaluator);
   }
 
-  static public int getLine(Node node) {
+  public static int getLine(Node node) {
     return lines.get(node);
   }
 
-  static public int getPosition(Node node) {
+  public static int getPosition(Node node) {
     return positions.get(node);
   }
 

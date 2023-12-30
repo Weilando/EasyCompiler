@@ -8,8 +8,9 @@ Helpers
     cr = 0x000d; // new line
     line_terminator = lf | cr | cr lf;
 
-    not_star = [all_unicode_chars - '*'];
+    not_star           = [all_unicode_chars - '*'];
     not_star_not_slash = [all_unicode_chars - ['*' + '/']];
+    not_quotation_mark = [all_unicode_chars - '"'];
 
     letter          = [['a' .. 'z'] + ['A' .. 'Z']];
     digit           = ['0' .. '9'];
@@ -19,17 +20,21 @@ Helpers
     easy_int              = '0' | non_zero_digit digit*;
     easy_letter           = letter | '$' | '_';
     easy_letter_or_digit  = easy_letter | digit;
+    easy_string           = ('"' (not_quotation_mark)* '"');
 
     end_of_line_comment = '//' [all_unicode_chars - [lf + cr]]* line_terminator;
     traditional_comment = '/*' not_star* ('*' (not_star_not_slash not_star*)?)* '*/';
 
 
 Tokens
-    // Keywords
+    // Type keywords
     boolean_key = 'boolean';
     float_key   = 'float';
     int_key     = 'int';
+    string_key  = 'string';
     void_key    = 'void';
+
+    // Control flow keywords
     if_key      = 'if';
     else_key    = 'else';
     while_key   = 'while';
@@ -75,6 +80,7 @@ Tokens
     boolean_literal = 'true' | 'false';
     float_literal   = easy_float;
     int_literal     = easy_int;
+    string_literal  = easy_string;
 
     // Comments
     comment = traditional_comment | end_of_line_comment;
@@ -103,13 +109,15 @@ Productions
     literal {-> expr} =
         {boolean} boolean_literal {-> New expr.boolean(boolean_literal)}
       | {float} float_literal {-> New expr.float(float_literal)}
-      | {int} int_literal {-> New expr.int(int_literal)};
+      | {int} int_literal {-> New expr.int(int_literal)}
+      | {string} string_literal {-> New expr.string(string_literal)};
 
     // Types
     type {-> tp} =
         {boolean} boolean_key {-> New tp.boolean()}
       | {float} float_key {-> New tp.float()}
-      | {int} int_key {-> New tp.int()};
+      | {int} int_key {-> New tp.int()}
+      | {string} string_key {-> New tp.string()};
 
     // Main method
     main_method {-> main} =
@@ -203,6 +211,7 @@ Productions
         {boolean} boolean_literal {-> New expr.boolean(boolean_literal)}
       | {float} float_literal {-> New expr.float(float_literal)}
       | {int} int_literal {-> New expr.int(int_literal)}
+      | {string} string_literal {-> New expr.string(string_literal)}
       | {var_id} [id]:identifier {-> New expr.id(id)}
       | {expr} l_par expression r_par {-> expression.expr};
 
@@ -212,7 +221,7 @@ Abstract Syntax Tree
 
     main = [declarations]:stat* [statements]:stat*;
 
-    tp = {boolean} | {float} | {int};
+    tp = {boolean} | {float} | {int} | {string};
 
     stat =
         {decl}    [type]:tp [id]:identifier
@@ -246,4 +255,5 @@ Abstract Syntax Tree
       | {boolean} [lit]:boolean_literal
       | {float}   [lit]:float_literal
       | {int}     [lit]:int_literal
+      | {string}  [lit]:string_literal
       | {id}      [id]:identifier;

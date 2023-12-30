@@ -2,26 +2,33 @@ void main() { // 16 type-errors
   boolean b = true;
   float f = 1.0;
   int i = 0;
+  string s = "s";
 
-  // modulo is only defined for int (4)
+  // modulo is only defined for int (6)
   print(2.3 % 2);
   print(2 % false);
   print(f % i);
-  print(2 % b);
+  print(b % 2);
+  print(s % 2);
+  print(2 % "s");
 
-  // arithmetic operations are only allowed for numbers (6)
+  // arithmetic operations are only allowed for numbers (8)
   print(42 + true);
   print(false - 2.4);
   print(b * 2);
   print(i / b);
   print(-true);
   print(+b);
+  print(-s);
+  print(-"s");
 
-  // boolean operations are only allowed for booleans (6)
+  // boolean operations are only allowed for booleans (8)
   if(i && b) {}
   if(true && f) {}
   while(2 || false) {}
   while(b || 1.2) {}
   print(!f);
   print(!2);
+  print(!s);
+  print(!"s");
 }
