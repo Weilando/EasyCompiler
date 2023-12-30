@@ -45,12 +45,10 @@ In the following example, we describe how to compile an _Easy_ program into Java
 1. Create the file `hello_world.easy` at root and copy the following program.
     ```
     void main() {
-      boolean hello = true;
-      println(hello);
+      println("Hello world!");
     }
     ```
-    Once compiled, it will assign a boolean variable and print its value.
 2. Run the _Easy_ compiler with `java -jar build/libs/EasyCompiler.jar -compile hello_world.easy`.
     It creates `hello_world.j` which contains a Jasmin assembler representation of our _Easy_ code.
 3. Run `java -jar libs/jasmin.jar hello_world.j` to transform `hello_world.j` into `hello_world.class`, which contains Java bytecode.
-4. Finally, run `java hello_world` to start the compiled program, which should output `true`.
+4. Finally, run `java hello_world` to start the compiled program, which should output `Hello world!`.
