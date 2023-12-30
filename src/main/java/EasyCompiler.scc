@@ -107,28 +107,29 @@ Productions
 
     // Literals
     literal {-> expr} =
-        {boolean} boolean_literal {-> New expr.boolean(boolean_literal)}
-      | {float} float_literal {-> New expr.float(float_literal)}
-      | {int} int_literal {-> New expr.int(int_literal)}
-      | {string} string_literal {-> New expr.string(string_literal)};
+        {boolean}  boolean_literal  {-> New expr.boolean(boolean_literal)}
+      | {float}    float_literal    {-> New expr.float(float_literal)}
+      | {int}      int_literal      {-> New expr.int(int_literal)}
+      | {string}   string_literal   {-> New expr.string(string_literal)};
 
     // Types
     type {-> tp} =
-        {boolean} boolean_key {-> New tp.boolean()}
-      | {float} float_key {-> New tp.float()}
-      | {int} int_key {-> New tp.int()}
-      | {string} string_key {-> New tp.string()};
+        {boolean}  boolean_key  {-> New tp.boolean()}
+      | {float}    float_key    {-> New tp.float()}
+      | {int}      int_key      {-> New tp.int()}
+      | {string}   string_key   {-> New tp.string()};
 
     // Main method
     main_method {-> main} =
         void_key main_id l_par r_par
-        l_brace [declarations]:variable_declaration_statement* [body]:statement* r_brace {-> New main([declarations.stat], [body.stat])};
+        l_brace [declarations]:variable_declaration_statement* [body]:statement* r_brace
+        {-> New main([declarations.stat], [body.stat])};
 
     // Variables
     // Only local variables declared at the beginning of main are allowed (i.e. modifiers are not necessary).
     variable_declaration_statement {-> stat} =
-        {declaration} type [id]:identifier semicolon {-> New stat.decl(type.tp, id)}
-      | {initialization} type [id]:identifier equals expression semicolon {-> New stat.init(type.tp, id, expression.expr)};
+        {declaration}     type [id]:identifier semicolon                    {-> New stat.decl(type.tp, id)}
+      | {initialization}  type [id]:identifier equals expression semicolon  {-> New stat.init(type.tp, id, expression.expr)};
 
     variable_assignment {-> stat} =
         [id]:identifier equals [expr]:expression semicolon {-> New stat.assign(id, expr.expr)};
@@ -140,25 +141,25 @@ Productions
     // Statements
     // Solution of the dangling-else-problem with while statements from https://en.wikipedia.org/wiki/Dangling_else#Avoiding_the_conflict_in_LR_parsers
     statement {-> stat} =
-        {open} open_statement {-> open_statement.stat}
-      | {closed} closed_statement {-> closed_statement.stat} ;
+        {open}    open_statement    {-> open_statement.stat}
+      | {closed}  closed_statement  {-> closed_statement.stat} ;
 
     open_statement {-> stat} =
-        {if} if_key l_par [expr]:expression r_par [then]:statement {-> New stat.if(expr.expr, then.stat)}
-      | {if_else} if_key l_par [expr]:expression r_par [then]:closed_statement else_key [else]:open_statement {-> New stat.ifelse(expr.expr, then.stat, else.stat)}
-      | {while_open} while_key l_par [expr]:expression r_par [body]:open_statement {-> New stat.while(expr.expr, body.stat)};
+        {if}          if_key l_par [expr]:expression r_par [then]:statement                                        {-> New stat.if(expr.expr, then.stat)}
+      | {if_else}     if_key l_par [expr]:expression r_par [then]:closed_statement else_key [else]:open_statement  {-> New stat.ifelse(expr.expr, then.stat, else.stat)}
+      | {while_open}  while_key l_par [expr]:expression r_par [body]:open_statement                                {-> New stat.while(expr.expr, body.stat)};
 
     closed_statement {-> stat} =
-        {simple} simple_statement {-> simple_statement.stat}
-      | {if_closed} if_key l_par [expr]:expression r_par [then]:closed_statement else_key [else]:closed_statement {-> New stat.ifelse(expr.expr, then.stat, else.stat)}
-      | {while_closed} while_key l_par [expr]:expression r_par [body]:closed_statement {-> New stat.while(expr.expr, body.stat)};
+        {simple}        simple_statement                                                                               {-> simple_statement.stat}
+      | {if_closed}     if_key l_par [expr]:expression r_par [then]:closed_statement else_key [else]:closed_statement  {-> New stat.ifelse(expr.expr, then.stat, else.stat)}
+      | {while_closed}  while_key l_par [expr]:expression r_par [body]:closed_statement                                {-> New stat.while(expr.expr, body.stat)};
 
     simple_statement {-> stat} =
-        {variable_assignment} variable_assignment {-> variable_assignment.stat}
-      | {print_statement} print_statement {-> print_statement.stat}
-      | {println_statement} println_statement {-> println_statement.stat}
-      | {block} block {-> block.stat}
-      | {empty} semicolon {-> New stat.empty()};
+        {variable_assignment}  variable_assignment  {-> variable_assignment.stat}
+      | {print_statement}      print_statement      {-> print_statement.stat}
+      | {println_statement}    println_statement    {-> println_statement.stat}
+      | {block}                block                {-> block.stat}
+      | {empty}                semicolon            {-> New stat.empty()};
 
     print_statement {-> stat} =
         print_id l_par [expr]:expression r_par semicolon {-> New stat.print(expr.expr)};
@@ -171,49 +172,49 @@ Productions
         or_expression {-> or_expression.expr};
 
     unary_expression {-> expr} =
-        {not} not term {-> New expr.not(term.expr)}
-      | {plus} plus term {-> New expr.uplus(term.expr)}
-      | {minus} minus term {-> New expr.uminus(term.expr)}
-      | {term} term {-> term.expr};
+        {not}   not term    {-> New expr.not(term.expr)}
+      | {plus}  plus term   {-> New expr.uplus(term.expr)}
+      | {minus} minus term  {-> New expr.uminus(term.expr)}
+      | {term}  term        {-> term.expr};
 
     additive_expression {-> expr} =
-        {add} [left]:additive_expression plus  [right]:multiplicative_expression {-> New expr.add(left.expr, right.expr)}
-      | {sub} [left]:additive_expression minus [right]:multiplicative_expression {-> New expr.sub(left.expr, right.expr)}
-      | {multiplicative} multiplicative_expression {-> multiplicative_expression.expr};
+        {add}             [left]:additive_expression plus  [right]:multiplicative_expression  {-> New expr.add(left.expr, right.expr)}
+      | {sub}             [left]:additive_expression minus [right]:multiplicative_expression  {-> New expr.sub(left.expr, right.expr)}
+      | {multiplicative}  multiplicative_expression                                           {-> multiplicative_expression.expr};
 
     multiplicative_expression {-> expr} =
-        {mod} [left]:multiplicative_expression mod  [right]:unary_expression {-> New expr.mod(left.expr, right.expr)}
-      | {mul} [left]:multiplicative_expression mult [right]:unary_expression {-> New expr.mul(left.expr, right.expr)}
-      | {div} [left]:multiplicative_expression div  [right]:unary_expression {-> New expr.div(left.expr, right.expr)}
-      | {unary} unary_expression {-> unary_expression.expr};
+        {mod}    [left]:multiplicative_expression mod  [right]:unary_expression  {-> New expr.mod(left.expr, right.expr)}
+      | {mul}    [left]:multiplicative_expression mult [right]:unary_expression  {-> New expr.mul(left.expr, right.expr)}
+      | {div}    [left]:multiplicative_expression div  [right]:unary_expression  {-> New expr.div(left.expr, right.expr)}
+      | {unary}  unary_expression                                                {-> unary_expression.expr};
 
     comparison_expression {-> expr} =
-        {lt} [left]:comparison_expression lt [right]:additive_expression {-> New expr.lt(left.expr, right.expr)}
-      | {gt} [left]:comparison_expression gt [right]:additive_expression {-> New expr.gt(left.expr, right.expr)}
-      | {lteq} [left]:comparison_expression lteq [right]:additive_expression {-> New expr.lteq(left.expr, right.expr)}
-      | {gteq} [left]:comparison_expression gteq [right]:additive_expression {-> New expr.gteq(left.expr, right.expr)}
-      | {additive} additive_expression {-> additive_expression.expr};
+        {lt}        [left]:comparison_expression lt [right]:additive_expression    {-> New expr.lt(left.expr, right.expr)}
+      | {gt}        [left]:comparison_expression gt [right]:additive_expression    {-> New expr.gt(left.expr, right.expr)}
+      | {lteq}      [left]:comparison_expression lteq [right]:additive_expression  {-> New expr.lteq(left.expr, right.expr)}
+      | {gteq}      [left]:comparison_expression gteq [right]:additive_expression  {-> New expr.gteq(left.expr, right.expr)}
+      | {additive}  additive_expression                                            {-> additive_expression.expr};
 
     equality_expression {-> expr} =
-        {eq} [left]:equality_expression eq [right]:comparison_expression {-> New expr.eq(left.expr, right.expr)}
-      | {neq} [left]:equality_expression neq [right]:comparison_expression {-> New expr.neq(left.expr, right.expr)}
-      | {comparison} comparison_expression {-> comparison_expression.expr};
+        {eq}          [left]:equality_expression eq [right]:comparison_expression   {-> New expr.eq(left.expr, right.expr)}
+      | {neq}         [left]:equality_expression neq [right]:comparison_expression  {-> New expr.neq(left.expr, right.expr)}
+      | {comparison}  comparison_expression                                         {-> comparison_expression.expr};
 
     and_expression {-> expr} =
-        {and} [left]:and_expression and [right]:equality_expression {-> New expr.and(left.expr, right.expr)}
-      | {equality} equality_expression {-> equality_expression.expr};
+        {and}       [left]:and_expression and [right]:equality_expression  {-> New expr.and(left.expr, right.expr)}
+      | {equality}  equality_expression                                    {-> equality_expression.expr};
 
     or_expression {-> expr} =
-        {or} [left]:or_expression or [right]:and_expression {-> New expr.or(left.expr, right.expr)}
-      | {and} and_expression {-> and_expression.expr};
+        {or}   [left]:or_expression or [right]:and_expression  {-> New expr.or(left.expr, right.expr)}
+      | {and}  and_expression                                  {-> and_expression.expr};
 
     term {-> expr} =
-        {boolean} boolean_literal {-> New expr.boolean(boolean_literal)}
-      | {float} float_literal {-> New expr.float(float_literal)}
-      | {int} int_literal {-> New expr.int(int_literal)}
-      | {string} string_literal {-> New expr.string(string_literal)}
-      | {var_id} [id]:identifier {-> New expr.id(id)}
-      | {expr} l_par expression r_par {-> expression.expr};
+        {boolean}  boolean_literal          {-> New expr.boolean(boolean_literal)}
+      | {float}    float_literal            {-> New expr.float(float_literal)}
+      | {int}      int_literal              {-> New expr.int(int_literal)}
+      | {string}   string_literal           {-> New expr.string(string_literal)}
+      | {var_id}   [id]:identifier          {-> New expr.id(id)}
+      | {expr}     l_par expression r_par   {-> expression.expr};
 
 
 Abstract Syntax Tree
