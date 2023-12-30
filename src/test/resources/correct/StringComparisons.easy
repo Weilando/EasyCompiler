@@ -1,0 +1,14 @@
+void main() {
+  string a = "a";
+  string b = "b";
+
+  print(a == b);      // false
+  print("c" == "c");  // true
+  print(a == "a");    // true
+  println("a" == b);  // false
+
+  print(a != b);      // true
+  print("c" != "c");  // false
+  print(a != "a");    // false
+  println("a" != b);  // true
+}

@@ -8,6 +8,7 @@ import typecheck.SymbolTable;
 import typecheck.Type;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class CodeGenerator extends DepthFirstAdapter {
   private final CodeCache cache;
@@ -66,13 +67,13 @@ public class CodeGenerator extends DepthFirstAdapter {
       currStat.apply(stackDepthEvaluator);
     }
 
-    String[] beginMainMethod = {
+    final String[] beginMainMethod = {
         ".method public static main([Ljava/lang/String;)V",
         String.format("\t.limit stack %d", stackDepthEvaluator.getMaxDepthCounter()),
         String.format("\t.limit locals %d",
             symbolTable.countSymbols() + 1), // all type-checked symbols and args[]
         "" };
-    String[] endMainMethod = {
+    final String[] endMainMethod = {
         "", "\treturn",
         ".end method"
     };
@@ -300,12 +301,32 @@ public class CodeGenerator extends DepthFirstAdapter {
   // Comparison expressions (calculate a boolean value with true=1, false=0)
   @Override
   public void outAEqExpr(AEqExpr node) {
-    cache.addIndentedLines(Arrays.asList(getComparisonCode("ifeq")));
+    if (node.getLeft().getType().equals(Type.STRING)) {
+      cache.addIndentedLine("invokevirtual java/lang/String/equals(Ljava/lang/Object;)Z");
+    } else {
+      cache.addIndentedLines(Arrays.asList(getComparisonCode("ifeq")));
+    }
   }
 
   @Override
   public void outANeqExpr(ANeqExpr node) {
-    cache.addIndentedLines(Arrays.asList(getComparisonCode("ifne")));
+    if (node.getLeft().getType().equals(Type.STRING)) {
+      cache.addIndentedLine("invokevirtual java/lang/String/equals(Ljava/lang/Object;)Z");
+
+      // negate
+      String TLabel = getNewTLabel();
+      String CLabel = getNewCLabel();
+      List<String> negationCode = Arrays.asList(
+          String.format("ifeq %s", TLabel),
+          "ldc 0",
+          String.format("goto %s", CLabel),
+          String.format("%s:", TLabel),
+          "ldc 1",
+          String.format("%s:", CLabel));
+      cache.addIndentedLines(negationCode);
+    } else {
+      cache.addIndentedLines(Arrays.asList(getComparisonCode("ifne")));
+    }
   }
 
   @Override
@@ -389,6 +410,7 @@ public class CodeGenerator extends DepthFirstAdapter {
   }
 
   String[] getComparisonCode(String operand) {
+    /* Generates comparison code for boolean, float and int. */
     String CLabel = getNewCLabel();
     String TLabel = getNewTLabel();
     return new String[] {

@@ -110,6 +110,12 @@ public class ParsingTest {
   }
 
   @Test
+  public void parseStringComparisons() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "StringComparisons.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
   public void parseStringExpressions() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "StringExpressions.easy");
     assertTrue(easyCompiler.parse());

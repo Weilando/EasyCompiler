@@ -106,6 +106,12 @@ public class TypeCheckTest {
   }
 
   @Test
+  public void checkStringComparisons() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "StringComparisons.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
   public void checkStringExpressions() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "StringExpressions.easy");
     assertTrue(easyCompiler.typeCheck());

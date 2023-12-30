@@ -228,6 +228,17 @@ public class CodeGenerationTest {
   }
 
   @Test
+  public void resultStringComparisons() throws InterruptedException {
+    String testName = "StringComparisons";
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
+
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("falsetruetruefalse\ntruefalsefalsetrue", inputStreamString);
+  }
+
+  @Test
   public void resultStringExpressions() throws InterruptedException {
     String testName = "StringExpressions";
     generateJasminFile(testName);

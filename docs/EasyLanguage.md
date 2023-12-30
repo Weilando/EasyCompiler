@@ -108,8 +108,7 @@ b = true;
 ```
 
 ### Typecast
-As the language is strictly type save but two different types of numbers exist, it may be necessary to perform typecasts in some cases.
-They are done automatically.
+_Easy_ is strictly type save and performs typecasts whenever necessary.
 
 
 ## Arrays
@@ -154,7 +153,7 @@ print(arr[3]);
 The result's type depends on the types inside the expressions.
 
 operator | description
-----------|------------
+---------|------------
 `+` | Addition of two numbers or expressions. Result is `int`, if no `float` is involved, and `float` otherwise.
 `-` | Subtraction of two numbers or expressions. Result is `int`, if no `float` is involved, and `float` otherwise.
 `*` | Multiplication of two numbers or expressions. Result is `int`, if no `float` is involved, and `float` otherwise.
@@ -165,7 +164,7 @@ operator | description
 The result is always `boolean`.
 
 operator | description
-----------|------------
+---------|------------
 `!` | Logical _negation_ of a boolean expression.
 `&&` | Logical _and_ of two boolean expressions.
 `\|\|` | Logical _or_ of two boolean expressions.
@@ -174,18 +173,19 @@ operator | description
 The result is always `boolean`.
 
 operator | description
-----------|------------
-`==` | Equality of the results of two expressions from the same class (i.e., number or boolean).
-`!=` | Inequality of the results of two expressions from the same class (i.e., number or boolean).
+---------|------------
+`==` | Equality of the results of two expressions from the same type.
+`!=` | Inequality of the results of two expressions from the same type.
 `>` | Check, if the left number is greater than the right number.
 `>=` | Check, if the left number is greater than or equal to the right number.
 `<` | Check, if the left number is smaller than the right number.
 `<=` | Check, if the left number is smaller than or equal to the right number.
 
 ### String
-operator | description
+
+operator  | description
 ----------|------------
-`§` | Concatenation of two strings (e.g. `"One " § "string"` results in _One string_). Concatenations of strings with other data types result in strings, e.g. `"Count=" § 4` results in _Count=4_.
+`§` | Concatenation of two expressions into a string (e.g., `"Route " § 66` results in the string _Route 66_).
 
 ### Parenthesis
 Pairs of parenthesis (i.e., `(...)`) can be used to highlight the precedences inside expressions.

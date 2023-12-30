@@ -89,7 +89,7 @@ As a trade-off the generated files are deleted after tests.
 - [x] extend grammar to parse `string` keyword and literals
 - [x] extend type-checking
 - [x] extend code-generation
-- [ ] extend comparisons (`==` and `!=`)
+- [x] extend comparisons (`==` and `!=`)
 - [ ] implement concatenation
 
 ## Stage 6: Implementation of functions

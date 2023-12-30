@@ -253,7 +253,7 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   }
 
   private Type evaluateChildrenEqualityComparison(PExpr left, PExpr right) {
-    // Booleans, floats and ints can be compared, but the type needs to be the same
+    // Require the same type for comparisons (int and float are both numbers)
     if (haveSameType(left, right) || bothNumerical(left, right)) {
       return Type.BOOLEAN;
     }
