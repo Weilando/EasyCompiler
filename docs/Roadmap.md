@@ -90,7 +90,7 @@ As a trade-off the generated files are deleted after tests.
 - [x] extend type-checking
 - [x] extend code-generation
 - [x] extend comparisons (`==` and `!=`)
-- [ ] implement concatenation
+- [x] implement concatenation
 
 ## Stage 6: Implementation of functions
 - [ ] extend grammar to parse function heads and bodies

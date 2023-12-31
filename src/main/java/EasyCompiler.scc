@@ -76,6 +76,9 @@ Tokens
     not   = '!';
     dnot  = '!!'; // double not, can be ignored
 
+    // String operators
+    concat = '§';
+
     // Literals
     boolean_literal = 'true' | 'false';
     float_literal   = easy_float;
@@ -168,25 +171,31 @@ Productions
         println_id l_par [expr]:expression r_par semicolon {-> New stat.println(expr.expr)};
 
     // Expressions
-    expression {-> expr} =
-        or_expression {-> or_expression.expr};
+    term {-> expr} =
+        {boolean}  boolean_literal          {-> New expr.boolean(boolean_literal)}
+      | {float}    float_literal            {-> New expr.float(float_literal)}
+      | {int}      int_literal              {-> New expr.int(int_literal)}
+      | {string}   string_literal           {-> New expr.string(string_literal)}
+      | {var_id}   [id]:identifier          {-> New expr.id(id)}
+      | {expr}     l_par expression r_par   {-> expression.expr};
 
     unary_expression {-> expr} =
-        {not}   not term    {-> New expr.not(term.expr)}
+        {minus} minus term  {-> New expr.uminus(term.expr)}
+      | {not}   not term    {-> New expr.not(term.expr)}
       | {plus}  plus term   {-> New expr.uplus(term.expr)}
-      | {minus} minus term  {-> New expr.uminus(term.expr)}
       | {term}  term        {-> term.expr};
+
+    multiplicative_expression {-> expr} =
+        {div}    [left]:multiplicative_expression div  [right]:unary_expression  {-> New expr.div(left.expr, right.expr)}
+      | {mod}    [left]:multiplicative_expression mod  [right]:unary_expression  {-> New expr.mod(left.expr, right.expr)}
+      | {mul}    [left]:multiplicative_expression mult [right]:unary_expression  {-> New expr.mul(left.expr, right.expr)}
+      | {unary}  unary_expression                                                {-> unary_expression.expr};
 
     additive_expression {-> expr} =
         {add}             [left]:additive_expression plus  [right]:multiplicative_expression  {-> New expr.add(left.expr, right.expr)}
+      | {concat}          [left]:additive_expression concat [right]:multiplicative_expression {-> New expr.concat(left.expr, right.expr)}
       | {sub}             [left]:additive_expression minus [right]:multiplicative_expression  {-> New expr.sub(left.expr, right.expr)}
       | {multiplicative}  multiplicative_expression                                           {-> multiplicative_expression.expr};
-
-    multiplicative_expression {-> expr} =
-        {mod}    [left]:multiplicative_expression mod  [right]:unary_expression  {-> New expr.mod(left.expr, right.expr)}
-      | {mul}    [left]:multiplicative_expression mult [right]:unary_expression  {-> New expr.mul(left.expr, right.expr)}
-      | {div}    [left]:multiplicative_expression div  [right]:unary_expression  {-> New expr.div(left.expr, right.expr)}
-      | {unary}  unary_expression                                                {-> unary_expression.expr};
 
     comparison_expression {-> expr} =
         {lt}        [left]:comparison_expression lt [right]:additive_expression    {-> New expr.lt(left.expr, right.expr)}
@@ -208,13 +217,8 @@ Productions
         {or}   [left]:or_expression or [right]:and_expression  {-> New expr.or(left.expr, right.expr)}
       | {and}  and_expression                                  {-> and_expression.expr};
 
-    term {-> expr} =
-        {boolean}  boolean_literal          {-> New expr.boolean(boolean_literal)}
-      | {float}    float_literal            {-> New expr.float(float_literal)}
-      | {int}      int_literal              {-> New expr.int(int_literal)}
-      | {string}   string_literal           {-> New expr.string(string_literal)}
-      | {var_id}   [id]:identifier          {-> New expr.id(id)}
-      | {expr}     l_par expression r_par   {-> expression.expr};
+    expression {-> expr} =
+        or_expression {-> or_expression.expr};
 
 
 Abstract Syntax Tree
@@ -237,24 +241,25 @@ Abstract Syntax Tree
       | {empty}   ;
 
     expr =
-        {add}     [left]:expr [right]:expr
+      {boolean} [lit]:boolean_literal
+      | {float}   [lit]:float_literal
+      | {int}     [lit]:int_literal
+      | {string}  [lit]:string_literal
+      | {id}      [id]:identifier
+      | {not}     [expr]:expr
+      | {uminus}  [expr]:expr
+      | {uplus}   [expr]:expr
+      | {add}     [left]:expr [right]:expr
+      | {concat}  [left]:expr [right]:expr
       | {sub}     [left]:expr [right]:expr
-      | {mod}     [left]:expr [right]:expr
-      | {mul}     [left]:expr [right]:expr
       | {div}     [left]:expr [right]:expr
-      | {or}      [left]:expr [right]:expr
-      | {and}     [left]:expr [right]:expr
-      | {eq}      [left]:expr [right]:expr
-      | {neq}     [left]:expr [right]:expr
+      | {mul}     [left]:expr [right]:expr
+      | {mod}     [left]:expr [right]:expr
       | {lt}      [left]:expr [right]:expr
       | {gt}      [left]:expr [right]:expr
       | {lteq}    [left]:expr [right]:expr
       | {gteq}    [left]:expr [right]:expr
-      | {not}     [expr]:expr
-      | {uplus}   [expr]:expr
-      | {uminus}  [expr]:expr
-      | {boolean} [lit]:boolean_literal
-      | {float}   [lit]:float_literal
-      | {int}     [lit]:int_literal
-      | {string}  [lit]:string_literal
-      | {id}      [id]:identifier;
+      | {eq}      [left]:expr [right]:expr
+      | {neq}     [left]:expr [right]:expr
+      | {and}     [left]:expr [right]:expr
+      | {or}      [left]:expr [right]:expr;

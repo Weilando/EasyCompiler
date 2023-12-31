@@ -1,6 +1,4 @@
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CodeGenerationTest {
@@ -68,7 +68,7 @@ public class CodeGenerationTest {
 
     assertEquals(0, classProcess.waitFor());
     assertEquals(
-        "true\nfalse\nfalse\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse\ntrue\nfalse\nfalse\ntrue\ntrue\nfalse\nfalse\nfalse\ntrue\nfalse\ntrue\ntrue\ntrue\nfalse\ntrue\nfalse",
+        "truefalsefalsetruefalse\ntruetruefalsetruetruefalse\ntruefalsefalsetrue\ntruefalsefalsefalse\ntruefalsetruetrue\ntruefalsetruefalse",
         inputStreamString);
   }
 
@@ -77,9 +77,9 @@ public class CodeGenerationTest {
     String testName = "Minimal";
     generateJasminFile(testName);
     generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
 
-    Process minimalProcess = runtime.exec(String.format("java %s", testName), null, workingDirectory);
-    assertEquals(0, minimalProcess.waitFor());
+    assertEquals(0, classProcess.waitFor());
   }
 
   @Test
@@ -101,7 +101,7 @@ public class CodeGenerationTest {
     setupClassExecutionProcess(testName);
 
     assertEquals(0, classProcess.waitFor());
-    assertEquals("true\nfalse\nfalse\ntrue\nfalse\ntrue\nfalse\nfalse\ntrue\ntrue\nfalse\ntrue\ntrue\nfalse",
+    assertEquals("truefalsefalsetruefalsetruefalse\nfalsetruetruefalsetruetruefalse",
         inputStreamString);
   }
 
@@ -113,7 +113,7 @@ public class CodeGenerationTest {
     setupClassExecutionProcess(testName);
 
     assertEquals(0, classProcess.waitFor());
-    assertEquals("true\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\nfalse\ntrue\nfalse", inputStreamString);
+    assertEquals("truetruetruetrue\ntruetruetruetrue\ntruefalsetruefalse", inputStreamString);
   }
 
   @Test
@@ -146,7 +146,8 @@ public class CodeGenerationTest {
     setupClassExecutionProcess(testName);
 
     assertEquals(0, classProcess.waitFor());
-    assertEquals("3.1415927\n-2.0\n2.0\n2.0\n3.4\n-1.6\n7.0\n3.5\n-5.4\n3.2\n16.74\n2.7", inputStreamString);
+    assertEquals("3.1415927\n-2.0\n2.0\n2.0\n3.4\n-1.6\n7.0\n3.5\n-5.4\n3.2\n16.74\n2.7",
+        inputStreamString);
   }
 
   @Test
@@ -236,6 +237,17 @@ public class CodeGenerationTest {
 
     assertEquals(0, classProcess.waitFor());
     assertEquals("falsetruetruefalse\ntruefalsefalsetrue", inputStreamString);
+  }
+
+  @Test
+  public void resultStringConcats() throws InterruptedException {
+    String testName = "StringConcats";
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
+
+    assertEquals(0, classProcess.waitFor());
+    assertEquals("aaaccacc\natrueafalsea2a3a0.5a0.4\ntrue10.4c\ntrue0.52a", inputStreamString);
   }
 
   @Test

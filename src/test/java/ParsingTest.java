@@ -116,6 +116,12 @@ public class ParsingTest {
   }
 
   @Test
+  public void parseStringConcats() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "StringConcats.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
   public void parseStringExpressions() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "StringExpressions.easy");
     assertTrue(easyCompiler.parse());

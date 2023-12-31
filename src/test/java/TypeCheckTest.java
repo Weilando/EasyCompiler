@@ -112,6 +112,12 @@ public class TypeCheckTest {
   }
 
   @Test
+  public void checkStringConcats() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "StringConcats.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
   public void checkStringExpressions() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "StringExpressions.easy");
     assertTrue(easyCompiler.typeCheck());

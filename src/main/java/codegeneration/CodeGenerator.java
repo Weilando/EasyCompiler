@@ -1,33 +1,75 @@
 package codegeneration;
 
+import java.util.Arrays;
+import java.util.List;
+
 import analysis.DepthFirstAdapter;
 import lineevaluation.LineEvaluator;
-import node.*;
+import node.AAddExpr;
+import node.AAndExpr;
+import node.AAssignStat;
+import node.ABooleanExpr;
+import node.AConcatExpr;
+import node.ADeclStat;
+import node.ADivExpr;
+import node.AEqExpr;
+import node.AFloatExpr;
+import node.AGtExpr;
+import node.AGteqExpr;
+import node.AIdExpr;
+import node.AIfStat;
+import node.AIfelseStat;
+import node.AInitStat;
+import node.AIntExpr;
+import node.ALtExpr;
+import node.ALteqExpr;
+import node.AMain;
+import node.AModExpr;
+import node.AMulExpr;
+import node.ANeqExpr;
+import node.ANotExpr;
+import node.AOrExpr;
+import node.APrg;
+import node.APrintStat;
+import node.APrintlnStat;
+import node.AStringExpr;
+import node.ASubExpr;
+import node.AUminusExpr;
+import node.AWhileStat;
+import node.Node;
+import node.PExpr;
+import node.PStat;
 import stackdepthevaluation.StackDepthEvaluator;
 import typecheck.SymbolTable;
 import typecheck.Type;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class CodeGenerator extends DepthFirstAdapter {
   private final CodeCache cache;
   private final String programName;
   private final SymbolTable symbolTable;
-  private int lastCLabel; // "Continue" label
-  private int lastHLabel; // "Head" label
-  private int lastTLabel; // "True" label
+  private int lastContinueLabel;
+  private int lastHeadLabel;
+  private int lastTrueLabel;
 
+  /**
+   * The CodeGenerator walks the AST using Depth First Search and emit Jasmin
+   * assembly code.
+   * 
+   * @param cache       Code cache
+   * @param programName Name of the program, used for source and class name
+   * @param symbolTable Symbol table
+   */
   public CodeGenerator(CodeCache cache, String programName, SymbolTable symbolTable) {
     this.cache = cache;
     this.programName = programName;
     this.symbolTable = symbolTable;
-    this.lastCLabel = 0;
-    this.lastHLabel = 0;
-    this.lastTLabel = 0;
+    this.lastContinueLabel = 0;
+    this.lastHeadLabel = 0;
+    this.lastTrueLabel = 0;
   }
 
-  private String getJVMType(Type type) {
+  private String getJvmType(Type type) {
+    /* Translates the Easy type into a JVM type. */
     switch (type) {
       case BOOLEAN:
         return "Z";
@@ -94,52 +136,52 @@ public class CodeGenerator extends DepthFirstAdapter {
   @Override
   public void caseAIfStat(AIfStat node) {
     addLineNumber(node, "if statement");
-    String CLabel = getNewCLabel();
+    final String continueLabel = getNewContinueLabel();
 
     // generate condition and skip then-body if false (i.e., equal to 0)
     node.getExpr().apply(this);
-    cache.addIndentedLine(String.format("ifeq %s", CLabel));
+    cache.addIndentedLine(String.format("ifeq %s", continueLabel));
 
     // generate body (failed condition jumps to end of body)
     node.getThenBlock().apply(this);
-    cache.addIndentedLine(String.format("%s:", CLabel));
+    cache.addIndentedLine(String.format("%s:", continueLabel));
   }
 
   @Override
   public void caseAIfelseStat(AIfelseStat node) {
     addLineNumber(node, "if-else statement");
-    String CLabelElse = getNewCLabel();
-    String CLabelEnd = getNewCLabel();
+    final String continueLabelElse = getNewContinueLabel();
+    final String continueLabelEnd = getNewContinueLabel();
 
     // generate condition and skip then-body if false (i.e., equal to 0)
     node.getExpr().apply(this);
-    cache.addIndentedLine(String.format("ifeq %s", CLabelElse));
+    cache.addIndentedLine(String.format("ifeq %s", continueLabelElse));
 
     // generate then-body
     node.getThenBlock().apply(this);
-    cache.addIndentedLine(String.format("goto %s", CLabelEnd));
+    cache.addIndentedLine(String.format("goto %s", continueLabelEnd));
 
     // generate else-block
-    cache.addIndentedLine(String.format("%s:", CLabelElse));
+    cache.addIndentedLine(String.format("%s:", continueLabelElse));
     node.getElseBlock().apply(this);
-    cache.addIndentedLine(String.format("%s:", CLabelEnd));
+    cache.addIndentedLine(String.format("%s:", continueLabelEnd));
   }
 
   @Override
   public void caseAWhileStat(AWhileStat node) {
     addLineNumber(node, "while statement");
-    String HLabel = getNewHLabel();
-    String CLabel = getNewCLabel();
+    final String headLabel = getNewHeadLabel();
+    final String continueLabel = getNewContinueLabel();
 
     // generate head and skip while-body if false (i.e., equal to 0)
-    cache.addIndentedLine(String.format("%s:", HLabel));
+    cache.addIndentedLine(String.format("%s:", headLabel));
     node.getExpr().apply(this);
-    cache.addIndentedLine(String.format("ifeq %s", CLabel));
+    cache.addIndentedLine(String.format("ifeq %s", continueLabel));
 
     // generate body
     node.getBody().apply(this);
-    cache.addIndentedLine(String.format("goto %s", HLabel));
-    cache.addIndentedLine(String.format("%s:", CLabel));
+    cache.addIndentedLine(String.format("goto %s", headLabel));
+    cache.addIndentedLine(String.format("%s:", continueLabel));
   }
 
   @Override
@@ -161,7 +203,7 @@ public class CodeGenerator extends DepthFirstAdapter {
 
     String printCommand = String.format(
         "invokevirtual java/io/PrintStream/print(%s)V",
-        getJVMType(type));
+        getJvmType(type));
     cache.addIndentedLine(printCommand);
   }
 
@@ -184,7 +226,7 @@ public class CodeGenerator extends DepthFirstAdapter {
 
     String printCommand = String.format(
         "invokevirtual java/io/PrintStream/println(%s)V",
-        getJVMType(type));
+        getJvmType(type));
     cache.addIndentedLine(printCommand);
   }
 
@@ -269,12 +311,48 @@ public class CodeGenerator extends DepthFirstAdapter {
   // Boolean operations
   @Override
   public void outAAndExpr(AAndExpr node) {
-    cache.addIndentedLine("iand"); // logic and acts behaves multiplication
+    cache.addIndentedLine("iand"); // logic of "and" behaves like multiplication
   }
 
   @Override
   public void outAOrExpr(AOrExpr node) {
     cache.addIndentedLine("ior");
+  }
+
+  // String operations
+  @Override
+  public void outAConcatExpr(AConcatExpr node) {
+    cache.addIndentedLine("invokevirtual java/lang/StringBuffer/toString()Ljava/lang/String;");
+  }
+
+  private String getAppendCommand(PExpr node) {
+    /* Get append command for a StringBuilder using the correct type. */
+    String baseCommand = "invokevirtual java/lang/StringBuffer/append(%s)Ljava/lang/StringBuffer;";
+    String jvmType = getJvmType(node.getType());
+    return baseCommand.formatted(jvmType);
+  }
+
+  @Override
+  public void caseAConcatExpr(AConcatExpr node) {
+    inAConcatExpr(node);
+    if (node.getLeft() != null) {
+      node.getLeft().apply(this);
+    }
+    cache.addIndentedLine(getAppendCommand(node.getLeft()));
+    if (node.getRight() != null) {
+      node.getRight().apply(this);
+    }
+    cache.addIndentedLine(getAppendCommand(node.getRight()));
+    outAConcatExpr(node);
+  }
+
+  @Override
+  public void inAConcatExpr(AConcatExpr node) {
+    List<String> stringBufferInit = Arrays.asList(
+        "new java/lang/StringBuffer",
+        "dup",
+        "invokespecial java/lang/StringBuffer/<init>()V");
+    cache.addIndentedLines(stringBufferInit);
   }
 
   // Unary operations
@@ -314,15 +392,15 @@ public class CodeGenerator extends DepthFirstAdapter {
       cache.addIndentedLine("invokevirtual java/lang/String/equals(Ljava/lang/Object;)Z");
 
       // negate
-      String TLabel = getNewTLabel();
-      String CLabel = getNewCLabel();
+      final String trueLabel = getNewTrueLabel();
+      final String continueLabel = getNewContinueLabel();
       List<String> negationCode = Arrays.asList(
-          String.format("ifeq %s", TLabel),
+          String.format("ifeq %s", trueLabel),
           "ldc 0",
-          String.format("goto %s", CLabel),
-          String.format("%s:", TLabel),
+          String.format("goto %s", continueLabel),
+          String.format("%s:", trueLabel),
           "ldc 1",
-          String.format("%s:", CLabel));
+          String.format("%s:", continueLabel));
       cache.addIndentedLines(negationCode);
     } else {
       cache.addIndentedLines(Arrays.asList(getComparisonCode("ifne")));
@@ -397,30 +475,33 @@ public class CodeGenerator extends DepthFirstAdapter {
   }
 
   // Helpers
-  String getNewCLabel() {
-    return String.format("C%d", ++this.lastCLabel);
+  String getNewContinueLabel() {
+    /* Generates a unique label to continue after assembly control structures. */
+    return String.format("C%d", ++this.lastContinueLabel);
   }
 
-  String getNewTLabel() {
-    return String.format("T%d", ++this.lastTLabel);
+  String getNewTrueLabel() {
+    /* Generates a unique label for true cases in assembly instructions. */
+    return String.format("T%d", ++this.lastTrueLabel);
   }
 
-  String getNewHLabel() {
-    return String.format("H%d", ++this.lastHLabel);
+  String getNewHeadLabel() {
+    /* Generates a unique head label for assembly instructions. */
+    return String.format("H%d", ++this.lastHeadLabel);
   }
 
   String[] getComparisonCode(String operand) {
     /* Generates comparison code for boolean, float and int. */
-    String CLabel = getNewCLabel();
-    String TLabel = getNewTLabel();
+    final String continueLabel = getNewContinueLabel();
+    final String trueLabel = getNewTrueLabel();
     return new String[] {
         "isub",
-        String.format("%s %s", operand, TLabel),
+        String.format("%s %s", operand, trueLabel),
         "ldc 0",
-        String.format("goto %s", CLabel),
-        String.format("%s:", TLabel),
+        String.format("goto %s", continueLabel),
+        String.format("%s:", trueLabel),
         "ldc 1",
-        String.format("%s:", CLabel) };
+        String.format("%s:", continueLabel) };
   }
 
   void generateAssignCode(String id, boolean castInt) {
