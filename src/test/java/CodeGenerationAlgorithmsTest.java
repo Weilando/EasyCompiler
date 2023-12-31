@@ -1,6 +1,4 @@
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CodeGenerationAlgorithmsTest {
@@ -56,9 +56,9 @@ public class CodeGenerationAlgorithmsTest {
     }
   }
 
-  //------------------------
+  // ------------------------
   // Test correct algorithms
-  //------------------------
+  // ------------------------
   @Test
   public void resultBinomial() throws InterruptedException {
     String testName = "Binomial";

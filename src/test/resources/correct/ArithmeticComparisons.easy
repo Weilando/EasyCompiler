@@ -3,36 +3,36 @@ void main() {
   int y = 7;
   int z = 3;
 
-  println(4 == 4);  // true
-  println(3 == -3); // false
-  println(x == y);  // false
-  println(x == 42); // true
+  print(4 == 4);    // true
+  print(3 == -3);   // false
+  print(x == y);    // false
+  print(x == 42);   // true
   println(2 == z);  // false
 
-  println(1 != 0);  // true
-  println(2 != -2); // true
-  println(3 != 3);  // false
-  println(y != z);  // true
-  println(z != 2);  // true
+  print(1 != 0);    // true
+  print(2 != -2);   // true
+  print(3 != 3);    // false
+  print(y != z);    // true
+  print(z != 2);    // true
   println(3 != z);  // false
 
-  println(-3 < 3);  // true
-  println(y < z);   // false
-  println(x < 42);  // false
+  print(-3 < 3);    // true
+  print(y < z);     // false
+  print(x < 42);    // false
   println(2 < z);   // true
 
-  println(3 > -3);  // true
-  println(z > y);   // false
-  println(x > 42);  // false
+  print(3 > -3);    // true
+  print(z > y);     // false
+  print(x > 42);    // false
   println(2 > z);   // false
 
-  println(-3 <= 3); // true
-  println(y <= z);  // false
-  println(x <= 42); // true
+  print(-3 <= 3);   // true
+  print(y <= z);    // false
+  print(x <= 42);   // true
   println(2 <= z);  // true
 
-  println(3 >= -3); // true
-  println(z >= y);  // false
-  println(x >= 42); // true
+  print(3 >= -3);   // true
+  print(z >= y);    // false
+  print(x >= 42);   // true
   println(2 >= z);  // false
 }

@@ -21,6 +21,10 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
 }
 
 task getSableCC(type: Copy) {

@@ -23,6 +23,8 @@ public class TypeChecker extends DepthFirstAdapter {
       varType = Type.FLOAT;
     } else if (node.getType() instanceof AIntTp) {
       varType = Type.INT;
+    } else if (node.getType() instanceof AStringTp) {
+      varType = Type.STRING;
     } else { // Should never happen
       errorHandler.throwInternalError(id);
     }
@@ -47,6 +49,8 @@ public class TypeChecker extends DepthFirstAdapter {
       type = Type.FLOAT;
     } else if (node.getType() instanceof AIntTp) {
       type = Type.INT;
+    } else if (node.getType() instanceof AStringTp) {
+      type = Type.STRING;
     }
 
     if (symbolTable.contains(key)) {
@@ -69,7 +73,6 @@ public class TypeChecker extends DepthFirstAdapter {
     Type exprType = evaluateType(node.getExpr());
     checkAssignment(id, varType, exprType);
   }
-
 
   // Control statements
   @Override
@@ -95,7 +98,6 @@ public class TypeChecker extends DepthFirstAdapter {
       errorHandler.throwConditionError(node, "if", headType);
     }
   }
-
 
   // Print statement
   @Override

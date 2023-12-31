@@ -4,24 +4,24 @@ void main() {
   boolean C = !false || false;
   boolean D;
   D = true && !false;
-  println(A); // true
-  println(B); // true
-  println(C); // true
-  println(D); // true
+  print(A);    // true
+  print(B);    // true
+  print(C);    // true
+  println(D);  // true
 
   A = A || B && C;
   B = A && (C || (D != B));
-  println(A); // true
-  println(B); // true
-  println(C); // true
-  println(D); // true
+  print(A);    // true
+  print(B);    // true
+  print(C);    // true
+  println(D);  // true
 
   A = A && !true != C;
   B = !B && !((A || C) != (A && !true));
   C = (A && true || (false && C && (true == B))) || false;
   D = A && B || C != D;
-  println(A); // true
-  println(B); // false
-  println(C); // true
-  println(D); // false
+  print(A);    // true
+  print(B);    // false
+  print(C);    // true
+  println(D);  // false
 }

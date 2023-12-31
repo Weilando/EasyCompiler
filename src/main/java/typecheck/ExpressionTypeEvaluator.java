@@ -1,10 +1,33 @@
 package typecheck;
 
 import analysis.DepthFirstAdapter;
-import node.*;
+import node.AAddExpr;
+import node.AAndExpr;
+import node.ABooleanExpr;
+import node.AConcatExpr;
+import node.ADivExpr;
+import node.AEqExpr;
+import node.AFloatExpr;
+import node.AGtExpr;
+import node.AGteqExpr;
+import node.AIdExpr;
+import node.AIntExpr;
+import node.ALtExpr;
+import node.ALteqExpr;
+import node.AModExpr;
+import node.AMulExpr;
+import node.ANeqExpr;
+import node.ANotExpr;
+import node.AOrExpr;
+import node.AStringExpr;
+import node.ASubExpr;
+import node.AUminusExpr;
+import node.AUplusExpr;
+import node.Node;
+import node.PExpr;
 
 public class ExpressionTypeEvaluator extends DepthFirstAdapter {
-  final private SymbolTable symbolTable;
+  private final SymbolTable symbolTable;
   private Type type;
 
   public ExpressionTypeEvaluator(SymbolTable symbolTable) {
@@ -32,6 +55,12 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   }
 
   @Override
+  public void caseAStringExpr(AStringExpr node) {
+    node.setType(Type.STRING);
+    type = Type.STRING;
+  }
+
+  @Override
   public void outAIdExpr(AIdExpr node) {
     String id = node.getId().getText();
 
@@ -43,6 +72,37 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
     node.setType(type);
   }
 
+  // Unary expressions
+  @Override
+  public void caseAUminusExpr(AUminusExpr node) {
+    type = node.getType();
+    if (type.equals(Type.UNDEFINED)) {
+      type = evaluateChildArithmeticUnary(node.getExpr());
+      node.setType(type);
+    }
+  }
+
+  @Override
+  public void caseANotExpr(ANotExpr node) {
+    type = node.getType();
+    if (type.equals(Type.UNDEFINED)) {
+      if (hasType(node.getExpr(), Type.BOOLEAN)) {
+        type = Type.BOOLEAN;
+      } else {
+        type = Type.ERROR;
+      }
+      node.setType(type);
+    }
+  }
+
+  @Override
+  public void caseAUplusExpr(AUplusExpr node) {
+    type = node.getType();
+    if (type.equals(Type.UNDEFINED)) {
+      type = evaluateChildArithmeticUnary(node.getExpr());
+      node.setType(type);
+    }
+  }
 
   // Arithmetic expressions (->float and int allowed)
   @Override
@@ -94,7 +154,6 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
     }
   }
 
-
   // Boolean expressions (->only boolean allowed)
   @Override
   public void caseAAndExpr(AAndExpr node) {
@@ -114,8 +173,7 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
     }
   }
 
-
-  // Comparison expressions (many work with floats and ints, but result always is boolean)
+  // Comparison expressions (many work with numbers, but result always is boolean)
   @Override
   public void caseAEqExpr(AEqExpr node) {
     type = node.getType();
@@ -170,39 +228,18 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
     }
   }
 
-
-  // Unary expressions
+  // String operations
   @Override
-  public void caseANotExpr(ANotExpr node) {
-    type = node.getType();
-    if (type.equals(Type.UNDEFINED)) {
-      if (hasType(node.getExpr(), Type.BOOLEAN)) {
-        type = Type.BOOLEAN;
-      } else {
-        type = Type.ERROR;
-      }
-      node.setType(type);
+  public void caseAConcatExpr(AConcatExpr node) {
+    if (node.getType().equals(Type.UNDEFINED)) {
+      ExpressionTypeEvaluator leftEv = new ExpressionTypeEvaluator(symbolTable);
+      ExpressionTypeEvaluator rightEv = new ExpressionTypeEvaluator(symbolTable);
+
+      node.getLeft().apply(leftEv);
+      node.getRight().apply(rightEv);
+      node.setType(Type.STRING);
     }
   }
-
-  @Override
-  public void caseAUplusExpr(AUplusExpr node) {
-    type = node.getType();
-    if (type.equals(Type.UNDEFINED)) {
-      type = evaluateChildArithmeticUnary(node.getExpr());
-      node.setType(type);
-    }
-  }
-
-  @Override
-  public void caseAUminusExpr(AUminusExpr node) {
-    type = node.getType();
-    if (type.equals(Type.UNDEFINED)) {
-      type = evaluateChildArithmeticUnary(node.getExpr());
-      node.setType(type);
-    }
-  }
-
 
   // Helpers
   private boolean bothNumerical(Node leftNode, Node rightNode) {
@@ -252,7 +289,7 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   }
 
   private Type evaluateChildrenEqualityComparison(PExpr left, PExpr right) {
-    // Booleans, floats and ints can be compared, but the type needs to be the same
+    // Require the same type for comparisons (int and float are both numbers)
     if (haveSameType(left, right) || bothNumerical(left, right)) {
       return Type.BOOLEAN;
     }
