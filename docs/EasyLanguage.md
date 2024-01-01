@@ -4,7 +4,7 @@ The goal is to write a compiler for a small language _easy_ with a few advanced 
 The compiler should convert the language's source code into Jasmin assembly, which can be translated to JVM byte code.
 
 Some features may not be available yet.
-Please check the status in the project's [roadmap](Roadmap.md).
+Please check the status in the project's [roadmap](#roadmap).
 
 ## General concepts
 
@@ -223,10 +223,32 @@ high       | `!,+,-`     | Unary
 ...        | `<,<=,>=,>` | Comparison
 ...        | `==,!=`     | Equality
 ...        | `&&`        | Conjunction
-low        | `||`        | Disjunction
+low        | `\|\|`      | Disjunction
 
+## Roadmap
 
-## Syntactic sugar and further features
+- [x] Parsing (basic functionality)
+- [x] Type-checking (basic functionality)
+- [x] Code-generation (basic functionality)
+- [x] Implementation of floats
+- [x] Implementation of strings
+- [ ] Implementation of functions
+- [ ] Implementation of arrays
+- [ ] Implementation of syntactic sugar
+
+### Implementation of functions
+
+- [ ] extend grammar to parse function heads and bodies
+- [ ] extend type-checking, add a symbol table for each function
+- [ ] extend code-generation
+
+### Implementation of arrays
+
+- [ ] extend grammar
+- [ ] extend type-checking
+- [ ] extend code-generation
+
+### Syntactic sugar and further features
 
 Syntactic sugar may be added as additional features.
 A tick indicates it has been added:

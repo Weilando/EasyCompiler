@@ -3,8 +3,8 @@
 This project is a compiler for _Easy_, a simple programming language.
 The compiler's output is Jasmin assembler, which can be assembled into Java Bytecode, i.e. the programs can be executed on the JVM.
 
-- [Project roadmap](/docs/Roadmap.md) which shows the project's progress
-- [Language documentation](/docs/EasyLanguage.md) which describes _Easy_ in greater detail.
+- [Project roadmap](/docs/EasyLanguage.md#roadmap) and [changelog](/docs/Changelog.md) show the project's progress
+- [Language documentation](/docs/EasyLanguage.md) describe _Easy_ in greater detail.
 
 ## Features
 
@@ -52,3 +52,13 @@ In the following example, we describe how to compile an _Easy_ program into Java
     It creates `hello_world.j` which contains a Jasmin assembler representation of our _Easy_ code.
 3. Run `java -jar libs/jasmin.jar hello_world.j` to transform `hello_world.j` into `hello_world.class`, which contains Java bytecode.
 4. Finally, run `java hello_world` to start the compiled program, which should output `Hello world!`.
+
+## Testing
+
+We test analyses and other testable features using input files, and test code generation by running the _Easy_ Compiler and running the compiled programs on the JVM.
+
+It was planned to use a mocked filesystem for generated Jasmin-files and class-files during tests.
+Unfortunately we cannot call jasmin.jar and the produced class-files via `Runtime.getRuntime.exec`, as the command starts a new process.
+An in-memory filesystem would work great, if we could use all functions in one process.
+
+As a trade-off, gradle deletes the generated files after running the tests.
