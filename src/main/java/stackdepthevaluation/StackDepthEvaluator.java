@@ -1,7 +1,37 @@
 package stackdepthevaluation;
 
 import analysis.DepthFirstAdapter;
-import node.*;
+import node.AAddExpr;
+import node.AAndExpr;
+import node.AAssignStat;
+import node.ABooleanExpr;
+import node.AConcatExpr;
+import node.ADivExpr;
+import node.AEqExpr;
+import node.AFloatExpr;
+import node.AGtExpr;
+import node.AGteqExpr;
+import node.AIdExpr;
+import node.AIfStat;
+import node.AIfelseStat;
+import node.AInitStat;
+import node.AIntExpr;
+import node.ALtExpr;
+import node.ALteqExpr;
+import node.AMain;
+import node.AModExpr;
+import node.AMulExpr;
+import node.ANeqExpr;
+import node.ANotExpr;
+import node.AOrExpr;
+import node.APrintStat;
+import node.APrintlnStat;
+import node.AStringExpr;
+import node.ASubExpr;
+import node.AUminusExpr;
+import node.AWhileStat;
+import node.PExpr;
+import node.PStat;
 
 public class StackDepthEvaluator extends DepthFirstAdapter {
   private int depthCounter = 0;
@@ -138,8 +168,7 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
   public void outANotExpr(ANotExpr node) {
     incrementDepthCounter(); // ldc pushes 1
     decrementDepthCounter(); // iadd pops 2 arguments and pushes 1 result
-    incrementDepthCounter(); // ldc pushes 1
-    decrementDepthCounter(); // irem pops 2 arguments and pushes 1 result
+    // same pattern for ldc and irem
   }
 
   // Comparison expressions (calculate a boolean value with true=1, false=0)
@@ -171,6 +200,33 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
   @Override
   public void outAGtExpr(AGtExpr node) {
     decrementDepthCounter(); // ifgt pops 1
+  }
+
+  // String operations
+  @Override
+  public void inAConcatExpr(AConcatExpr node) {
+    incrementDepthCounter(); // new StringBuffer pushes 1
+    incrementDepthCounter(); // dup pushes 1
+    decrementDepthCounter(); // invokespecial <init> pops 1
+  }
+
+  @Override
+  public void caseAConcatExpr(AConcatExpr node) {
+    inAConcatExpr(node);
+    if (node.getLeft() != null) {
+      node.getLeft().apply(this);
+    }
+    // invokevirtual append pops 1 and pushes 1
+    if (node.getRight() != null) {
+      node.getRight().apply(this);
+    }
+    // invokevirtual append pops 1 and pushes 1
+    outAConcatExpr(node);
+  }
+
+  @Override
+  public void outAConcatExpr(AConcatExpr node) {
+    decrementDepthCounter(); // invokevirtual toString pops 1
   }
 
   // Literal expressions
