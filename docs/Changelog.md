@@ -66,3 +66,8 @@ This changelog lists [semantic versions](https://semver.org/spec/v2.0.0.html) an
     - define declarations and assignments
     - define control structures (without Dangling-Else!): `if`-`else`, `while`
     - define `print` and `println`
+
+## Unversioned changes
+
+- :bug: improve stack depth evaluation for string concatenations
+- :memo: add changelog instead of roadmap

@@ -321,8 +321,12 @@ public class CodeGenerator extends DepthFirstAdapter {
 
   // String operations
   @Override
-  public void outAConcatExpr(AConcatExpr node) {
-    cache.addIndentedLine("invokevirtual java/lang/StringBuffer/toString()Ljava/lang/String;");
+  public void inAConcatExpr(AConcatExpr node) {
+    List<String> stringBufferInit = Arrays.asList(
+        "new java/lang/StringBuffer  ; concat",
+        "dup",
+        "invokespecial java/lang/StringBuffer/<init>()V");
+    cache.addIndentedLines(stringBufferInit);
   }
 
   private String getAppendCommand(PExpr node) {
@@ -347,12 +351,8 @@ public class CodeGenerator extends DepthFirstAdapter {
   }
 
   @Override
-  public void inAConcatExpr(AConcatExpr node) {
-    List<String> stringBufferInit = Arrays.asList(
-        "new java/lang/StringBuffer",
-        "dup",
-        "invokespecial java/lang/StringBuffer/<init>()V");
-    cache.addIndentedLines(stringBufferInit);
+  public void outAConcatExpr(AConcatExpr node) {
+    cache.addIndentedLine("invokevirtual java/lang/StringBuffer/toString()Ljava/lang/String;");
   }
 
   // Unary operations
