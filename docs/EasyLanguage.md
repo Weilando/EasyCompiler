@@ -33,29 +33,43 @@ Both comments can start after a command within the same line, but only the multi
 
 ## Functions
 
-Functions begin with their return type followed by a unique identifier and a pair of parenthesis.
-It contains a comma separated list of arguments, each looks like a declaration.
-The body is surrounded by braces (i.e., `{...}`).
-A `return` statement is necessary, if the return type is different from `void`.
-Correct return types are variable types and `void`.
-`void` functions can be exited with an empty `return;`, but it is not necessary.
+Functions are named blocks that bundle statements and transform zero to many inputs into at most one output.
+
+### Definition
+
+Functions begin with a unique identifier and a pair of parenthesis, followed by an arrow and their return type.
+The parenthesis contains a comma separated list of arguments, where each argument requires a unique name (per function definition) and type (equal to variable types).
+Braces (i.e., `{...}`) surround the function body.
+
+If the function has a return value, the last statement must be `return`.
+A function without any return value has the return type `void` and does not require a `return` statement (although `return;` is possible).
 
 ```
-int calcSum(int a, int b) {
+calcSum(int a, int b) -> int {
   return a + b;
 }
 ```
 
-### `print`
+Each function has its own scope for variables, i.e., two variables with the same name in two different functions are independent of each other.
+A function must not have an argument and a variable with the same name.
 
-`print` outputs its argument on the command line.
-Versions for all data types are available.
-`print(42);` prints _42_.
-If `print` is called with an array, the array is printed as a comma-separated list if its values inside brackets.
-E.g. `int[3] arr; print(a);` prints _[0, 0, 0]_.
+### Call
 
-### `println`
+Function calls consist of the function name followed by paranthesis comma separated argument values.
+Function treat arguments with call-by-value, i.e., functions cannot change variables passed as arguments, but receive their values.
 
+```
+// ...
+int x = 3
+y = calcSum(x, 2);
+// ...
+```
+
+
+## `print` and `println`
+
+`print` outputs its argument on the command line (e.g., `print(42);` prints _42_).
+For an array, `print` generates a comma-separated list of all values inside brackets (e.g., `int[3] arr; print(a);` prints _[0, 0, 0]_).
 `println` behaves like `print`, but adds a new line after the output.
 
 
