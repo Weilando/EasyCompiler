@@ -2,6 +2,12 @@
 
 This changelog lists [semantic versions](https://semver.org/spec/v2.0.0.html) and related changes.
 
+## 0.5.1: 2024-01-02 (#7)
+
+- :bug: improve stack depth evaluation for string concatenations
+- :memo: add changelog instead of roadmap
+- :memo: improve description of functions
+
 ## 0.5.0: 2023-12-31 (#6)
 
 - :sparkles: add string literals and variables
@@ -66,8 +72,3 @@ This changelog lists [semantic versions](https://semver.org/spec/v2.0.0.html) an
     - define declarations and assignments
     - define control structures (without Dangling-Else!): `if`-`else`, `while`
     - define `print` and `println`
-
-## Unversioned changes
-
-- :bug: improve stack depth evaluation for string concatenations
-- :memo: add changelog instead of roadmap
