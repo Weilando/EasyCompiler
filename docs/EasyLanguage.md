@@ -14,7 +14,7 @@ Declarations are only allowed at the beginning of any function.
 
 A correct program requires a main function of the following form once:
 ```
-void main() {
+none <- main() {
   ...
 }
 ```
@@ -42,10 +42,10 @@ The parenthesis contains a comma separated list of arguments, where each argumen
 Braces (i.e., `{...}`) surround the function body.
 
 If the function has a return value, the last statement must be `return`.
-A function without any return value has the return type `void` and does not require a `return` statement (although `return;` is possible).
+A function without any return value has the return type `none` and does not require a `return` statement (although `return;` is possible).
 
 ```
-calcSum(int a, int b) -> int {
+int <- calcSum(int a, int b) {
   return a + b;
 }
 ```

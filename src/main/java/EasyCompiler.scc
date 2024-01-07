@@ -32,7 +32,7 @@ Tokens
     float_key   = 'float';
     int_key     = 'int';
     string_key  = 'string';
-    void_key    = 'void';
+    none_key    = 'none';
 
     // Control flow keywords
     if_key      = 'if';
@@ -54,6 +54,7 @@ Tokens
     semicolon   = ';';
     comma       = ',';
     dot         = '.';
+    l_arrow     = '<-';
 
     // Arithmetic operators
     plus  = '+';
@@ -124,7 +125,7 @@ Productions
 
     // Main method
     main_method {-> main} =
-        void_key main_id l_par r_par
+        none_key l_arrow main_id l_par r_par
         l_brace [declarations]:variable_declaration_statement* [body]:statement* r_brace
         {-> New main([declarations.stat], [body.stat])};
 

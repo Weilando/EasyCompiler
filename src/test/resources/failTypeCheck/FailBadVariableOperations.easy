@@ -1,4 +1,4 @@
-void main() { // 16 type-errors
+none <- main() { // 16 type-errors
   int i;
   float f;
   boolean b;

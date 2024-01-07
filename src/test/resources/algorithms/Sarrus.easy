@@ -1,4 +1,4 @@
-void main() {
+none <- main() {
   /* Calculate the determinant of a given 2x2-matrix using Sarrus' rule.
   / a11 a12 \
   \ a21 a22 / */

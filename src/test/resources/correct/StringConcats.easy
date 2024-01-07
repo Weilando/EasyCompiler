@@ -1,4 +1,4 @@
-void main() {
+none <- main() {
   string a = "a";
   boolean b = true;
   float f = 0.5;

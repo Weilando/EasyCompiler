@@ -1,4 +1,4 @@
-void main() {
+none <- main() {
   if (1 == 2) {
     while (false) {
       println(42);
