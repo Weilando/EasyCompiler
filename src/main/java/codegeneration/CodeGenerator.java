@@ -109,18 +109,18 @@ public class CodeGenerator extends DepthFirstAdapter {
       currStat.apply(stackDepthEvaluator);
     }
 
-    final String[] beginMainMethod = {
+    final String[] beginMainFunction = {
         ".method public static main([Ljava/lang/String;)V",
         String.format("\t.limit stack %d", stackDepthEvaluator.getMaxDepthCounter()),
         String.format("\t.limit locals %d",
             symbolTable.countSymbols() + 1), // all type-checked symbols and args[]
         "" };
-    final String[] endMainMethod = {
+    final String[] endMainFunction = {
         "", "\treturn",
         ".end method"
     };
 
-    cache.addLines(Arrays.asList(beginMainMethod));
+    cache.addLines(Arrays.asList(beginMainFunction));
 
     for (PStat currDecl : node.getDeclarations()) {
       currDecl.apply(this);
@@ -129,7 +129,7 @@ public class CodeGenerator extends DepthFirstAdapter {
       currStat.apply(this);
     }
 
-    cache.addLines(Arrays.asList(endMainMethod));
+    cache.addLines(Arrays.asList(endMainFunction));
   }
 
   // Statements

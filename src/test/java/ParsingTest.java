@@ -74,6 +74,12 @@ public class ParsingTest {
   }
 
   @Test
+  public void parseFunctions() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Functions.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
   public void parseIf() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "If.easy");
     assertTrue(easyCompiler.parse());
@@ -224,14 +230,26 @@ public class ParsingTest {
   // Throw parser-errors while parsing files with errors
   // ----------------------------------------------------
   @Test
+  public void errorFunctionAfterMainFunction() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailFunctionAfterMainFunction.easy");
+    assertFalse(easyCompiler.parse());
+  }
+
+  @Test
+  public void errorMainFunctionWithArgs() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMainFunctionWithArgs.easy");
+    assertFalse(easyCompiler.parse());
+  }
+
+  @Test
   public void errorMissingBrace() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMissingBrace.easy");
     assertFalse(easyCompiler.parse());
   }
 
   @Test
-  public void errorMissingMainMethod() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMissingMainMethod.easy");
+  public void errorMissingMainFunction() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMissingMainFunction.easy");
     assertFalse(easyCompiler.parse());
   }
 
@@ -244,6 +262,12 @@ public class ParsingTest {
   @Test
   public void errorMissingSemicolon() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMissingSemicolon.easy");
+    assertFalse(easyCompiler.parse());
+  }
+
+  @Test
+  public void errorTwoMainFunctions() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailTwoMainFunctions.easy");
     assertFalse(easyCompiler.parse());
   }
 }
