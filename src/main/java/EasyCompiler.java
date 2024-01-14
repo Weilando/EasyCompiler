@@ -1,13 +1,5 @@
-import codegeneration.CodeCache;
-import codegeneration.CodeGenerator;
-import lexer.Lexer;
-import lexer.LexerException;
-import lineevaluation.LineEvaluator;
-import livenessanalysis.LivenessAnalyzer;
-import node.Start;
-import parser.Parser;
-import parser.ParserException;
-import typecheck.TypeChecker;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 import java.io.File;
 import java.io.FileReader;
@@ -19,17 +11,32 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import codegeneration.CodeCache;
+import codegeneration.CodeGenerator;
+import lexer.Lexer;
+import lexer.LexerException;
+import lineevaluation.LineEvaluator;
+import livenessanalysis.LivenessAnalyzer;
+import node.Start;
+import parser.Parser;
+import parser.ParserException;
+import typecheck.TypeChecker;
 
+/** Compiler for the Easy language. */
 public class EasyCompiler {
-  final private boolean DEBUG = false;
-  final private Path sourceFilePath;
+  private final boolean verbose = false;
+  private final Path sourceFilePath;
   private Start ast;
   private ArrayList<String> code;
   private TypeChecker typeChecker;
   private boolean parseErrorOccurred = false;
 
+  /**
+   * Constructor for the EasyCompiler class. Please note that each instance
+   * handles a single source file.
+   *
+   * @param sourceFilePath Path to the source file
+   */
   public EasyCompiler(String sourceFilePath) {
     if (!isValidFileName(sourceFilePath)) {
       System.out.println("Invalid file name.");
@@ -39,8 +46,13 @@ public class EasyCompiler {
     this.sourceFilePath = Paths.get(sourceFilePath);
   }
 
+  /**
+   * Checks command line arguments and starts the EasyCompiler.
+   *
+   * @param args Command line arguments
+   */
   public static void main(String[] args) {
-    final String correctCall = "java EasyCompiler [-compile|-liveness|-typeCheck|-parse] <Filename.easy>";
+    final String correctCall = "java EasyCompiler -[compile|liveness|typeCheck|parse] <file>.easy";
     EasyCompiler easyCompiler;
 
     if (args.length == 2) {
@@ -60,16 +72,18 @@ public class EasyCompiler {
           easyCompiler.parse();
           break;
         default:
+          System.out.println("Unknown Option. Correct call:");
           System.out.println(correctCall);
       }
     } else {
+      System.out.println("Missing argument. Correct call:");
       System.out.println(correctCall);
     }
   }
 
-  //------------
+  // ------------
   // Compilation
-  //------------
+  // ------------
   void compile() {
     if (generateCode() && writeOutputFile()) {
       System.out.println("Successful!");
@@ -79,7 +93,8 @@ public class EasyCompiler {
   boolean generateCode() {
     if (parse() && typeCheck()) {
       CodeCache codeCache = new CodeCache();
-      CodeGenerator codeGenerator = new CodeGenerator(codeCache, getProgramName(), this.typeChecker.getSymbolTable());
+      CodeGenerator codeGenerator = new CodeGenerator(
+          codeCache, getProgramName(), this.typeChecker.getSymbolTable());
       ast.apply(codeGenerator);
       this.code = codeCache.getCode();
 
@@ -88,14 +103,14 @@ public class EasyCompiler {
     return false;
   }
 
-  //---------
+  // ---------
   // Analysis
-  //---------
+  // ---------
   void liveness() {
     if (parse() && typeCheck()) {
       LivenessAnalyzer analyzer = new LivenessAnalyzer(ast, this.typeChecker.getSymbolTable());
 
-      if (DEBUG) {
+      if (verbose) {
         analyzer.printGraph();
       }
 
@@ -113,7 +128,9 @@ public class EasyCompiler {
       printAST();
       LineEvaluator.setLines(this.ast);
     } catch (IOException e) {
-      System.out.println(String.format("Input-Error: An error occurred while reading input file \"%s\".", this.sourceFilePath.toString()));
+      String filePath = this.sourceFilePath.toString();
+      System.out.println(
+          "Input-Error: An error occurred while reading input file \"%s\".".formatted(filePath));
       System.out.println(e.toString());
       return false;
     } catch (LexerException e) {
@@ -139,7 +156,7 @@ public class EasyCompiler {
     this.ast.apply(this.typeChecker);
 
     if (!this.typeChecker.errorsOccurred()) {
-      if (DEBUG) {
+      if (verbose) {
         this.typeChecker.printSymbolTable();
       }
       return true;
@@ -152,9 +169,9 @@ public class EasyCompiler {
     return this.typeChecker.getErrorNumber();
   }
 
-  //--------
+  // --------
   // Helpers
-  //--------
+  // --------
   String getProgramName() {
     return this.sourceFilePath.getFileName().toString().replaceAll(".easy", "");
   }
@@ -177,7 +194,7 @@ public class EasyCompiler {
   }
 
   private void printAST() {
-    if ((this.ast != null) && DEBUG) {
+    if ((this.ast != null) && verbose) {
       ASTPrinter printer = new ASTPrinter();
       this.ast.apply(printer);
     }

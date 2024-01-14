@@ -1,11 +1,11 @@
 package typecheck;
 
+import java.util.HashMap;
 import livenessanalysis.InterferenceGraphNode;
 
-import java.util.HashMap;
-
+/** The symbol table stores all known variables and their type. */
 public class SymbolTable {
-  final private HashMap<String, Symbol> table;
+  private final HashMap<String, Symbol> table;
   private int lastSymbolNumber;
 
   public SymbolTable() {

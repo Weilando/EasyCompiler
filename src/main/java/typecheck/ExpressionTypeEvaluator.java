@@ -26,6 +26,10 @@ import node.AUplusExpr;
 import node.Node;
 import node.PExpr;
 
+/**
+ * The expression type evaluator walks the AST and assigns types to expression
+ * nodes. It does not checks any compatibilities.
+ */
 public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   private final SymbolTable symbolTable;
   private Type type;

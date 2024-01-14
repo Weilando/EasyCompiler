@@ -1,5 +1,9 @@
 package typecheck;
 
+/**
+ * A symbol describes a variable using its internal identifier (a consecutive
+ * number) and type.
+ */
 public class Symbol {
   private final Type type;
   private final int variableNumber;

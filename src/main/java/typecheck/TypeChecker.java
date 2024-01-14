@@ -1,11 +1,28 @@
 package typecheck;
 
 import analysis.DepthFirstAdapter;
-import node.*;
+import node.AAssignStat;
+import node.ABooleanTp;
+import node.ADeclStat;
+import node.AFloatTp;
+import node.AIfStat;
+import node.AIfelseStat;
+import node.AInitStat;
+import node.AIntTp;
+import node.APrintStat;
+import node.APrintlnStat;
+import node.AStringTp;
+import node.AWhileStat;
+import node.PExpr;
+import node.TIdentifier;
 
+/**
+ * The type checker walks the AST using depth first search. IT assigns a type to
+ * each node and checks the compatibility of childrens' types.
+ */
 public class TypeChecker extends DepthFirstAdapter {
-  final private TypeErrorHandler errorHandler;
-  final private SymbolTable symbolTable;
+  private final TypeErrorHandler errorHandler;
+  private final SymbolTable symbolTable;
 
   public TypeChecker() {
     this.errorHandler = new TypeErrorHandler();
@@ -30,7 +47,7 @@ public class TypeChecker extends DepthFirstAdapter {
     }
 
     if (symbolTable.contains(key)) {
-      errorHandler.throwAlreadyDefinedError(id);
+      errorHandler.printAlreadyDefinedError(id);
     } else {
       symbolTable.add(key, varType);
     }
@@ -54,7 +71,7 @@ public class TypeChecker extends DepthFirstAdapter {
     }
 
     if (symbolTable.contains(key)) {
-      errorHandler.throwAlreadyDefinedError(id);
+      errorHandler.printAlreadyDefinedError(id);
     } else {
       symbolTable.add(key, type);
     }
@@ -65,7 +82,7 @@ public class TypeChecker extends DepthFirstAdapter {
     String key = id.getText();
 
     if (!symbolTable.contains(key)) {
-      errorHandler.throwNotDeclaredError(id);
+      errorHandler.printNotDeclaredError(id);
       return;
     }
 
@@ -79,7 +96,7 @@ public class TypeChecker extends DepthFirstAdapter {
   public void outAWhileStat(AWhileStat node) {
     Type headType = evaluateType(node.getExpr());
     if (!headType.equals(Type.BOOLEAN)) {
-      errorHandler.throwConditionError(node, "while", headType);
+      errorHandler.printConditionError(node, "while", headType);
     }
   }
 
@@ -87,7 +104,7 @@ public class TypeChecker extends DepthFirstAdapter {
   public void outAIfStat(AIfStat node) {
     Type headType = evaluateType(node.getExpr());
     if (!headType.equals(Type.BOOLEAN)) {
-      errorHandler.throwConditionError(node, "if", headType);
+      errorHandler.printConditionError(node, "if", headType);
     }
   }
 
@@ -95,7 +112,7 @@ public class TypeChecker extends DepthFirstAdapter {
   public void outAIfelseStat(AIfelseStat node) {
     Type headType = evaluateType(node.getExpr());
     if (!headType.equals(Type.BOOLEAN)) {
-      errorHandler.throwConditionError(node, "if", headType);
+      errorHandler.printConditionError(node, "if", headType);
     }
   }
 
@@ -105,7 +122,7 @@ public class TypeChecker extends DepthFirstAdapter {
     PExpr expr = node.getExpr();
     Type contentType = evaluateType(expr);
     if (contentType.equals(Type.ERROR)) {
-      errorHandler.throwPrintError(node);
+      errorHandler.printPrintError(node);
     }
     expr.setType(contentType);
   }
@@ -115,7 +132,7 @@ public class TypeChecker extends DepthFirstAdapter {
     PExpr expr = node.getExpr();
     Type contentType = evaluateType(expr);
     if (contentType.equals(Type.ERROR)) {
-      errorHandler.throwPrintlnError(node);
+      errorHandler.printPrintlnError(node);
     }
     expr.setType(contentType);
   }
@@ -129,13 +146,13 @@ public class TypeChecker extends DepthFirstAdapter {
 
   private void checkAssignment(TIdentifier id, Type varType, Type exprType) {
     if (exprType.equals(Type.ERROR)) {
-      errorHandler.throwFlawedExpressionError(id);
+      errorHandler.printFlawedExpressionError(id);
     } else if (varType.equals(Type.FLOAT)) {
       if (!(exprType.equals(Type.FLOAT) || exprType.equals(Type.INT))) {
-        errorHandler.throwIncompatibleError(id, varType, exprType);
+        errorHandler.printIncompatibleError(id, varType, exprType);
       }
     } else if (!varType.equals(exprType)) {
-      errorHandler.throwIncompatibleError(id, varType, exprType);
+      errorHandler.printIncompatibleError(id, varType, exprType);
     }
   }
 
