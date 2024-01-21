@@ -1,11 +1,18 @@
 package livenessanalysis;
 
 import analysis.DepthFirstAdapter;
-import node.*;
-import typecheck.Symbol;
-import typecheck.SymbolTable;
-
 import java.util.PriorityQueue;
+import node.AAssignStat;
+import node.ADeclStat;
+import node.AIdExpr;
+import node.AIfStat;
+import node.AIfelseStat;
+import node.AInitStat;
+import node.APrintStat;
+import node.APrintlnStat;
+import node.AWhileStat;
+import symboltable.Symbol;
+import symboltable.SymbolTable;
 
 public class DataflowGraphBuilder extends DepthFirstAdapter {
   private final DataflowNode start;
@@ -21,12 +28,14 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
   }
 
   // Statements
-  // Create a new Node while going in a statement and add symbol to def-set, if it is a writing statement
+  // Create a new Node while going in a statement and add symbol to def-set, if it
+  // is a writing statement
   // Writing Statements
   @Override
   public void inAInitStat(AInitStat node) {
     String id = node.getId().getText();
-    Symbol defSymbol = symbolTable.getSymbol(id);
+    String scopeName = symbolTable.determineScope(node);
+    Symbol defSymbol = symbolTable.getSymbol(scopeName, id);
 
     DataflowNode successor = getNewSymbolNode("init");
     successor.addDef(defSymbol);
@@ -38,7 +47,8 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
   @Override
   public void inAAssignStat(AAssignStat node) {
     String id = node.getId().getText();
-    Symbol defSymbol = symbolTable.getSymbol(id);
+    String scopeName = symbolTable.determineScope(node);
+    Symbol defSymbol = symbolTable.getSymbol(scopeName, id);
 
     DataflowNode successor = getNewSymbolNode("assign");
     successor.addDef(defSymbol);
@@ -99,19 +109,19 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
     node.getExpr().apply(this);
     node.getBody().apply(this);
 
-    // current is the last statement of while-body now and needs to point on the head of this while loop
+    // current is the last statement of while-body now and needs to point on the
+    // head of this while loop
     current.addEdgeTo(successor);
   }
-
 
   // Expressions; add symbols to current DataflowNode's use-set
   @Override
   public void outAIdExpr(AIdExpr node) {
     String id = node.getId().getText();
-    Symbol symbol = symbolTable.getSymbol(id);
+    String scopeName = symbolTable.determineScope(node);
+    Symbol symbol = symbolTable.getSymbol(scopeName, id);
     current.addUse(symbol);
   }
-
 
   // Helpers
   private DataflowNode getNewSymbolNode(String statementType) {
@@ -133,7 +143,9 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
       System.out.println(currNode);
 
       for (DataflowNode successor : currNode.getSuccessors()) {
-        if (successor.getNumber() > currNumber) printQueue.add(successor);
+        if (successor.getNumber() > currNumber) {
+          printQueue.add(successor);
+        }
       }
     }
     System.out.println();

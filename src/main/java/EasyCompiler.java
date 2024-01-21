@@ -1,6 +1,8 @@
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
+import codegeneration.CodeCache;
+import codegeneration.CodeGenerator;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -10,9 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-
-import codegeneration.CodeCache;
-import codegeneration.CodeGenerator;
 import lexer.Lexer;
 import lexer.LexerException;
 import lineevaluation.LineEvaluator;
@@ -20,6 +19,8 @@ import livenessanalysis.LivenessAnalyzer;
 import node.Start;
 import parser.Parser;
 import parser.ParserException;
+import symboltable.SymbolTable;
+import symboltable.SymbolTableBuilder;
 import typecheck.TypeChecker;
 
 /** Compiler for the Easy language. */
@@ -28,6 +29,8 @@ public class EasyCompiler {
   private final Path sourceFilePath;
   private Start ast;
   private ArrayList<String> code;
+  private SymbolTable symbolTable;
+  private SymbolTableBuilder symbolTableBuilder;
   private TypeChecker typeChecker;
   private boolean parseErrorOccurred = false;
 
@@ -94,7 +97,7 @@ public class EasyCompiler {
     if (parse() && typeCheck()) {
       CodeCache codeCache = new CodeCache();
       CodeGenerator codeGenerator = new CodeGenerator(
-          codeCache, getProgramName(), this.typeChecker.getSymbolTable());
+          codeCache, getProgramName(), this.symbolTable);
       ast.apply(codeGenerator);
       this.code = codeCache.getCode();
 
@@ -108,7 +111,7 @@ public class EasyCompiler {
   // ---------
   void liveness() {
     if (parse() && typeCheck()) {
-      LivenessAnalyzer analyzer = new LivenessAnalyzer(ast, this.typeChecker.getSymbolTable());
+      LivenessAnalyzer analyzer = new LivenessAnalyzer(ast, this.symbolTable);
 
       if (verbose) {
         analyzer.printGraph();
@@ -145,23 +148,36 @@ public class EasyCompiler {
     return true;
   }
 
-  boolean typeCheck() {
+  boolean buildSymbolTable() {
     if (!parse()) {
+      return false;
+    } else if (this.symbolTableBuilder != null) {
+      return true;
+    }
+
+    this.symbolTableBuilder = new SymbolTableBuilder();
+    this.ast.apply(symbolTableBuilder);
+    this.symbolTable = symbolTableBuilder.getSymbolTable();
+
+    return !this.symbolTableBuilder.errorsOccurred();
+  }
+
+  boolean typeCheck() {
+    if (!parse() || !buildSymbolTable()) {
       return false;
     } else if (this.typeChecker != null) {
       return true;
     }
 
-    this.typeChecker = new TypeChecker();
+    this.typeChecker = new TypeChecker(this.symbolTable);
     this.ast.apply(this.typeChecker);
 
-    if (!this.typeChecker.errorsOccurred()) {
-      if (verbose) {
-        this.typeChecker.printSymbolTable();
-      }
-      return true;
-    }
-    return false;
+    return !this.typeChecker.errorsOccurred();
+  }
+
+  int getSymbolErrorNumber() {
+    buildSymbolTable();
+    return symbolTableBuilder.getErrorNumber();
   }
 
   int getTypeErrorNumber() {

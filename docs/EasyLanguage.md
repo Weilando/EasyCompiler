@@ -37,7 +37,7 @@ Functions are named blocks that bundle statements and transform zero to many inp
 
 ### Definition
 
-Functions begin with a unique identifier and a pair of parenthesis, followed by an arrow and their return type.
+Functions begin with a return type and a left arrow, followed by a unique identifier and a pair of parenthesis.
 The parenthesis contains a comma separated list of arguments, where each argument requires a unique name (per function definition) and type (equal to variable types).
 Braces (i.e., `{...}`) surround the function body.
 
@@ -252,8 +252,8 @@ low        | `\|\|`      | Disjunction
 
 ### Implementation of functions
 
-- [ ] extend grammar to parse function heads and bodies
-- [ ] extend type-checking, add a symbol table for each function
+- [x] extend grammar to parse function heads and bodies
+- [x] extend type-checking, add a symbol table for each function
 - [ ] extend code-generation
 
 ### Implementation of arrays

@@ -1,8 +1,7 @@
 package livenessanalysis;
 
-import typecheck.Symbol;
-
 import java.util.HashSet;
+import symboltable.Symbol;
 
 public class DataflowNode implements Comparable<DataflowNode> {
   private final int number;

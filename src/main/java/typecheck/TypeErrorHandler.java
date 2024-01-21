@@ -3,11 +3,11 @@ package typecheck;
 import lineevaluation.LineEvaluator;
 import node.Node;
 import node.TIdentifier;
+import symboltable.Type;
 
 /**
- * The type error handler generates specialized type errors. Usually, it prints
- * the error message to generate a full list of errors. It only fails for
- * completely unexpected behaviour.
+ * Generator for specialized type errors. Usually, it prints the error message
+ * to generate a full list of errors. It only fails for unexpected behaviour.
  */
 public class TypeErrorHandler {
   private int errorNumber;
@@ -17,16 +17,6 @@ public class TypeErrorHandler {
   }
 
   // Error generators
-  void printAlreadyDefinedError(TIdentifier id) {
-    errorNumberIncrement();
-    System.out.println(generateErrorHeadId(id) + "is already defined.");
-  }
-
-  void printNotDeclaredError(TIdentifier id) {
-    errorNumberIncrement();
-    System.out.println(generateErrorHeadId(id) + "has not been declared before usage.");
-  }
-
   void printFlawedExpressionError(TIdentifier id) {
     errorNumberIncrement();
     String errorHead = generateErrorHeadId(id);
@@ -37,9 +27,15 @@ public class TypeErrorHandler {
   void printIncompatibleError(TIdentifier id, Type varType, Type exprType) {
     errorNumberIncrement();
     String errorHead = generateErrorHeadId(id);
-    String errorMessage = "cannot be assigned, because the expression type is incompatible. Expected \"%s\", but found\"%s\"."
+    String errorMessage = ("cannot be assigned, because the expression type is incompatible."
+        + " Expected \"%s\", but found\"%s\".")
         .formatted(varType.toString().toLowerCase(), exprType.toString().toLowerCase());
     System.out.println(errorHead + errorMessage);
+  }
+
+  void printNotDeclaredError(TIdentifier id) {
+    errorNumberIncrement();
+    System.out.println(generateErrorHeadId(id) + "has not been declared before usage.");
   }
 
   void printConditionError(Node node, String statementName, Type wrongType) {
@@ -49,10 +45,29 @@ public class TypeErrorHandler {
       String errorMessage = "Expression in " + statementName + " condition contains type errors.";
       System.out.println(errorHead + errorMessage);
     } else {
-      String errorMessage = "Expression in %s condition has incompatible type. Expected \"boolean\" but found \"%s\"."
+      String errorMessage = ("Expression in %s condition has incompatible type."
+          + " Expected \"boolean\" but found \"%s\".")
           .formatted(statementName, wrongType.toString().toLowerCase());
       System.out.println(errorHead + errorMessage);
     }
+  }
+
+  void printWrongNumberOfArgumentsError(
+      TIdentifier functioIdentifier, int expectedNumber, int givenNumber) {
+    errorNumberIncrement();
+    String errorHead = generateErrorHeadId(functioIdentifier);
+    String errorMessage = "Function requires %d arguments but got %d.".formatted(
+        expectedNumber, givenNumber);
+    System.out.println(errorHead + errorMessage);
+  }
+
+  void printWrongArgumentTypeError(
+      TIdentifier functioIdentifier, int argPosition, Type expectedType, Type givenType) {
+    errorNumberIncrement();
+    String errorHead = generateErrorHeadId(functioIdentifier);
+    String errorMessage = "Argument %d has the wrong type. Expexted %s but got %s.".formatted(
+        argPosition, expectedType, givenType);
+    System.out.println(errorHead + errorMessage);
   }
 
   void printPrintError(Node node) {

@@ -1,6 +1,8 @@
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class TypeCheckTest {
   private final String pathTestFilesCorrect = "src/test/resources/correct/";
@@ -17,7 +19,8 @@ public class TypeCheckTest {
 
   @Test
   public void checkArithmeticComparisons() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "ArithmeticComparisons.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesCorrect + "ArithmeticComparisons.easy");
     assertTrue(easyCompiler.typeCheck());
   }
 
@@ -66,6 +69,12 @@ public class TypeCheckTest {
   @Test
   public void checkFloatWithCast() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FloatWithCast.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkFunctions() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Functions.easy");
     assertTrue(easyCompiler.typeCheck());
   }
 
@@ -146,22 +155,34 @@ public class TypeCheckTest {
   // ---------------------------------------------------------
   @Test
   public void errorBadConditions() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadConditions.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadConditions.easy");
     assertFalse(easyCompiler.typeCheck());
     assertEquals(12, easyCompiler.getTypeErrorNumber());
   }
 
   @Test
   public void errorBadExpressions() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadExpressions.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadExpressions.easy");
     assertFalse(easyCompiler.typeCheck());
     assertEquals(22, easyCompiler.getTypeErrorNumber());
   }
 
   @Test
-  public void errorBadVariableOperations() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadVariableOperations.easy");
+  public void errorBadFunctionArguments() {
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadFunctionArguments.easy");
     assertFalse(easyCompiler.typeCheck());
-    assertEquals(16, easyCompiler.getTypeErrorNumber());
+    assertEquals(5, easyCompiler.getTypeErrorNumber());
+  }
+
+  @Test
+  public void errorBadVariableOperations() {
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadVariableOperations.easy");
+    assertFalse(easyCompiler.typeCheck());
+    assertEquals(13, easyCompiler.getTypeErrorNumber());
+    assertEquals(3, easyCompiler.getSymbolErrorNumber());
   }
 }

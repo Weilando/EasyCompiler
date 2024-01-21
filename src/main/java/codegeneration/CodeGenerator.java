@@ -1,9 +1,8 @@
 package codegeneration;
 
+import analysis.DepthFirstAdapter;
 import java.util.Arrays;
 import java.util.List;
-
-import analysis.DepthFirstAdapter;
 import lineevaluation.LineEvaluator;
 import node.AAddExpr;
 import node.AAndExpr;
@@ -40,9 +39,10 @@ import node.Node;
 import node.PExpr;
 import node.PStat;
 import stackdepthevaluation.StackDepthEvaluator;
-import typecheck.SymbolTable;
-import typecheck.Type;
+import symboltable.SymbolTable;
+import symboltable.Type;
 
+/** The code generator walks the AST and generates Jasmin code. */
 public class CodeGenerator extends DepthFirstAdapter {
   private final CodeCache cache;
   private final String programName;
@@ -54,7 +54,7 @@ public class CodeGenerator extends DepthFirstAdapter {
   /**
    * The CodeGenerator walks the AST using Depth First Search and emit Jasmin
    * assembly code.
-   * 
+   *
    * @param cache       Code cache
    * @param programName Name of the program, used for source and class name
    * @param symbolTable Symbol table
@@ -113,7 +113,7 @@ public class CodeGenerator extends DepthFirstAdapter {
         ".method public static main([Ljava/lang/String;)V",
         String.format("\t.limit stack %d", stackDepthEvaluator.getMaxDepthCounter()),
         String.format("\t.limit locals %d",
-            symbolTable.countSymbols() + 1), // all type-checked symbols and args[]
+            symbolTable.countSymbolsInScope("main") + 1), // all type-checked symbols and args[]
         "" };
     final String[] endMainFunction = {
         "", "\treturn",
@@ -244,7 +244,8 @@ public class CodeGenerator extends DepthFirstAdapter {
   @Override
   public void outAInitStat(AInitStat node) {
     String id = node.getId().getText();
-    generateAssignCode(id, node.getExpr().getType().equals(Type.INT));
+    String scopeName = symbolTable.determineScope(node);
+    generateAssignCode(scopeName, id, node.getExpr().getType().equals(Type.INT));
   }
 
   @Override
@@ -255,7 +256,8 @@ public class CodeGenerator extends DepthFirstAdapter {
   @Override
   public void outAAssignStat(AAssignStat node) {
     String id = node.getId().getText();
-    generateAssignCode(id, node.getExpr().getType().equals(Type.INT));
+    String scopeName = symbolTable.determineScope(node);
+    generateAssignCode(scopeName, id, node.getExpr().getType().equals(Type.INT));
   }
 
   // Arithmetic operations
@@ -447,10 +449,11 @@ public class CodeGenerator extends DepthFirstAdapter {
   @Override
   public void outAIdExpr(AIdExpr node) {
     String id = node.getId().getText();
-    int varNumber = symbolTable.getVariableNumber(id);
+    String scopeName = symbolTable.determineScope(node);
+    int varNumber = symbolTable.getVariableNumber(scopeName, id);
     String loadCommand = "";
 
-    switch (this.symbolTable.getType(id)) {
+    switch (this.symbolTable.getSymbolType(scopeName, id)) {
       case FLOAT:
         loadCommand = "fload";
         break;
@@ -504,11 +507,11 @@ public class CodeGenerator extends DepthFirstAdapter {
         String.format("%s:", continueLabel) };
   }
 
-  void generateAssignCode(String id, boolean castInt) {
-    int varNumber = symbolTable.getVariableNumber(id);
+  void generateAssignCode(String scopeName, String id, boolean castInt) {
+    int varNumber = symbolTable.getVariableNumber(scopeName, id);
     String storeCommand = "";
 
-    switch (this.symbolTable.getType(id)) {
+    switch (this.symbolTable.getSymbolType(scopeName, id)) {
       case FLOAT:
         if (castInt) {
           cache.addIndentedLine("i2f");

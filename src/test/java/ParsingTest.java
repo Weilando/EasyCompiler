@@ -1,7 +1,7 @@
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 public class ParsingTest {
   private final String pathAlgorithms = "src/test/resources/algorithms/";
@@ -21,7 +21,8 @@ public class ParsingTest {
 
   @Test
   public void parseArithmeticComparisons() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "ArithmeticComparisons.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesCorrect + "ArithmeticComparisons.easy");
     assertTrue(easyCompiler.parse());
   }
 
@@ -183,19 +184,22 @@ public class ParsingTest {
   // --------------------------------------
   @Test
   public void parseFailBadConditions() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadConditions.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadConditions.easy");
     assertTrue(easyCompiler.parse());
   }
 
   @Test
   public void parseFailBadExpressions() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadExpressions.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadExpressions.easy");
     assertTrue(easyCompiler.parse());
   }
 
   @Test
   public void parseFailBadVariableOperations() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailTypeCheck + "FailBadVariableOperations.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadVariableOperations.easy");
     assertTrue(easyCompiler.parse());
   }
 
@@ -216,13 +220,15 @@ public class ParsingTest {
 
   @Test
   public void parseTwoVariablesBothLive() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "twoVariablesBothLive.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesLiveness + "twoVariablesBothLive.easy");
     assertTrue(easyCompiler.parse());
   }
 
   @Test
   public void parseTwoVariablesOneLive() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "twoVariablesOneLive.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesLiveness + "twoVariablesOneLive.easy");
     assertTrue(easyCompiler.parse());
   }
 
@@ -231,13 +237,15 @@ public class ParsingTest {
   // ----------------------------------------------------
   @Test
   public void errorFunctionAfterMainFunction() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailFunctionAfterMainFunction.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailParser + "FailFunctionAfterMainFunction.easy");
     assertFalse(easyCompiler.parse());
   }
 
   @Test
   public void errorMainFunctionWithArgs() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMainFunctionWithArgs.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailParser + "FailMainFunctionWithArgs.easy");
     assertFalse(easyCompiler.parse());
   }
 
@@ -249,25 +257,29 @@ public class ParsingTest {
 
   @Test
   public void errorMissingMainFunction() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMissingMainFunction.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailParser + "FailMissingMainFunction.easy");
     assertFalse(easyCompiler.parse());
   }
 
   @Test
   public void errorMissingParenthesis() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMissingParenthesis.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailParser + "FailMissingParenthesis.easy");
     assertFalse(easyCompiler.parse());
   }
 
   @Test
   public void errorMissingSemicolon() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailMissingSemicolon.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailParser + "FailMissingSemicolon.easy");
     assertFalse(easyCompiler.parse());
   }
 
   @Test
   public void errorTwoMainFunctions() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesFailParser + "FailTwoMainFunctions.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailParser + "FailTwoMainFunctions.easy");
     assertFalse(easyCompiler.parse());
   }
 }

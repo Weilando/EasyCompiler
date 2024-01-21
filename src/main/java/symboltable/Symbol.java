@@ -1,4 +1,4 @@
-package typecheck;
+package symboltable;
 
 /**
  * A symbol describes a variable using its internal identifier (a consecutive

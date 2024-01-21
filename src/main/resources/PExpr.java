@@ -2,10 +2,9 @@
 
 package node;
 
-import typecheck.Type;
+import symboltable.Type;
 
-public abstract class PExpr extends Node
-{
+public abstract class PExpr extends Node {
   private Type type = Type.UNDEFINED;
 
   public Type getType() {

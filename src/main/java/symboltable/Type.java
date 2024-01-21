@@ -1,4 +1,4 @@
-package typecheck;
+package symboltable;
 
 /** Definition of all known types in the Easy language. */
 public enum Type {
