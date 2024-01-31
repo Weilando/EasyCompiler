@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -158,7 +157,34 @@ public class CodeGenerationTest {
     setupClassExecutionProcess(testName);
 
     assertEquals(0, classProcess.waitFor());
-    assertEquals("3.0\n-2.0\n3.0\n1.5\n6.4\n3.5\n5.0\n-4.0\n10.0\n-0.5\n1414.014.014.014.014.014.014.0",
+    assertEquals(
+        "3.0\n-2.0\n3.0\n1.5\n6.4\n3.5\n5.0\n-4.0\n10.0\n-0.5\n1414.014.014.014.014.014.014.0",
+        inputStreamString);
+  }
+
+  @Test
+  public void resultFunctionReturnTypes() throws InterruptedException {
+    String testName = "FunctionReturnTypes";
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
+
+    assertEquals(0, classProcess.waitFor());
+    assertEquals(
+        "2\n1.0\nabc\ntrue",
+        inputStreamString);
+  }
+
+  @Test
+  public void resultFunctionArguments() throws InterruptedException {
+    String testName = "FunctionArguments";
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
+
+    assertEquals(0, classProcess.waitFor());
+    assertEquals(
+        "true\n1.0\n2\nabc\ntrue\n1.0\n2\nabc",
         inputStreamString);
   }
 

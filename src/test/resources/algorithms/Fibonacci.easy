@@ -1,5 +1,5 @@
 // print fibonacci-numbers from 0 to N
-void main() {
+none <- main() {
   int fib1 = 0;
   int fib2 = 1;
   int N = 100;

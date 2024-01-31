@@ -1,15 +1,15 @@
 package livenessanalysis;
 
-import typecheck.SymbolTable;
-
 import java.util.HashSet;
+import symboltable.SymbolTable;
 
 public class InterferenceGraphAnalyzer {
   private final HashSet<InterferenceGraphNode> nodes;
   private int colors;
 
   public InterferenceGraphAnalyzer(SymbolTable symbolTable, DataflowNode dataflowStart) {
-    InterferenceGraphBuilder graphBuilder = new InterferenceGraphBuilder(symbolTable, dataflowStart);
+    InterferenceGraphBuilder graphBuilder = new InterferenceGraphBuilder(
+        symbolTable, dataflowStart);
     this.nodes = graphBuilder.getGraphNodeSet();
     this.colors = 0;
     colorGraph();

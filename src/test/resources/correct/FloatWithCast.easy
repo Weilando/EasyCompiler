@@ -1,4 +1,4 @@
-void main() {
+none <- main() {
   float f1 = 3;
   float f2 = -2;
   int i = 2;

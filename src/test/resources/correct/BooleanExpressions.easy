@@ -1,4 +1,4 @@
-void main() {
+none <- main() {
   boolean A = true && false || true;
   boolean B = false || false || true && true;
   boolean C = !false || false;

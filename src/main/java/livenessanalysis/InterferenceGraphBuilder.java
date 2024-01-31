@@ -1,11 +1,10 @@
 package livenessanalysis;
 
-import typecheck.Symbol;
-import typecheck.SymbolTable;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.PriorityQueue;
+import symboltable.Symbol;
+import symboltable.SymbolTable;
 
 public class InterferenceGraphBuilder {
   private final HashMap<Symbol, InterferenceGraphNode> nodes;
@@ -13,7 +12,7 @@ public class InterferenceGraphBuilder {
 
   public InterferenceGraphBuilder(SymbolTable symbolTable, DataflowNode dataflowStart) {
     this.dataflowStart = dataflowStart;
-    this.nodes = symbolTable.generateInterferenceGraphNodes();
+    this.nodes = symbolTable.generateInterferenceGraphNodes("main");
     generateEdges();
   }
 
@@ -33,7 +32,9 @@ public class InterferenceGraphBuilder {
       }
 
       for (DataflowNode predecessor : curr.getPredecessors()) {
-        if (predecessor.getNumber() < currNumber) queue.add(predecessor);
+        if (predecessor.getNumber() < currNumber) {
+          queue.add(predecessor);
+        }
       }
     }
 

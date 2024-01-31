@@ -1,9 +1,9 @@
-void main() { // 16 type-errors
+none <- main() { // 13 type-errors, 3 symbol errors
   int i;
   float f;
   boolean b;
 
-  // duplicate declarations (3)
+  // duplicate declarations (3 symbol errors)
   int i = 0;
   float f = 0.0;
   boolean b = true;

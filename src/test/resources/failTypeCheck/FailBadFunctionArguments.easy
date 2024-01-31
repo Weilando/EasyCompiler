@@ -1,0 +1,11 @@
+int <- addTwo(int a) {
+    return a + 2;
+}
+
+none <- main() {  // 5 type errors due to wrong arguments
+    addTwo(1, 2);
+    addTwo();
+    addTwo(true);
+    addTwo(2.0);
+    addTwo("abc");
+}

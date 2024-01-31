@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gradle build
+gradle test
 
 if [ ! -f libs/jasmin.jar ]; then
     echo "Download jasmin"

@@ -1,0 +1,6 @@
+none <- n() {}
+
+none <- main() {
+    print(n());
+    println(n());
+}

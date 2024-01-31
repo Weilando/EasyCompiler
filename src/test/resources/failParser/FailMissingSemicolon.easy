@@ -1,3 +1,3 @@
-void main() {
+none <- main() {
   int a = 1
 }

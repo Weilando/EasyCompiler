@@ -1,0 +1,35 @@
+// 20 type errors in return statements
+int <- i() {
+    return 2.0;
+    return False;
+    return "";
+    return;
+}
+
+float <- f() {
+    return 2;
+    return False;
+    return "";
+    return;
+}
+
+string <- s() {
+    return 2;
+    return False;
+    return 2.0;
+    return;
+}
+
+boolean <- b() {
+    return 2;
+    return "";
+    return 2.0;
+    return;
+}
+
+none <- main() {
+    return 2;
+    return False;
+    return 2.0;
+    return "";
+}

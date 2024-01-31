@@ -1,12 +1,11 @@
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class LivenessAnalysisTest {
   private final String pathAlgorithms = "src/test/resources/algorithms/";
@@ -30,9 +29,9 @@ public class LivenessAnalysisTest {
     System.setErr(originalErr);
   }
 
-  //------------------------
+  // ------------------------
   // Tests liveness-analysis
-  //------------------------
+  // ------------------------
   @Test
   public void zeroVariablesNeed0Registers() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "noVariable.easy");
@@ -51,7 +50,8 @@ public class LivenessAnalysisTest {
 
   @Test
   public void oneLiveVariableNeeds1Register() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "twoVariablesOneLive.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesLiveness + "twoVariablesOneLive.easy");
     easyCompiler.liveness();
     assertFalse(outContent.toString().contains("Type-Error"));
     assertTrue(outContent.toString().contains("Registers: 1\n"));
@@ -59,14 +59,15 @@ public class LivenessAnalysisTest {
 
   @Test
   public void twoLiveVariablesNeed2Registers() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "twoVariablesBothLive.easy");
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesLiveness + "twoVariablesBothLive.easy");
     easyCompiler.liveness();
     assertFalse(outContent.toString().contains("Type-Error"));
     assertTrue(outContent.toString().contains("Registers: 2\n"));
   }
 
   @Test
-  public void IfNeeds1Register() {
+  public void ifNeeds1Register() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "If.easy");
     easyCompiler.liveness();
     assertFalse(outContent.toString().contains("Type-Error"));
@@ -74,7 +75,7 @@ public class LivenessAnalysisTest {
   }
 
   @Test
-  public void IntNeeds4Registers() {
+  public void intNeeds4Registers() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Int.easy");
     easyCompiler.liveness();
     assertFalse(outContent.toString().contains("Type-Error"));
@@ -82,7 +83,7 @@ public class LivenessAnalysisTest {
   }
 
   @Test
-  public void BinomialNeeds5Registers() {
+  public void binomialNeeds5Registers() {
     EasyCompiler easyCompiler = new EasyCompiler(pathAlgorithms + "Binomial.easy");
     easyCompiler.liveness();
     assertFalse(outContent.toString().contains("Type-Error"));
@@ -90,7 +91,7 @@ public class LivenessAnalysisTest {
   }
 
   @Test
-  public void EuclidNeeds5Registers() {
+  public void euclidNeeds5Registers() {
     EasyCompiler easyCompiler = new EasyCompiler(pathAlgorithms + "Euclid.easy");
     easyCompiler.liveness();
     assertFalse(outContent.toString().contains("Type-Error"));

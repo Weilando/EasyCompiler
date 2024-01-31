@@ -14,7 +14,7 @@ Declarations are only allowed at the beginning of any function.
 
 A correct program requires a main function of the following form once:
 ```
-void main() {
+none <- main() {
   ...
 }
 ```
@@ -37,15 +37,15 @@ Functions are named blocks that bundle statements and transform zero to many inp
 
 ### Definition
 
-Functions begin with a unique identifier and a pair of parenthesis, followed by an arrow and their return type.
+Functions begin with a return type and a left arrow, followed by a unique identifier and a pair of parenthesis.
 The parenthesis contains a comma separated list of arguments, where each argument requires a unique name (per function definition) and type (equal to variable types).
 Braces (i.e., `{...}`) surround the function body.
 
 If the function has a return value, the last statement must be `return`.
-A function without any return value has the return type `void` and does not require a `return` statement (although `return;` is possible).
+A function without any return value has the return type `none` and does not require a `return` statement (although `return;` is possible).
 
 ```
-calcSum(int a, int b) -> int {
+int <- calcSum(int a, int b) {
   return a + b;
 }
 ```
@@ -246,15 +246,9 @@ low        | `\|\|`      | Disjunction
 - [x] Code-generation (basic functionality)
 - [x] Implementation of floats
 - [x] Implementation of strings
-- [ ] Implementation of functions
+- [x] Implementation of functions
 - [ ] Implementation of arrays
 - [ ] Implementation of syntactic sugar
-
-### Implementation of functions
-
-- [ ] extend grammar to parse function heads and bodies
-- [ ] extend type-checking, add a symbol table for each function
-- [ ] extend code-generation
 
 ### Implementation of arrays
 

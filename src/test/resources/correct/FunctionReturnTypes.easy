@@ -1,0 +1,22 @@
+int <- i() {
+  return 2;
+}
+
+float <- f() {
+  return 1.0;
+}
+
+string <- s() {
+  return "abc";
+}
+
+boolean <- b() {
+  return true;
+}
+
+none <- main() {
+  println(i());
+  println(f());
+  println(s());
+  println(b());
+}

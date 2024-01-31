@@ -3,6 +3,7 @@ package codegeneration;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Cache for generated code lines. */
 public class CodeCache {
   private final ArrayList<String> code = new ArrayList<>();
 

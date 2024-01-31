@@ -1,4 +1,4 @@
-void main() { // 8 type-errors
+none <- main() { // 8 type-errors
   int i = 1;
   float f = 2.3;
   string s = "s";

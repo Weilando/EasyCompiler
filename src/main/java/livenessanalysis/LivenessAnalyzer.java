@@ -1,7 +1,7 @@
 package livenessanalysis;
 
 import node.Start;
-import typecheck.SymbolTable;
+import symboltable.SymbolTable;
 
 public class LivenessAnalyzer {
   private final DataflowGraphBuilder graphBuilder;
@@ -12,7 +12,8 @@ public class LivenessAnalyzer {
     ast.apply(graphBuilder);
 
     DataflowAnalyzer dataflowAnalyzer = new DataflowAnalyzer(graphBuilder);
-    this.interferenceGraphAnalyzer = new InterferenceGraphAnalyzer(symbolTable, dataflowAnalyzer.getDataflowStart());
+    this.interferenceGraphAnalyzer = new InterferenceGraphAnalyzer(
+        symbolTable, dataflowAnalyzer.getDataflowStart());
   }
 
   public void printGraph() {

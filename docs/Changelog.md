@@ -2,6 +2,13 @@
 
 This changelog lists [semantic versions](https://semver.org/spec/v2.0.0.html) and related changes.
 
+## 0.6.0: 2024-01-31 (#8)
+
+- :sparkles: add functions
+- :white_check_mark: extend and update tests
+- :memo: update description of functions
+- :recycle: improve readability
+
 ## 0.5.1: 2024-01-02 (#7)
 
 - :bug: improve stack depth evaluation for string concatenations
@@ -37,7 +44,7 @@ This changelog lists [semantic versions](https://semver.org/spec/v2.0.0.html) an
 
 - :heavy_plus_sign: setup the Jasmin assembler
 - :sparkles: implement generation of Jasmin assembly code
-    - main method
+    - main function
     - declarations, initializations and assignments
     - expressions: unary, arithmetic, comparison, logical
     - statements: `if`-`else`, `while`, `print`, `println`
@@ -67,7 +74,7 @@ This changelog lists [semantic versions](https://semver.org/spec/v2.0.0.html) an
 - :memo: create language description of _Easy_
 - :heavy_plus_sign: setup SableCC
 - :sparkles: add SableCC grammar, generate abstract syntax tree
-    - define main method, code blocks and comments
+    - define main function, code blocks and comments
     - define literals, operators and expressions including precedence: unary, arithmetic, comparison and logical
     - define declarations and assignments
     - define control structures (without Dangling-Else!): `if`-`else`, `while`

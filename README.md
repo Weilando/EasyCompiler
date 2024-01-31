@@ -44,7 +44,7 @@ In the following example, we describe how to compile an _Easy_ program into Java
 
 1. Create the file `hello_world.easy` at root and copy the following program.
     ```
-    void main() {
+    none <- main() {
       println("Hello world!");
     }
     ```

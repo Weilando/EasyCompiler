@@ -1,75 +1,94 @@
 package typecheck;
 
 import analysis.DepthFirstAdapter;
-import node.*;
+import java.util.LinkedList;
+import node.AAssignStat;
+import node.AFuncExpr;
+import node.AFuncStat;
+import node.AIfStat;
+import node.AIfelseStat;
+import node.AInitStat;
+import node.APrintStat;
+import node.APrintlnStat;
+import node.AReturnStat;
+import node.AWhileStat;
+import node.PExpr;
+import node.TIdentifier;
+import symboltable.FunctionArgumentTypeList;
+import symboltable.SymbolTable;
+import symboltable.Type;
 
+/**
+ * Depth first walker for the AST which assigns a type to each node and checks
+ * the compatibility of childrens' types.
+ */
 public class TypeChecker extends DepthFirstAdapter {
-  final private TypeErrorHandler errorHandler;
-  final private SymbolTable symbolTable;
+  private final TypeErrorHandler errorHandler;
+  private final SymbolTable symbolTable;
 
-  public TypeChecker() {
+  public TypeChecker(SymbolTable symbolTable) {
     this.errorHandler = new TypeErrorHandler();
-    this.symbolTable = new SymbolTable();
+    this.symbolTable = symbolTable;
+  }
+
+  @Override
+  public void outAFuncStat(AFuncStat node) {
+    TIdentifier id = node.getId();
+    String idText = id.getText();
+    FunctionArgumentTypeList definitionArgTypes = symbolTable.getFunctionArgumentTypes(idText);
+    LinkedList<PExpr> statementArgTypes = node.getArgs();
+    checkFunctionCall(id, definitionArgTypes, statementArgTypes);
+  }
+
+  @Override
+  public void outAFuncExpr(AFuncExpr node) {
+    TIdentifier id = node.getId();
+    String idText = id.getText();
+    FunctionArgumentTypeList definitionArgTypes = symbolTable.getFunctionArgumentTypes(idText);
+    LinkedList<PExpr> statementArgTypes = node.getArgs();
+    checkFunctionCall(id, definitionArgTypes, statementArgTypes);
+  }
+
+  @Override
+  public void outAReturnStat(AReturnStat node) {
+    String scopeName = symbolTable.determineScope(node);
+    Type returnType = symbolTable.getFunctionReturnType(scopeName);
+    PExpr expr = node.getExpr();
+    Type exprType;
+    if (expr == null) {
+      exprType = Type.NONE;
+    } else {
+      exprType = evaluateType(expr);
+    }
+
+    if (!exprType.equals(returnType)) {
+      errorHandler.printWrongReturnTypeError(node, returnType, exprType);
+    }
   }
 
   // Variable statements
+  @Override
   public void outAInitStat(AInitStat node) {
     TIdentifier id = node.getId();
-    String key = id.getText();
-    Type varType = Type.ERROR;
-    if (node.getType() instanceof ABooleanTp) {
-      varType = Type.BOOLEAN;
-    } else if (node.getType() instanceof AFloatTp) {
-      varType = Type.FLOAT;
-    } else if (node.getType() instanceof AIntTp) {
-      varType = Type.INT;
-    } else if (node.getType() instanceof AStringTp) {
-      varType = Type.STRING;
-    } else { // Should never happen
-      errorHandler.throwInternalError(id);
-    }
-
-    if (symbolTable.contains(key)) {
-      errorHandler.throwAlreadyDefinedError(id);
-    } else {
-      symbolTable.add(key, varType);
-    }
-
+    String idText = id.getText();
+    String scopeName = symbolTable.determineScope(node);
+    Type varType = symbolTable.getSymbolType(scopeName, idText);
     Type exprType = evaluateType(node.getExpr());
     checkAssignment(id, varType, exprType);
   }
 
-  public void outADeclStat(ADeclStat node) {
-    TIdentifier id = node.getId();
-    String key = id.getText();
-    Type type = Type.ERROR;
-    if (node.getType() instanceof ABooleanTp) {
-      type = Type.BOOLEAN;
-    } else if (node.getType() instanceof AFloatTp) {
-      type = Type.FLOAT;
-    } else if (node.getType() instanceof AIntTp) {
-      type = Type.INT;
-    } else if (node.getType() instanceof AStringTp) {
-      type = Type.STRING;
-    }
-
-    if (symbolTable.contains(key)) {
-      errorHandler.throwAlreadyDefinedError(id);
-    } else {
-      symbolTable.add(key, type);
-    }
-  }
-
+  @Override
   public void outAAssignStat(AAssignStat node) {
     TIdentifier id = node.getId();
-    String key = id.getText();
+    String idText = id.getText();
 
-    if (!symbolTable.contains(key)) {
-      errorHandler.throwNotDeclaredError(id);
+    String scopeName = symbolTable.determineScope(node);
+    if (!symbolTable.containsSymbol(scopeName, idText)) {
+      errorHandler.printNotDeclaredError(id);
       return;
     }
 
-    Type varType = symbolTable.getType(key);
+    Type varType = symbolTable.getSymbolType(scopeName, idText);
     Type exprType = evaluateType(node.getExpr());
     checkAssignment(id, varType, exprType);
   }
@@ -79,7 +98,7 @@ public class TypeChecker extends DepthFirstAdapter {
   public void outAWhileStat(AWhileStat node) {
     Type headType = evaluateType(node.getExpr());
     if (!headType.equals(Type.BOOLEAN)) {
-      errorHandler.throwConditionError(node, "while", headType);
+      errorHandler.printConditionError(node, "while", headType);
     }
   }
 
@@ -87,7 +106,7 @@ public class TypeChecker extends DepthFirstAdapter {
   public void outAIfStat(AIfStat node) {
     Type headType = evaluateType(node.getExpr());
     if (!headType.equals(Type.BOOLEAN)) {
-      errorHandler.throwConditionError(node, "if", headType);
+      errorHandler.printConditionError(node, "if", headType);
     }
   }
 
@@ -95,7 +114,7 @@ public class TypeChecker extends DepthFirstAdapter {
   public void outAIfelseStat(AIfelseStat node) {
     Type headType = evaluateType(node.getExpr());
     if (!headType.equals(Type.BOOLEAN)) {
-      errorHandler.throwConditionError(node, "if", headType);
+      errorHandler.printConditionError(node, "if", headType);
     }
   }
 
@@ -105,7 +124,9 @@ public class TypeChecker extends DepthFirstAdapter {
     PExpr expr = node.getExpr();
     Type contentType = evaluateType(expr);
     if (contentType.equals(Type.ERROR)) {
-      errorHandler.throwPrintError(node);
+      errorHandler.printPrintError(node);
+    } else if (contentType.equals(Type.NONE)) {
+      errorHandler.printPrintNoneError(node);
     }
     expr.setType(contentType);
   }
@@ -115,7 +136,9 @@ public class TypeChecker extends DepthFirstAdapter {
     PExpr expr = node.getExpr();
     Type contentType = evaluateType(expr);
     if (contentType.equals(Type.ERROR)) {
-      errorHandler.throwPrintlnError(node);
+      errorHandler.printPrintError(node);
+    } else if (contentType.equals(Type.NONE)) {
+      errorHandler.printPrintNoneError(node);
     }
     expr.setType(contentType);
   }
@@ -129,13 +152,38 @@ public class TypeChecker extends DepthFirstAdapter {
 
   private void checkAssignment(TIdentifier id, Type varType, Type exprType) {
     if (exprType.equals(Type.ERROR)) {
-      errorHandler.throwFlawedExpressionError(id);
+      errorHandler.printFlawedExpressionError(id);
     } else if (varType.equals(Type.FLOAT)) {
       if (!(exprType.equals(Type.FLOAT) || exprType.equals(Type.INT))) {
-        errorHandler.throwIncompatibleError(id, varType, exprType);
+        errorHandler.printIncompatibleError(id, varType, exprType);
       }
     } else if (!varType.equals(exprType)) {
-      errorHandler.throwIncompatibleError(id, varType, exprType);
+      errorHandler.printIncompatibleError(id, varType, exprType);
+    }
+  }
+
+  private void checkFunctionCall(TIdentifier id, FunctionArgumentTypeList definitionArgTypes,
+      LinkedList<PExpr> statementArgTypes) {
+    int expectedNumberOfArgs = 0;
+    int givenNumberOfArgs = 0;
+    if (definitionArgTypes != null) {
+      expectedNumberOfArgs = definitionArgTypes.getNumberOfArguments();
+    }
+    if (statementArgTypes != null) {
+      givenNumberOfArgs = statementArgTypes.size();
+    }
+
+    if (expectedNumberOfArgs != givenNumberOfArgs) {
+      errorHandler.printWrongNumberOfArgumentsError(id, expectedNumberOfArgs, givenNumberOfArgs);
+    } else {
+      for (int i = 0; i < expectedNumberOfArgs; i++) {
+        PExpr givenArg = statementArgTypes.get(i);
+        Type givenArgType = evaluateType(givenArg);
+        Type expectedArgType = definitionArgTypes.getArgumentType(i);
+        if (givenArgType != expectedArgType) {
+          errorHandler.printWrongArgumentTypeError(id, i, expectedArgType, givenArgType);
+        }
+      }
     }
   }
 
@@ -145,13 +193,5 @@ public class TypeChecker extends DepthFirstAdapter {
 
   public int getErrorNumber() {
     return this.errorHandler.getErrorNumber();
-  }
-
-  public SymbolTable getSymbolTable() {
-    return this.symbolTable;
-  }
-
-  public void printSymbolTable() {
-    this.symbolTable.printTable();
   }
 }

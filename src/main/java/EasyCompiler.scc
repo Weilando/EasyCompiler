@@ -32,12 +32,13 @@ Tokens
     float_key   = 'float';
     int_key     = 'int';
     string_key  = 'string';
-    void_key    = 'void';
+    none_key    = 'none';
 
     // Control flow keywords
     if_key      = 'if';
     else_key    = 'else';
     while_key   = 'while';
+    return_key  = 'return';
 
     // Identifiers
     main_id     = 'main';
@@ -54,6 +55,7 @@ Tokens
     semicolon   = ';';
     comma       = ',';
     dot         = '.';
+    l_arrow     = '<-';
 
     // Arithmetic operators
     plus  = '+';
@@ -97,16 +99,18 @@ Ignored Tokens
 
 
 /* Concrete name vs. abstract name
-* class -> cls
-* main_method -> main
+* easy_compilation_unit -> prg
+* main_function -> main
+* function -> func
 * type -> tp
+* return_type -> rtp
 * statement -> stat
 * expression -> expr
 */
 Productions
     // Outer program (has no form)
     easy_compilation_unit {-> prg} =
-        main_method {-> New prg(main_method.main)};
+        function_definition* main_function  {-> New prg([function_definition.func], main_function.main)};
 
     // Literals
     literal {-> expr} =
@@ -122,17 +126,41 @@ Productions
       | {int}      int_key      {-> New tp.int()}
       | {string}   string_key   {-> New tp.string()};
 
-    // Main method
-    main_method {-> main} =
-        void_key main_id l_par r_par
-        l_brace [declarations]:variable_declaration_statement* [body]:statement* r_brace
+    return_type {-> rtp} =
+        {boolean}  boolean_key  {-> New rtp.boolean()}
+      | {float}    float_key    {-> New rtp.float()}
+      | {int}      int_key      {-> New rtp.int()}
+      | {none}     none_key     {-> New rtp.none()}
+      | {string}   string_key   {-> New rtp.string()};
+
+    // Functions
+    argument {-> arg} =
+        {declaration}  type [id]:identifier  {-> New arg.decl(id, type.tp)};
+
+    argument_declarations { -> arg* } = 
+        {single}      argument                                     { -> [argument.arg] }
+        | {multiple}  argument comma [rest]:argument_declarations  { -> [argument.arg, rest.arg] };
+
+    main_function {-> main} =
+        none_key l_arrow main_id l_par r_par
+        l_brace [declarations]:declaration_statement* [body]:statement* r_brace
         {-> New main([declarations.stat], [body.stat])};
 
+    function_definition {-> func} =
+        return_type l_arrow [name]:identifier l_par [args]:argument_declarations? r_par
+        l_brace [var_decls]:declaration_statement* [body]:statement* r_brace
+        {-> New func(return_type.rtp, name, [args.arg], [var_decls.stat], [body.stat])};
+
+    expression_list { -> expr* } = 
+        {single}      [exp]:expression                               { -> [exp.expr] }
+        | {multiple}  [exp]:expression comma [rest]:expression_list  { -> [exp.expr, rest.expr] };
+
+
     // Variables
-    // Only local variables declared at the beginning of main are allowed (i.e. modifiers are not necessary).
-    variable_declaration_statement {-> stat} =
-        {declaration}     type [id]:identifier semicolon                    {-> New stat.decl(type.tp, id)}
-      | {initialization}  type [id]:identifier equals expression semicolon  {-> New stat.init(type.tp, id, expression.expr)};
+    // Only local variables declared at the beginning of functions are allowed (i.e., modifiers are not necessary).
+    declaration_statement {-> stat} =
+        {declaration}     type [id]:identifier semicolon                    {-> New stat.decl(id, type.tp) }
+      | {initialization}  type [id]:identifier equals expression semicolon  {-> New stat.init(id, type.tp, expression.expr)};
 
     variable_assignment {-> stat} =
         [id]:identifier equals [expr]:expression semicolon {-> New stat.assign(id, expr.expr)};
@@ -158,11 +186,16 @@ Productions
       | {while_closed}  while_key l_par [expr]:expression r_par [body]:closed_statement                                {-> New stat.while(expr.expr, body.stat)};
 
     simple_statement {-> stat} =
-        {variable_assignment}  variable_assignment  {-> variable_assignment.stat}
+        {block}                block                {-> block.stat}
+      | {function_statement}   function_statement   {-> function_statement.stat}
+      | {empty}                semicolon            {-> New stat.empty()}
       | {print_statement}      print_statement      {-> print_statement.stat}
       | {println_statement}    println_statement    {-> println_statement.stat}
-      | {block}                block                {-> block.stat}
-      | {empty}                semicolon            {-> New stat.empty()};
+      | {return_statement}     return_statement     {-> return_statement.stat}
+      | {variable_assignment}  variable_assignment  {-> variable_assignment.stat};
+
+    function_statement {-> stat} =
+        [id]:identifier l_par [args]:expression_list? r_par semicolon {-> New stat.func(id, [args.expr])};
 
     print_statement {-> stat} =
         print_id l_par [expr]:expression r_par semicolon {-> New stat.print(expr.expr)};
@@ -170,14 +203,18 @@ Productions
     println_statement {-> stat} =
         println_id l_par [expr]:expression r_par semicolon {-> New stat.println(expr.expr)};
 
+    return_statement {-> stat} =
+        return_key [expr]:expression? semicolon {-> New stat.return(expr.expr)};
+
     // Expressions
     term {-> expr} =
-        {boolean}  boolean_literal          {-> New expr.boolean(boolean_literal)}
-      | {float}    float_literal            {-> New expr.float(float_literal)}
-      | {int}      int_literal              {-> New expr.int(int_literal)}
-      | {string}   string_literal           {-> New expr.string(string_literal)}
-      | {var_id}   [id]:identifier          {-> New expr.id(id)}
-      | {expr}     l_par expression r_par   {-> expression.expr};
+        {boolean}   boolean_literal                                        {-> New expr.boolean(boolean_literal)}
+      | {float}     float_literal                                          {-> New expr.float(float_literal)}
+      | {function}  [name]:identifier l_par [args]:expression_list? r_par  {-> New expr.func(name, [args.expr])}
+      | {int}       int_literal                                            {-> New expr.int(int_literal)}
+      | {string}    string_literal                                         {-> New expr.string(string_literal)}
+      | {id}        [id]:identifier                                        {-> New expr.id(id)}
+      | {expr}      l_par expression r_par                                 {-> expression.expr};
 
     unary_expression {-> expr} =
         {minus} minus term  {-> New expr.uminus(term.expr)}
@@ -222,28 +259,35 @@ Productions
 
 
 Abstract Syntax Tree
-    prg = [main]:main;
+    prg = func* main;
 
     main = [declarations]:stat* [statements]:stat*;
+    func = [return_type]:rtp [id]:identifier [args]:arg* [declarations]:stat* [statements]:stat*;
 
-    tp = {boolean} | {float} | {int} | {string};
+    tp   = {boolean} | {float} | {int} | {string};
+    rtp  = {boolean} | {float} | {int} | {none} | {string};
+    arg = {decl} [id]:identifier [type]:tp;
 
     stat =
-        {decl}    [type]:tp [id]:identifier
-      | {init}    [type]:tp [id]:identifier [expr]:expr
-      | {assign}  [id]:identifier [expr]:expr
+        {assign}  [id]:identifier [expr]:expr
       | {block}   [body]:stat*
-      | {print}   [expr]:expr
-      | {println} [expr]:expr
-      | {while}   [expr]:expr [body]:stat
+      | {func}    [id]:identifier [args]:expr*
+      | {decl}    [id]:identifier [type]:tp
+      | {empty}
       | {if}      [expr]:expr [then_block]:stat
       | {ifelse}  [expr]:expr [then_block]:stat [else_block]:stat
-      | {empty}   ;
+      | {init}    [id]:identifier [type]:tp [expr]:expr
+      | {print}   [expr]:expr
+      | {println} [expr]:expr
+      | {return}  [expr]:expr?
+      | {while}   [expr]:expr [body]:stat;
 
     expr =
-      {boolean} [lit]:boolean_literal
+      {boolean}   [lit]:boolean_literal
       | {float}   [lit]:float_literal
+      | {func}    [id]:identifier [args]:expr*
       | {int}     [lit]:int_literal
+      | {none}    [lit]:none_key
       | {string}  [lit]:string_literal
       | {id}      [id]:identifier
       | {not}     [expr]:expr

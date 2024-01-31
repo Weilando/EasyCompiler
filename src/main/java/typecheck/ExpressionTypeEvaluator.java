@@ -8,6 +8,7 @@ import node.AConcatExpr;
 import node.ADivExpr;
 import node.AEqExpr;
 import node.AFloatExpr;
+import node.AFuncExpr;
 import node.AGtExpr;
 import node.AGteqExpr;
 import node.AIdExpr;
@@ -25,7 +26,13 @@ import node.AUminusExpr;
 import node.AUplusExpr;
 import node.Node;
 import node.PExpr;
+import symboltable.SymbolTable;
+import symboltable.Type;
 
+/**
+ * Depth first walker for the AST which assigns types to expression nodes. It
+ * does not checks any compatibilities.
+ */
 public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   private final SymbolTable symbolTable;
   private Type type;
@@ -49,6 +56,17 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   }
 
   @Override
+  public void caseAFuncExpr(AFuncExpr node) {
+    Type returnType = symbolTable.getFunctionReturnType(node.getId().getText());
+    node.setType(returnType);
+    type = returnType;
+
+    for (PExpr argExpr : node.getArgs()) {
+      argExpr.apply(this);
+    }
+  }
+
+  @Override
   public void caseAIntExpr(AIntExpr node) {
     node.setType(Type.INT);
     type = Type.INT;
@@ -63,9 +81,10 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   @Override
   public void outAIdExpr(AIdExpr node) {
     String id = node.getId().getText();
+    String scopeName = symbolTable.determineScope(node);
 
-    if (symbolTable.contains(id)) {
-      type = symbolTable.getType(id);
+    if (symbolTable.containsSymbol(scopeName, id)) {
+      type = symbolTable.getSymbolType(scopeName, id);
     } else {
       type = Type.ERROR;
     }
@@ -238,6 +257,7 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
       node.getLeft().apply(leftEv);
       node.getRight().apply(rightEv);
       node.setType(Type.STRING);
+      type = Type.STRING;
     }
   }
 

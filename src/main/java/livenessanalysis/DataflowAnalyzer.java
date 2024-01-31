@@ -1,15 +1,15 @@
 package livenessanalysis;
 
-import typecheck.Symbol;
-
 import java.util.HashSet;
 import java.util.PriorityQueue;
+import symboltable.Symbol;
 
 public class DataflowAnalyzer {
   private final DataflowNode start;
 
   public DataflowAnalyzer(DataflowGraphBuilder dataflowGraphBuilder) {
-    this.start = dataflowGraphBuilder.getCurrent(); // analysis should run from the end to start for speedup
+    // analysis should run from the end to start for speedup
+    this.start = dataflowGraphBuilder.getCurrent();
     analyzeGraph();
   }
 
@@ -17,8 +17,14 @@ public class DataflowAnalyzer {
     generateInAndOutSets();
   }
 
-  private void generateInAndOutSets() { // algorithm 10.4 from Appel, Modern Compiler Impl. in Java; initial in- and out-sets are empty
-    if (start.getPredecessors().isEmpty()) return;
+  /*
+   * Algorithm 10.4 from Appel, Modern Compiler Impl. in Java. Initial in- and
+   * out-sets are empty.
+   */
+  private void generateInAndOutSets() {
+    if (start.getPredecessors().isEmpty()) {
+      return;
+    }
     boolean changes = true;
     PriorityQueue<DataflowNode> queue = new PriorityQueue<>();
 
@@ -36,17 +42,21 @@ public class DataflowAnalyzer {
         curr.addIn(getUseJointOutMinusDef(curr));
         curr.addOut(getJoinedSuccessorIns(curr));
 
-        if (differentElementsIn(oldIn, curr.getIn()) || differentElementsIn(oldOut, curr.getOut())) {
+        if (differentElementsIn(oldIn, curr.getIn())
+            || differentElementsIn(oldOut, curr.getOut())) {
           changes = true;
         }
         for (DataflowNode predecessor : curr.getPredecessors()) {
-          if (predecessor.getNumber() < currNumber) queue.add(predecessor);
+          if (predecessor.getNumber() < currNumber) {
+            queue.add(predecessor);
+          }
         }
       }
     }
   }
 
-  private HashSet<Symbol> getUseJointOutMinusDef(DataflowNode node) { // use[n] joint with (out[n]-def[n])
+  /* use[n] joint with (out[n]-def[n]). */
+  private HashSet<Symbol> getUseJointOutMinusDef(DataflowNode node) {
     HashSet<Symbol> returnSet = new HashSet<>(node.getUse());
 
     HashSet<Symbol> difference = new HashSet<>(node.getOut());

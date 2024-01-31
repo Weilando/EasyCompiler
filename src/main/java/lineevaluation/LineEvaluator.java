@@ -1,12 +1,15 @@
 package lineevaluation;
 
 import analysis.ReversedDepthFirstAdapter;
+import java.util.HashMap;
 import node.Node;
 import node.Start;
 import node.Token;
 
-import java.util.HashMap;
-
+/**
+ * Helper that determines the line and position of a node by applying reversed
+ * depth first search to the AST.
+ */
 public class LineEvaluator extends ReversedDepthFirstAdapter {
   private static final HashMap<Node, Integer> lines = new HashMap<>();
   private static final HashMap<Node, Integer> positions = new HashMap<>();

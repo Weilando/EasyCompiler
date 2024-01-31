@@ -7,7 +7,7 @@
 
 	"features": {
 		"ghcr.io/devcontainers/features/java:1": {
-			"version": "none",
+			"version": "17",
 			"installGradle": "true",
 			"gradleVersion": "7.3"
 		}
@@ -15,13 +15,12 @@
 	
 	"initializeCommand": "ls",
 
-	"postAttachCommand": "chmod +x .devcontainer/post-attach.sh && .devcontainer/post-attach.sh",
+	"postAttachCommand": "sh .devcontainer/post-attach.sh",
 	
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"shengchen.vscode-checkstyle",
-				"vscjava.vscode-gradle"
+				"shengchen.vscode-checkstyle"
 			]
 		}
 	}

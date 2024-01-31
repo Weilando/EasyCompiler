@@ -1,4 +1,4 @@
-void main() {
+none <- main() {
   int a = 5;
   boolean truthy = true;
   while (a > 0) {

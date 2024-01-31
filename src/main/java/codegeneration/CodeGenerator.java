@@ -1,9 +1,8 @@
 package codegeneration;
 
+import analysis.DepthFirstAdapter;
 import java.util.Arrays;
 import java.util.List;
-
-import analysis.DepthFirstAdapter;
 import lineevaluation.LineEvaluator;
 import node.AAddExpr;
 import node.AAndExpr;
@@ -14,6 +13,9 @@ import node.ADeclStat;
 import node.ADivExpr;
 import node.AEqExpr;
 import node.AFloatExpr;
+import node.AFunc;
+import node.AFuncExpr;
+import node.AFuncStat;
 import node.AGtExpr;
 import node.AGteqExpr;
 import node.AIdExpr;
@@ -32,6 +34,7 @@ import node.AOrExpr;
 import node.APrg;
 import node.APrintStat;
 import node.APrintlnStat;
+import node.AReturnStat;
 import node.AStringExpr;
 import node.ASubExpr;
 import node.AUminusExpr;
@@ -39,10 +42,13 @@ import node.AWhileStat;
 import node.Node;
 import node.PExpr;
 import node.PStat;
+import node.TIdentifier;
 import stackdepthevaluation.StackDepthEvaluator;
-import typecheck.SymbolTable;
-import typecheck.Type;
+import symboltable.FunctionArgumentTypeList;
+import symboltable.SymbolTable;
+import symboltable.Type;
 
+/** The code generator walks the AST and generates Jasmin code. */
 public class CodeGenerator extends DepthFirstAdapter {
   private final CodeCache cache;
   private final String programName;
@@ -54,7 +60,7 @@ public class CodeGenerator extends DepthFirstAdapter {
   /**
    * The CodeGenerator walks the AST using Depth First Search and emit Jasmin
    * assembly code.
-   * 
+   *
    * @param cache       Code cache
    * @param programName Name of the program, used for source and class name
    * @param symbolTable Symbol table
@@ -68,21 +74,7 @@ public class CodeGenerator extends DepthFirstAdapter {
     this.lastTrueLabel = 0;
   }
 
-  private String getJvmType(Type type) {
-    /* Translates the Easy type into a JVM type. */
-    switch (type) {
-      case BOOLEAN:
-        return "Z";
-      case FLOAT:
-        return "F";
-      case INT:
-        return "I";
-      default:
-        return "Ljava/lang/String;";
-    }
-  }
-
-  // Basic structure
+  // Basic structure and function definitions
   @Override
   public void inAPrg(APrg node) { // pretend to be a java class internally
     String[] fileHead = {
@@ -102,25 +94,19 @@ public class CodeGenerator extends DepthFirstAdapter {
   @Override
   public void caseAMain(AMain node) {
     StackDepthEvaluator stackDepthEvaluator = new StackDepthEvaluator();
-    for (PStat currDecl : node.getDeclarations()) {
-      currDecl.apply(stackDepthEvaluator);
-    }
-    for (PStat currStat : node.getStatements()) {
-      currStat.apply(stackDepthEvaluator);
-    }
+    node.apply(stackDepthEvaluator);
 
-    final String[] beginMainMethod = {
+    final String[] beginMainFunction = {
         ".method public static main([Ljava/lang/String;)V",
         String.format("\t.limit stack %d", stackDepthEvaluator.getMaxDepthCounter()),
         String.format("\t.limit locals %d",
-            symbolTable.countSymbols() + 1), // all type-checked symbols and args[]
+            symbolTable.countSymbolsInScope("main") + 1), // all type-checked symbols and args[]
         "" };
-    final String[] endMainMethod = {
-        "", "\treturn",
-        ".end method"
+    final String[] endMainFunction = {
+        "", "\treturn", ".end method", ""
     };
 
-    cache.addLines(Arrays.asList(beginMainMethod));
+    cache.addLines(Arrays.asList(beginMainFunction));
 
     for (PStat currDecl : node.getDeclarations()) {
       currDecl.apply(this);
@@ -129,7 +115,40 @@ public class CodeGenerator extends DepthFirstAdapter {
       currStat.apply(this);
     }
 
-    cache.addLines(Arrays.asList(endMainMethod));
+    cache.addLines(Arrays.asList(endMainFunction));
+  }
+
+  @Override
+  public void caseAFunc(AFunc node) {
+    StackDepthEvaluator stackDepthEvaluator = new StackDepthEvaluator();
+    node.apply(stackDepthEvaluator);
+    TIdentifier functionId = node.getId();
+    String functionName = functionId.getText();
+    Type returnType = symbolTable.getFunctionReturnType(functionName);
+    String returnJvmType = returnType.getJvmType();
+    FunctionArgumentTypeList argumentTypeList = symbolTable.getFunctionArgumentTypes(functionName);
+    String argumentJvmTypeString = argumentTypeList.getJvmTypeString();
+
+    final String[] beginFunction = {
+        ".method public static %s(%s)%s".formatted(
+            functionName, argumentJvmTypeString, returnJvmType),
+        "\t.limit stack %d".formatted(stackDepthEvaluator.getMaxDepthCounter()),
+        "\t.limit locals %d".formatted(symbolTable.countSymbolsInScope(functionName)),
+        "" };
+    final String[] endFunction = {
+        "", "\treturn", ".end method", ""
+    };
+
+    cache.addLines(Arrays.asList(beginFunction));
+
+    for (PStat currDecl : node.getDeclarations()) {
+      currDecl.apply(this);
+    }
+    for (PStat currStat : node.getStatements()) {
+      currStat.apply(this);
+    }
+
+    cache.addLines(Arrays.asList(endFunction));
   }
 
   // Statements
@@ -185,6 +204,81 @@ public class CodeGenerator extends DepthFirstAdapter {
   }
 
   @Override
+  public void caseAFuncStat(AFuncStat node) {
+    addLineNumber(node, "function call");
+
+    TIdentifier functionId = node.getId();
+    String functionName = functionId.getText();
+
+    Type returnType = symbolTable.getFunctionReturnType(functionName);
+    String returnJvmType = returnType.getJvmType();
+
+    FunctionArgumentTypeList argumentTypeList = symbolTable.getFunctionArgumentTypes(functionName);
+    String argumentJvmTypeString = argumentTypeList.getJvmTypeString();
+
+    for (PExpr currArg : node.getArgs()) { // put arguments on the stack
+      currArg.apply(this);
+    }
+
+    final String functionCall = "invokestatic %s/%s(%s)%s".formatted(
+        this.programName, functionName, argumentJvmTypeString, returnJvmType);
+    cache.addIndentedLine(functionCall);
+    if (!returnType.equals(Type.NONE)) {
+      cache.addIndentedLine("pop"); // ignore return value
+    }
+  }
+
+  @Override
+  public void caseAFuncExpr(AFuncExpr node) {
+    addLineNumber(node, "function expression");
+
+    TIdentifier functionId = node.getId();
+    String functionName = functionId.getText();
+
+    Type returnType = symbolTable.getFunctionReturnType(functionName);
+    String returnJvmType = returnType.getJvmType();
+
+    FunctionArgumentTypeList argumentTypeList = symbolTable.getFunctionArgumentTypes(functionName);
+    String argumentJvmTypeString = argumentTypeList.getJvmTypeString();
+
+    for (PExpr currArg : node.getArgs()) { // put arguments on the stack
+      currArg.apply(this);
+    }
+
+    final String functionCall = "invokestatic %s/%s(%s)%s".formatted(
+        this.programName, functionName, argumentJvmTypeString, returnJvmType);
+    cache.addIndentedLine(functionCall);
+  }
+
+  @Override
+  public void caseAReturnStat(AReturnStat node) {
+    addLineNumber(node, "return statement");
+
+    PExpr expr = node.getExpr();
+    String scopeName = symbolTable.determineScope(node);
+    Type returnType = symbolTable.getFunctionReturnType(scopeName);
+
+    if (expr != null) { // put return value on the stack
+      expr.apply(this);
+    }
+
+    switch (returnType) {
+      case BOOLEAN:
+      case INT:
+        cache.addIndentedLine("ireturn");
+        break;
+      case FLOAT:
+        cache.addIndentedLine("freturn");
+        break;
+      case STRING:
+        cache.addIndentedLine("areturn");
+        break;
+      default:
+        cache.addIndentedLine("return");
+    }
+  }
+
+  @Override
   public void caseAPrintStat(APrintStat node) {
     addLineNumber(node, "print statement");
     PExpr expr = node.getExpr();
@@ -203,7 +297,7 @@ public class CodeGenerator extends DepthFirstAdapter {
 
     String printCommand = String.format(
         "invokevirtual java/io/PrintStream/print(%s)V",
-        getJvmType(type));
+        type.getJvmType());
     cache.addIndentedLine(printCommand);
   }
 
@@ -226,7 +320,7 @@ public class CodeGenerator extends DepthFirstAdapter {
 
     String printCommand = String.format(
         "invokevirtual java/io/PrintStream/println(%s)V",
-        getJvmType(type));
+        type.getJvmType());
     cache.addIndentedLine(printCommand);
   }
 
@@ -244,7 +338,8 @@ public class CodeGenerator extends DepthFirstAdapter {
   @Override
   public void outAInitStat(AInitStat node) {
     String id = node.getId().getText();
-    generateAssignCode(id, node.getExpr().getType().equals(Type.INT));
+    String scopeName = symbolTable.determineScope(node);
+    generateAssignCode(scopeName, id, node.getExpr().getType().equals(Type.INT));
   }
 
   @Override
@@ -255,7 +350,8 @@ public class CodeGenerator extends DepthFirstAdapter {
   @Override
   public void outAAssignStat(AAssignStat node) {
     String id = node.getId().getText();
-    generateAssignCode(id, node.getExpr().getType().equals(Type.INT));
+    String scopeName = symbolTable.determineScope(node);
+    generateAssignCode(scopeName, id, node.getExpr().getType().equals(Type.INT));
   }
 
   // Arithmetic operations
@@ -332,7 +428,7 @@ public class CodeGenerator extends DepthFirstAdapter {
   private String getAppendCommand(PExpr node) {
     /* Get append command for a StringBuilder using the correct type. */
     String baseCommand = "invokevirtual java/lang/StringBuffer/append(%s)Ljava/lang/StringBuffer;";
-    String jvmType = getJvmType(node.getType());
+    String jvmType = node.getType().getJvmType();
     return baseCommand.formatted(jvmType);
   }
 
@@ -447,10 +543,11 @@ public class CodeGenerator extends DepthFirstAdapter {
   @Override
   public void outAIdExpr(AIdExpr node) {
     String id = node.getId().getText();
-    int varNumber = symbolTable.getVariableNumber(id);
+    String scopeName = symbolTable.determineScope(node);
+    int varNumber = symbolTable.getVariableNumber(scopeName, id);
     String loadCommand = "";
 
-    switch (this.symbolTable.getType(id)) {
+    switch (this.symbolTable.getSymbolType(scopeName, id)) {
       case FLOAT:
         loadCommand = "fload";
         break;
@@ -504,11 +601,11 @@ public class CodeGenerator extends DepthFirstAdapter {
         String.format("%s:", continueLabel) };
   }
 
-  void generateAssignCode(String id, boolean castInt) {
-    int varNumber = symbolTable.getVariableNumber(id);
+  void generateAssignCode(String scopeName, String id, boolean castInt) {
+    int varNumber = symbolTable.getVariableNumber(scopeName, id);
     String storeCommand = "";
 
-    switch (this.symbolTable.getType(id)) {
+    switch (this.symbolTable.getSymbolType(scopeName, id)) {
       case FLOAT:
         if (castInt) {
           cache.addIndentedLine("i2f");

@@ -1,9 +1,8 @@
 package livenessanalysis;
 
-import typecheck.Symbol;
-
 import java.util.HashSet;
 import java.util.stream.Collectors;
+import symboltable.Symbol;
 
 public class InterferenceGraphNode {
   private final Symbol symbol;
@@ -37,11 +36,14 @@ public class InterferenceGraphNode {
   }
 
   HashSet<InterferenceGraphNode> getColoredNeighbors() {
-    return (HashSet<InterferenceGraphNode>) neighbors.stream().filter(InterferenceGraphNode::isColored).collect(Collectors.toSet());
+    return (HashSet<InterferenceGraphNode>) neighbors.stream()
+        .filter(InterferenceGraphNode::isColored)
+        .collect(Collectors.toSet());
   }
 
   HashSet<Integer> getColorsInNeighborhood() {
-    return (HashSet<Integer>) getColoredNeighbors().stream().map(InterferenceGraphNode::getColor).collect(Collectors.toSet());
+    return (HashSet<Integer>) getColoredNeighbors().stream().map(InterferenceGraphNode::getColor)
+        .collect(Collectors.toSet());
   }
 
   @Override

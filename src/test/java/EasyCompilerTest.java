@@ -1,14 +1,15 @@
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 public class EasyCompilerTest {
-  private final String correctCall = "java EasyCompiler [-compile|-liveness|-typeCheck|-parse] <Filename.easy>";
+  private final String correctCall = "java EasyCompiler -[compile|liveness|typeCheck|parse] <file>.easy";
 
   private final String pathMinimalProgram = "src/test/resources/correct/Minimal.easy";
 
