@@ -75,8 +75,14 @@ public class ParsingTest {
   }
 
   @Test
-  public void parseFunctions() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Functions.easy");
+  public void parseFunctionArguments() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FunctionArguments.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseFunctionReturnTypes() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FunctionReturnTypes.easy");
     assertTrue(easyCompiler.parse());
   }
 
@@ -183,6 +189,13 @@ public class ParsingTest {
   // Parse type-check tests without errors
   // --------------------------------------
   @Test
+  public void parseFailBadBadReturnTypes() {
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadBadReturnTypes.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
   public void parseFailBadConditions() {
     EasyCompiler easyCompiler = new EasyCompiler(
         pathTestFilesFailTypeCheck + "FailBadConditions.easy");
@@ -193,6 +206,20 @@ public class ParsingTest {
   public void parseFailBadExpressions() {
     EasyCompiler easyCompiler = new EasyCompiler(
         pathTestFilesFailTypeCheck + "FailBadExpressions.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseFailBadFunctionArguments() {
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadFunctionArguments.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
+  @Test
+  public void parseFailBadPrint() {
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadPrint.easy");
     assertTrue(easyCompiler.parse());
   }
 

@@ -65,8 +65,17 @@ public class TypeErrorHandler {
       TIdentifier functioIdentifier, int argPosition, Type expectedType, Type givenType) {
     errorNumberIncrement();
     String errorHead = generateErrorHeadId(functioIdentifier);
-    String errorMessage = "Argument %d has the wrong type. Expexted %s but got %s.".formatted(
+    String errorMessage = "Argument %d has the wrong type. Expected %s but got %s.".formatted(
         argPosition, expectedType, givenType);
+    System.out.println(errorHead + errorMessage);
+  }
+
+  void printWrongReturnTypeError(
+      Node returnNode, Type expectedType, Type givenType) {
+    errorNumberIncrement();
+    String errorHead = generateErrorHeadNode(returnNode);
+    String errorMessage = "Return expression has the wrong type. Expected %s but got %s.".formatted(
+        expectedType, givenType);
     System.out.println(errorHead + errorMessage);
   }
 
@@ -77,10 +86,10 @@ public class TypeErrorHandler {
     System.out.println(errorHead + errorMessage);
   }
 
-  void printPrintlnError(Node node) {
+  void printPrintNoneError(Node node) {
     errorNumberIncrement();
     String errorHead = generateErrorHeadNode(node);
-    String errorMessage = "Expression in println statement contains type errors.";
+    String errorMessage = "Cannot print none.";
     System.out.println(errorHead + errorMessage);
   }
 

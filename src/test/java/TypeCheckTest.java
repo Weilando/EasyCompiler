@@ -73,8 +73,14 @@ public class TypeCheckTest {
   }
 
   @Test
-  public void checkFunctions() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "Functions.easy");
+  public void checkFunctionArguments() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FunctionArguments.easy");
+    assertTrue(easyCompiler.typeCheck());
+  }
+
+  @Test
+  public void checkFunctionReturnTypes() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesCorrect + "FunctionReturnTypes.easy");
     assertTrue(easyCompiler.typeCheck());
   }
 
@@ -175,6 +181,22 @@ public class TypeCheckTest {
         pathTestFilesFailTypeCheck + "FailBadFunctionArguments.easy");
     assertFalse(easyCompiler.typeCheck());
     assertEquals(5, easyCompiler.getTypeErrorNumber());
+  }
+
+  @Test
+  public void errorBadReturnTypes() {
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadBadReturnTypes.easy");
+    assertFalse(easyCompiler.typeCheck());
+    assertEquals(20, easyCompiler.getTypeErrorNumber());
+  }
+
+  @Test
+  public void errorBadPrint() {
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesFailTypeCheck + "FailBadPrint.easy");
+    assertFalse(easyCompiler.typeCheck());
+    assertEquals(2, easyCompiler.getTypeErrorNumber());
   }
 
   @Test

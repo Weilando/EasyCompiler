@@ -30,8 +30,8 @@ import symboltable.SymbolTable;
 import symboltable.Type;
 
 /**
- * The expression type evaluator walks the AST and assigns types to expression
- * nodes. It does not checks any compatibilities.
+ * Depth first walker for the AST which assigns types to expression nodes. It
+ * does not checks any compatibilities.
  */
 public class ExpressionTypeEvaluator extends DepthFirstAdapter {
   private final SymbolTable symbolTable;

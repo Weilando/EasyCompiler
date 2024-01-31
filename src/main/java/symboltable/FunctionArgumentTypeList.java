@@ -2,6 +2,7 @@ package symboltable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /** List of (data) types for all arguments of a single function. */
 public class FunctionArgumentTypeList {
@@ -17,5 +18,9 @@ public class FunctionArgumentTypeList {
 
   public int getNumberOfArguments() {
     return arguments.size();
+  }
+
+  public String getJvmTypeString() {
+    return arguments.stream().map(t -> t.getJvmType()).collect(Collectors.joining(""));
   }
 }

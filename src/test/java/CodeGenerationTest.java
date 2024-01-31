@@ -163,6 +163,32 @@ public class CodeGenerationTest {
   }
 
   @Test
+  public void resultFunctionReturnTypes() throws InterruptedException {
+    String testName = "FunctionReturnTypes";
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
+
+    assertEquals(0, classProcess.waitFor());
+    assertEquals(
+        "2\n1.0\nabc\ntrue",
+        inputStreamString);
+  }
+
+  @Test
+  public void resultFunctionArguments() throws InterruptedException {
+    String testName = "FunctionArguments";
+    generateJasminFile(testName);
+    generateClassFromJasminFile(testName);
+    setupClassExecutionProcess(testName);
+
+    assertEquals(0, classProcess.waitFor());
+    assertEquals(
+        "true\n1.0\n2\nabc\ntrue\n1.0\n2\nabc",
+        inputStreamString);
+  }
+
+  @Test
   public void resultIf() throws InterruptedException {
     String testName = "If";
     generateJasminFile(testName);

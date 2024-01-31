@@ -10,6 +10,7 @@ import node.AIfelseStat;
 import node.AInitStat;
 import node.APrintStat;
 import node.APrintlnStat;
+import node.AReturnStat;
 import node.AWhileStat;
 import node.PExpr;
 import node.TIdentifier;
@@ -18,8 +19,8 @@ import symboltable.SymbolTable;
 import symboltable.Type;
 
 /**
- * The type checker walks the AST using depth first search. IT assigns a type to
- * each node and checks the compatibility of childrens' types.
+ * Depth first walker for the AST which assigns a type to each node and checks
+ * the compatibility of childrens' types.
  */
 public class TypeChecker extends DepthFirstAdapter {
   private final TypeErrorHandler errorHandler;
@@ -40,12 +41,29 @@ public class TypeChecker extends DepthFirstAdapter {
   }
 
   @Override
-  public void caseAFuncExpr(AFuncExpr node) {
+  public void outAFuncExpr(AFuncExpr node) {
     TIdentifier id = node.getId();
     String idText = id.getText();
     FunctionArgumentTypeList definitionArgTypes = symbolTable.getFunctionArgumentTypes(idText);
     LinkedList<PExpr> statementArgTypes = node.getArgs();
     checkFunctionCall(id, definitionArgTypes, statementArgTypes);
+  }
+
+  @Override
+  public void outAReturnStat(AReturnStat node) {
+    String scopeName = symbolTable.determineScope(node);
+    Type returnType = symbolTable.getFunctionReturnType(scopeName);
+    PExpr expr = node.getExpr();
+    Type exprType;
+    if (expr == null) {
+      exprType = Type.NONE;
+    } else {
+      exprType = evaluateType(expr);
+    }
+
+    if (!exprType.equals(returnType)) {
+      errorHandler.printWrongReturnTypeError(node, returnType, exprType);
+    }
   }
 
   // Variable statements
@@ -107,6 +125,8 @@ public class TypeChecker extends DepthFirstAdapter {
     Type contentType = evaluateType(expr);
     if (contentType.equals(Type.ERROR)) {
       errorHandler.printPrintError(node);
+    } else if (contentType.equals(Type.NONE)) {
+      errorHandler.printPrintNoneError(node);
     }
     expr.setType(contentType);
   }
@@ -116,7 +136,9 @@ public class TypeChecker extends DepthFirstAdapter {
     PExpr expr = node.getExpr();
     Type contentType = evaluateType(expr);
     if (contentType.equals(Type.ERROR)) {
-      errorHandler.printPrintlnError(node);
+      errorHandler.printPrintError(node);
+    } else if (contentType.equals(Type.NONE)) {
+      errorHandler.printPrintNoneError(node);
     }
     expr.setType(contentType);
   }
@@ -142,8 +164,14 @@ public class TypeChecker extends DepthFirstAdapter {
 
   private void checkFunctionCall(TIdentifier id, FunctionArgumentTypeList definitionArgTypes,
       LinkedList<PExpr> statementArgTypes) {
-    int expectedNumberOfArgs = definitionArgTypes.getNumberOfArguments();
-    int givenNumberOfArgs = statementArgTypes.size();
+    int expectedNumberOfArgs = 0;
+    int givenNumberOfArgs = 0;
+    if (definitionArgTypes != null) {
+      expectedNumberOfArgs = definitionArgTypes.getNumberOfArguments();
+    }
+    if (statementArgTypes != null) {
+      givenNumberOfArgs = statementArgTypes.size();
+    }
 
     if (expectedNumberOfArgs != givenNumberOfArgs) {
       errorHandler.printWrongNumberOfArgumentsError(id, expectedNumberOfArgs, givenNumberOfArgs);

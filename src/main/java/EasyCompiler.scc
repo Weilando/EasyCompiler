@@ -208,13 +208,13 @@ Productions
 
     // Expressions
     term {-> expr} =
-        {boolean}   boolean_literal                                       {-> New expr.boolean(boolean_literal)}
-      | {float}     float_literal                                         {-> New expr.float(float_literal)}
-      | {function}  [name]:identifier l_par [args]:expression_list r_par  {-> New expr.func(name, [args.expr])}
-      | {int}       int_literal                                           {-> New expr.int(int_literal)}
-      | {string}    string_literal                                        {-> New expr.string(string_literal)}
-      | {id}        [id]:identifier                                       {-> New expr.id(id)}
-      | {expr}      l_par expression r_par                                {-> expression.expr};
+        {boolean}   boolean_literal                                        {-> New expr.boolean(boolean_literal)}
+      | {float}     float_literal                                          {-> New expr.float(float_literal)}
+      | {function}  [name]:identifier l_par [args]:expression_list? r_par  {-> New expr.func(name, [args.expr])}
+      | {int}       int_literal                                            {-> New expr.int(int_literal)}
+      | {string}    string_literal                                         {-> New expr.string(string_literal)}
+      | {id}        [id]:identifier                                        {-> New expr.id(id)}
+      | {expr}      l_par expression r_par                                 {-> expression.expr};
 
     unary_expression {-> expr} =
         {minus} minus term  {-> New expr.uminus(term.expr)}

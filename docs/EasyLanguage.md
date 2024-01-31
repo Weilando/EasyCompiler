@@ -254,7 +254,7 @@ low        | `\|\|`      | Disjunction
 
 - [x] extend grammar to parse function heads and bodies
 - [x] extend type-checking, add a symbol table for each function
-- [ ] extend code-generation
+- [x] extend code-generation
 
 ### Implementation of arrays
 

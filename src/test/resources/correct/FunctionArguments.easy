@@ -1,0 +1,18 @@
+none <- fun(boolean b_arg, float f_arg, int i_arg, string s_arg) {
+    boolean b = b_arg;
+    float f = f_arg;
+    int i = i_arg;
+    string s = s_arg;
+    println(b);
+    println(f);
+    println(i);
+    println(s);
+    println(b_arg);
+    println(f_arg);
+    println(i_arg);
+    println(s_arg);
+}
+
+none <- main() {
+    fun(true, 1.0, 2, "abc");
+}

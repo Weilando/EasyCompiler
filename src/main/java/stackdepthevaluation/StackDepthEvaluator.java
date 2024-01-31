@@ -6,9 +6,13 @@ import node.AAndExpr;
 import node.AAssignStat;
 import node.ABooleanExpr;
 import node.AConcatExpr;
+import node.ADeclArg;
 import node.ADivExpr;
 import node.AEqExpr;
 import node.AFloatExpr;
+import node.AFunc;
+import node.AFuncExpr;
+import node.AFuncStat;
 import node.AGtExpr;
 import node.AGteqExpr;
 import node.AIdExpr;
@@ -26,13 +30,19 @@ import node.ANotExpr;
 import node.AOrExpr;
 import node.APrintStat;
 import node.APrintlnStat;
+import node.AReturnStat;
 import node.AStringExpr;
 import node.ASubExpr;
 import node.AUminusExpr;
 import node.AWhileStat;
 import node.PExpr;
 import node.PStat;
+import symboltable.Type;
 
+/**
+ * Depth first walker for the AST which determines the stack depth for
+ * functions. Applicable to all nodes, but intended for function definitions.
+ */
 public class StackDepthEvaluator extends DepthFirstAdapter {
   private int depthCounter = 0;
   private int maxDepthCounter = 0;
@@ -50,12 +60,55 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
     }
   }
 
+  @Override
+  public void caseAFunc(AFunc node) {
+    for (PStat currDecl : node.getDeclarations()) {
+      currDecl.apply(this);
+    }
+    for (PStat currStat : node.getStatements()) {
+      currStat.apply(this);
+    }
+  }
+
+  @Override
+  public void caseADeclArg(ADeclArg node) {
+    incrementDepthCounter(1); // each argument is pushed on the stack
+  }
+
+  @Override
+  public void caseAReturnStat(AReturnStat node) {
+    PExpr expr = node.getExpr();
+    Type type = expr.getType();
+    if (!type.equals(Type.NONE)) {
+      incrementDepthCounter(1); // return value is pushed on the stack
+    }
+  }
+
+  @Override
+  public void caseAFuncExpr(AFuncExpr node) {
+    int numberOfArgs = node.getArgs().size();
+    incrementDepthCounter(numberOfArgs); // parameters are pushed on the stack
+    decrementDepthCounter(numberOfArgs);
+
+    Type type = node.getType();
+    if (!type.equals(Type.NONE)) {
+      incrementDepthCounter(1); // return value is pushed on the stack
+    }
+  }
+
+  @Override
+  public void caseAFuncStat(AFuncStat node) {
+    int numberOfArgs = node.getArgs().size();
+    incrementDepthCounter(numberOfArgs); // parameters are pushed on the stack
+    decrementDepthCounter(numberOfArgs);
+  }
+
   // Statements
   @Override
   public void caseAIfStat(AIfStat node) {
     // evaluate condition
     node.getExpr().apply(this);
-    decrementDepthCounter(); // ifeq pops 1
+    decrementDepthCounter(1); // ifeq pops 1
 
     // evaluate body
     node.getThenBlock().apply(this);
@@ -65,7 +118,7 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
   public void caseAIfelseStat(AIfelseStat node) {
     // evaluate condition
     node.getExpr().apply(this);
-    decrementDepthCounter(); // ifeq pops 1
+    decrementDepthCounter(1); // ifeq pops 1
 
     // evaluate then-body
     node.getThenBlock().apply(this);
@@ -78,7 +131,7 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
   public void caseAWhileStat(AWhileStat node) {
     // evaluate head
     node.getExpr().apply(this);
-    decrementDepthCounter(); // ifeq pops 1
+    decrementDepthCounter(1); // ifeq pops 1
 
     // evaluate body
     node.getBody().apply(this);
@@ -90,9 +143,8 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
     PExpr expr = node.getExpr();
     expr.apply(this);
 
-    incrementDepthCounter(); // getstatic pushes 1
-    decrementDepthCounter(); // invokevirtual pops 2
-    decrementDepthCounter();
+    incrementDepthCounter(1); // getstatic pushes 1
+    decrementDepthCounter(2); // invokevirtual pops 2
   }
 
   @Override
@@ -101,9 +153,8 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
     PExpr expr = node.getExpr();
     expr.apply(this);
 
-    incrementDepthCounter(); // getstatic pushes 1
-    decrementDepthCounter(); // invokevirtual pops 2
-    decrementDepthCounter();
+    incrementDepthCounter(1); // getstatic pushes 1
+    decrementDepthCounter(2); // invokevirtual pops 2
   }
 
   // Variable statements
@@ -111,103 +162,102 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
 
   @Override
   public void outAInitStat(AInitStat node) {
-    decrementDepthCounter(); // istore pops 1
+    decrementDepthCounter(1); // istore pops 1
   }
 
   @Override
   public void outAAssignStat(AAssignStat node) {
-    decrementDepthCounter(); // istore pops 1
+    decrementDepthCounter(1); // istore pops 1
   }
 
   // Arithmetic operations
   @Override
   public void outAAddExpr(AAddExpr node) {
-    decrementDepthCounter(); // iadd pops 2 arguments and pushes 1 result
+    decrementDepthCounter(1); // iadd pops 2 arguments and pushes 1 result
   }
 
   @Override
   public void outASubExpr(ASubExpr node) {
-    decrementDepthCounter(); // isub pops 2 arguments and pushes 1 result
+    decrementDepthCounter(1); // isub pops 2 arguments and pushes 1 result
   }
 
   @Override
   public void outAMulExpr(AMulExpr node) {
-    decrementDepthCounter(); // imul pops 2 arguments and pushes 1 result
+    decrementDepthCounter(1); // imul pops 2 arguments and pushes 1 result
   }
 
   @Override
   public void outADivExpr(ADivExpr node) {
-    decrementDepthCounter(); // idiv pops 2 arguments and pushes 1 result
+    decrementDepthCounter(1); // idiv pops 2 arguments and pushes 1 result
   }
 
   @Override
   public void outAModExpr(AModExpr node) {
-    decrementDepthCounter(); // irem pops 2 arguments and pushes 1 result
+    decrementDepthCounter(1); // irem pops 2 arguments and pushes 1 result
   }
 
   // Boolean operations
   @Override
   public void outAAndExpr(AAndExpr node) {
-    decrementDepthCounter(); // iand pops 2 arguments and pushes 1 result
+    decrementDepthCounter(1); // iand pops 2 arguments and pushes 1 result
   }
 
   @Override
   public void outAOrExpr(AOrExpr node) {
-    decrementDepthCounter(); // ior pops 2 arguments and pushes 1 result
+    decrementDepthCounter(1); // ior pops 2 arguments and pushes 1 result
   }
 
   // Unary operations
   // Unary plus has no effect and does not need to be processed.
   @Override
   public void outAUminusExpr(AUminusExpr node) {
-    incrementDepthCounter(); // ldc -1 pushes 1
-    decrementDepthCounter(); // imul pops 2 arguments and pushes 1 result
+    incrementDepthCounter(1); // ldc -1 pushes 1
+    decrementDepthCounter(1); // imul pops 2 arguments and pushes 1 result
   }
 
   @Override
   public void outANotExpr(ANotExpr node) {
-    incrementDepthCounter(); // ldc pushes 1
-    decrementDepthCounter(); // iadd pops 2 arguments and pushes 1 result
+    incrementDepthCounter(1); // ldc pushes 1
+    decrementDepthCounter(1); // iadd pops 2 arguments and pushes 1 result
     // same pattern for ldc and irem
   }
 
   // Comparison expressions (calculate a boolean value with true=1, false=0)
   @Override
   public void outAEqExpr(AEqExpr node) {
-    decrementDepthCounter(); // ifeq pops 1
+    decrementDepthCounter(1); // ifeq pops 1
   }
 
   @Override
   public void outANeqExpr(ANeqExpr node) {
-    decrementDepthCounter(); // ifne pops 1
+    decrementDepthCounter(1); // ifne pops 1
   }
 
   @Override
   public void outALteqExpr(ALteqExpr node) {
-    decrementDepthCounter(); // ifle pops 1
+    decrementDepthCounter(1); // ifle pops 1
   }
 
   @Override
   public void outALtExpr(ALtExpr node) {
-    decrementDepthCounter(); // iflt pops 1
+    decrementDepthCounter(1); // iflt pops 1
   }
 
   @Override
   public void outAGteqExpr(AGteqExpr node) {
-    decrementDepthCounter(); // ifge pops 1
+    decrementDepthCounter(1); // ifge pops 1
   }
 
   @Override
   public void outAGtExpr(AGtExpr node) {
-    decrementDepthCounter(); // ifgt pops 1
+    decrementDepthCounter(1); // ifgt pops 1
   }
 
   // String operations
   @Override
   public void inAConcatExpr(AConcatExpr node) {
-    incrementDepthCounter(); // new StringBuffer pushes 1
-    incrementDepthCounter(); // dup pushes 1
-    decrementDepthCounter(); // invokespecial <init> pops 1
+    incrementDepthCounter(2); // new StringBuffer and dup each push 1
+    decrementDepthCounter(1); // invokespecial <init> pops 1
   }
 
   @Override
@@ -226,33 +276,33 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
 
   @Override
   public void outAConcatExpr(AConcatExpr node) {
-    decrementDepthCounter(); // invokevirtual toString pops 1
+    decrementDepthCounter(1); // invokevirtual toString pops 1
   }
 
   // Literal expressions
   @Override
   public void outABooleanExpr(ABooleanExpr node) {
-    incrementDepthCounter(); // ldc pushes 1
+    incrementDepthCounter(1); // ldc pushes 1
   }
 
   @Override
   public void outAFloatExpr(AFloatExpr node) {
-    incrementDepthCounter(); // ldc pushes 1
+    incrementDepthCounter(1); // ldc pushes 1
   }
 
   @Override
   public void outAIntExpr(AIntExpr node) {
-    incrementDepthCounter(); // ldc pushes 1
+    incrementDepthCounter(1); // ldc pushes 1
   }
 
   @Override
   public void outAStringExpr(AStringExpr node) {
-    incrementDepthCounter(); // ldc pushes 1
+    incrementDepthCounter(1); // ldc pushes 1
   }
 
   @Override
   public void outAIdExpr(AIdExpr node) {
-    incrementDepthCounter(); // iload/fload pushes 1
+    incrementDepthCounter(1); // iload/fload pushes 1
   }
 
   // Counter-logic
@@ -260,14 +310,14 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
     return this.maxDepthCounter;
   }
 
-  private void incrementDepthCounter() {
-    this.depthCounter++;
+  private void incrementDepthCounter(int by) {
+    this.depthCounter += by;
     if (this.depthCounter > this.maxDepthCounter) {
-      this.maxDepthCounter++;
+      this.maxDepthCounter = this.depthCounter;
     }
   }
 
-  private void decrementDepthCounter() {
-    this.depthCounter--;
+  private void decrementDepthCounter(int by) {
+    this.depthCounter -= by;
   }
 }

@@ -18,14 +18,14 @@ public class SymbolTable {
   private final HashMap<String, FunctionArgumentTypeList> functionArgumentListTable;
   private final HashMap<String, Type> functionReturnTypeTable;
   private final HashMap<String, HashMap<String, Symbol>> symbolTablePerScope;
-  private int lastSymbolNumber;
+  private final HashMap<String, Integer> nextFreeSymbolNumberPerScope;
 
   /** Create a new symbol table with empty collections. */
   public SymbolTable() {
     this.functionArgumentListTable = new HashMap<>();
     this.functionReturnTypeTable = new HashMap<>();
     this.symbolTablePerScope = new HashMap<>();
-    this.lastSymbolNumber = 0;
+    this.nextFreeSymbolNumberPerScope = new HashMap<>();
   }
 
   /** Creates the data structures for a new function scope. */
@@ -33,12 +33,15 @@ public class SymbolTable {
     functionArgumentListTable.put(scopeName, new FunctionArgumentTypeList());
     functionReturnTypeTable.put(scopeName, returnType);
     symbolTablePerScope.put(scopeName, new HashMap<>());
+    nextFreeSymbolNumberPerScope.put(scopeName, 0);
   }
 
   /** Adds a symbol to an existing function scope. */
   public void addSymbolToScope(String scopeName, String symbolId, Type symbolType) {
     HashMap<String, Symbol> scopeSymbolTable = symbolTablePerScope.get(scopeName);
-    scopeSymbolTable.put(symbolId, new Symbol(symbolType, ++lastSymbolNumber));
+    int symbolNumber = nextFreeSymbolNumberPerScope.get(scopeName);
+    scopeSymbolTable.put(symbolId, new Symbol(symbolType, symbolNumber));
+    nextFreeSymbolNumberPerScope.put(scopeName, ++symbolNumber);
   }
 
   public boolean containsSymbol(String scopeName, String symbolId) {
