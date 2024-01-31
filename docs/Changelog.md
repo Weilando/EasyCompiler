@@ -2,11 +2,12 @@
 
 This changelog lists [semantic versions](https://semver.org/spec/v2.0.0.html) and related changes.
 
-## 0.6.0: 2024-01-?? (#8)
+## 0.6.0: 2024-01-31 (#8)
 
 - :sparkles: add functions
 - :white_check_mark: extend and update tests
 - :memo: update description of functions
+- :recycle: improve readability
 
 ## 0.5.1: 2024-01-02 (#7)
 
