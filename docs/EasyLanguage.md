@@ -246,15 +246,9 @@ low        | `\|\|`      | Disjunction
 - [x] Code-generation (basic functionality)
 - [x] Implementation of floats
 - [x] Implementation of strings
-- [ ] Implementation of functions
+- [x] Implementation of functions
 - [ ] Implementation of arrays
 - [ ] Implementation of syntactic sugar
-
-### Implementation of functions
-
-- [x] extend grammar to parse function heads and bodies
-- [x] extend type-checking, add a symbol table for each function
-- [x] extend code-generation
 
 ### Implementation of arrays
 

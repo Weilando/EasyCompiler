@@ -101,6 +101,8 @@ public class StackDepthEvaluator extends DepthFirstAdapter {
     int numberOfArgs = node.getArgs().size();
     incrementDepthCounter(numberOfArgs); // parameters are pushed on the stack
     decrementDepthCounter(numberOfArgs);
+    incrementDepthCounter(1); // return value is pushed on the stack
+    decrementDepthCounter(1); // return value popped
   }
 
   // Statements

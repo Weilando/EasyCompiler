@@ -127,8 +127,8 @@ public class EasyCompiler {
     }
 
     try {
-      this.ast = generateAST();
-      printAST();
+      this.ast = generateAbstractSyntaxTree();
+      printAbstractSyntaxTree();
       LineEvaluator.setLines(this.ast);
     } catch (IOException e) {
       String filePath = this.sourceFilePath.toString();
@@ -201,7 +201,7 @@ public class EasyCompiler {
     return file.getName().matches("[a-zA-Z]\\w*\\.easy");
   }
 
-  Start generateAST() throws IOException, LexerException, ParserException {
+  Start generateAbstractSyntaxTree() throws IOException, LexerException, ParserException {
     FileReader fileReader = new FileReader(this.sourceFilePath.toFile());
     PushbackReader pushbackReader = new PushbackReader(fileReader);
     Lexer lexer = new Lexer(pushbackReader);
@@ -209,7 +209,7 @@ public class EasyCompiler {
     return parser.parse();
   }
 
-  private void printAST() {
+  private void printAbstractSyntaxTree() {
     if ((this.ast != null) && verbose) {
       ASTPrinter printer = new ASTPrinter();
       this.ast.apply(printer);
