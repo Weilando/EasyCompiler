@@ -1,16 +1,8 @@
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-
 import codegeneration.CodeCache;
 import codegeneration.CodeGenerator;
-import java.io.File;
-import java.io.FileReader;
+
 import java.io.IOException;
 import java.io.PushbackReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import lexer.Lexer;
 import lexer.LexerException;
@@ -34,13 +26,13 @@ import typecheck.TypeChecker;
 /** Compiler for the Easy language. */
 public class EasyCompiler {
   private boolean verbose;
-  private final Path sourceFilePath;
   private Start ast;
-  private ArrayList<String> code;
+  ArrayList<String> code;
   private SymbolTable symbolTable;
   private SymbolTableBuilder symbolTableBuilder;
   private TypeChecker typeChecker;
   private boolean parseErrorOccurred = false;
+  public FileHandler fileHandler;
 
   /**
    * Constructor for the EasyCompiler class. Please note that each instance
@@ -50,12 +42,7 @@ public class EasyCompiler {
    */
   public EasyCompiler(String sourceFilePath) {
     this.verbose = false;
-
-    if (!isValidFileName(sourceFilePath)) {
-      System.out.println("Invalid file path '%s'.".formatted(sourceFilePath));
-      System.exit(0);
-    }
-    this.sourceFilePath = Paths.get(sourceFilePath);
+    this.fileHandler = new FileHandler(sourceFilePath);
   }
 
   /**
@@ -67,12 +54,7 @@ public class EasyCompiler {
    */
   public EasyCompiler(String sourceFilePath, boolean verbose) {
     this.verbose = verbose;
-
-    if (!isValidFileName(sourceFilePath)) {
-      System.out.println("Invalid file path '%s'.".formatted(sourceFilePath));
-      System.exit(0);
-    }
-    this.sourceFilePath = Paths.get(sourceFilePath);
+    this.fileHandler = new FileHandler(sourceFilePath);
   }
 
   /* Generates options for the command line interface parser. */
@@ -168,42 +150,9 @@ public class EasyCompiler {
     }
   }
 
-  // ------------
-  // Compilation
-  // ------------
-  void compile() {
-    if (generateCode() && writeOutputFile()) {
-      System.out.println("Successful!");
-    }
-  }
-
-  boolean generateCode() {
-    if (parse() && typeCheck()) {
-      CodeCache codeCache = new CodeCache();
-      CodeGenerator codeGenerator = new CodeGenerator(
-          codeCache, getProgramName(), this.symbolTable);
-      ast.apply(codeGenerator);
-      this.code = codeCache.getCode();
-
-      return true;
-    }
-    return false;
-  }
-
-  // ---------
-  // Analysis
-  // ---------
-  void liveness() {
-    if (parse() && typeCheck()) {
-      LivenessAnalyzer analyzer = new LivenessAnalyzer(ast, this.symbolTable);
-
-      if (verbose) {
-        analyzer.printGraph();
-      }
-
-      System.out.println(String.format("Registers: %d", analyzer.getMinimumRegisters()));
-    }
-  }
+  // -------
+  // Parsing
+  // -------
 
   boolean parse() {
     if ((ast == null) && parseErrorOccurred) {
@@ -215,7 +164,7 @@ public class EasyCompiler {
       printAbstractSyntaxTree();
       LineEvaluator.setLines(this.ast);
     } catch (IOException e) {
-      String filePath = this.sourceFilePath.toString();
+      String filePath = this.fileHandler.getFilePath();
       System.out.println(
           "Input-Error: An error occurred while reading input file \"%s\".".formatted(filePath));
       System.out.println(e.toString());
@@ -232,31 +181,45 @@ public class EasyCompiler {
     return true;
   }
 
+  Start generateAbstractSyntaxTree() throws IOException, LexerException, ParserException {
+    PushbackReader fileReader = this.fileHandler.getPushbackReader();
+    Lexer lexer = new Lexer(fileReader);
+    Parser parser = new Parser(lexer);
+    return parser.parse();
+  }
+
+  private void printAbstractSyntaxTree() {
+    if ((this.ast != null) && verbose) {
+      ASTPrinter printer = new ASTPrinter();
+      this.ast.apply(printer);
+    }
+  }
+
+  // -------------
+  // Type-Checking
+  // -------------
   boolean buildSymbolTable() {
     if (!parse()) {
       return false;
-    } else if (this.symbolTableBuilder != null) {
-      return true;
+    } else if (this.symbolTableBuilder == null) {
+      this.symbolTableBuilder = new SymbolTableBuilder();
+      this.ast.apply(symbolTableBuilder);
+      this.symbolTable = symbolTableBuilder.getSymbolTable();
     }
-
-    this.symbolTableBuilder = new SymbolTableBuilder();
-    this.ast.apply(symbolTableBuilder);
-    this.symbolTable = symbolTableBuilder.getSymbolTable();
 
     return !this.symbolTableBuilder.errorsOccurred();
   }
 
   boolean typeCheck() {
-    if (!parse() || !buildSymbolTable()) {
+    if (!parse()) {
       return false;
-    } else if (this.typeChecker != null) {
-      return true;
+    } else if (this.typeChecker == null) {
+      buildSymbolTable();
+      this.typeChecker = new TypeChecker(this.symbolTable);
+      this.ast.apply(this.typeChecker);
     }
 
-    this.typeChecker = new TypeChecker(this.symbolTable);
-    this.ast.apply(this.typeChecker);
-
-    return !this.typeChecker.errorsOccurred();
+    return !(this.symbolTableBuilder.errorsOccurred() || this.typeChecker.errorsOccurred());
   }
 
   int getSymbolErrorNumber() {
@@ -269,51 +232,40 @@ public class EasyCompiler {
     return this.typeChecker.getErrorNumber();
   }
 
-  // --------
-  // Helpers
-  // --------
-  String getProgramName() {
-    return this.sourceFilePath.getFileName().toString().replaceAll(".easy", "");
-  }
+  // -----------------
+  // Liveness-Analysis
+  // -----------------
+  void liveness() {
+    if (parse() && typeCheck()) {
+      LivenessAnalyzer analyzer = new LivenessAnalyzer(ast, this.symbolTable);
 
-  String getJasminFileNameAndPath() {
-    return this.sourceFilePath.toString().replace(".easy", ".j");
-  }
+      if (verbose) {
+        analyzer.printGraph();
+      }
 
-  static boolean isValidFileName(String fileName) {
-    File file = new File(fileName);
-    return file.getName().matches("[a-zA-Z]\\w*\\.easy");
-  }
-
-  Start generateAbstractSyntaxTree() throws IOException, LexerException, ParserException {
-    FileReader fileReader = new FileReader(this.sourceFilePath.toFile());
-    PushbackReader pushbackReader = new PushbackReader(fileReader);
-    Lexer lexer = new Lexer(pushbackReader);
-    Parser parser = new Parser(lexer);
-    return parser.parse();
-  }
-
-  private void printAbstractSyntaxTree() {
-    if ((this.ast != null) && verbose) {
-      ASTPrinter printer = new ASTPrinter();
-      this.ast.apply(printer);
+      System.out.println(String.format("Registers: %d", analyzer.getMinimumRegisters()));
     }
   }
 
-  boolean writeOutputFile() {
-    if (this.code == null) {
-      System.out.println("The output file could not be written, because no code was generated.");
-      return false;
+  // ------------
+  // Compilation
+  // ------------
+  void compile() {
+    if (generateCode() && fileHandler.writeOutputFile(this.code)) {
+      System.out.println("Successful!");
     }
+  }
 
-    try {
-      Path jasminFile = Paths.get(getJasminFileNameAndPath());
-      Files.write(jasminFile, this.code, StandardCharsets.UTF_8, CREATE, TRUNCATE_EXISTING);
-    } catch (IOException e) {
-      System.out.println("An error occurred while writing the output file.");
-      e.printStackTrace();
-      return false;
+  boolean generateCode() {
+    if (parse() && typeCheck()) {
+      CodeCache codeCache = new CodeCache();
+      CodeGenerator codeGenerator = new CodeGenerator(
+          codeCache, fileHandler.getProgramName(), this.symbolTable);
+      ast.apply(codeGenerator);
+      this.code = codeCache.getCode();
+
+      return true;
     }
-    return true;
+    return false;
   }
 }

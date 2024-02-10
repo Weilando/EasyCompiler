@@ -1,4 +1,3 @@
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -90,53 +89,5 @@ public class EasyCompilerTest {
     EasyCompiler.main(args);
     assertTrue(outContent.toString().contains("Parser-Error: "));
     assertFalse(outContent.toString().contains("Successful!"));
-  }
-
-  // ---------------------
-  // Test isValidFileName
-  // ---------------------
-  @Test
-  public void emptyStringIsNoValidFileName() {
-    String invalidFileName = "";
-    assertFalse(EasyCompiler.isValidFileName(invalidFileName));
-  }
-
-  @Test
-  public void fileExtensionIsInvalidFileName() {
-    String invalidFileName = ".easy";
-    assertFalse(EasyCompiler.isValidFileName(invalidFileName));
-  }
-
-  @Test
-  public void nameWithoutFileExtensionIsInvalidFileName() {
-    String invalidFileName = "Program";
-    assertFalse(EasyCompiler.isValidFileName(invalidFileName));
-  }
-
-  @Test
-  public void nameWithoutLetterIsInvalidFileName() {
-    String invalidFileName = "1.easy";
-    assertFalse(EasyCompiler.isValidFileName(invalidFileName));
-  }
-
-  @Test
-  public void validFileName() {
-    String validFileName = "Program_1.easy";
-    assertTrue(EasyCompiler.isValidFileName(validFileName));
-  }
-
-  // --------------------
-  // Test helper methods
-  // --------------------
-  @Test
-  public void generateCorrectJasminFileNameAndPath() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathMinimalProgram);
-    assertEquals("src/test/resources/correct/Minimal.j", easyCompiler.getJasminFileNameAndPath());
-  }
-
-  @Test
-  public void extractCorrectProgramName() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathMinimalProgram);
-    assertEquals("Minimal", easyCompiler.getProgramName());
   }
 }
