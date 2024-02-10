@@ -17,6 +17,14 @@ import lexer.LexerException;
 import lineevaluation.LineEvaluator;
 import livenessanalysis.LivenessAnalyzer;
 import node.Start;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import parser.Parser;
 import parser.ParserException;
 import symboltable.SymbolTable;
@@ -25,7 +33,7 @@ import typecheck.TypeChecker;
 
 /** Compiler for the Easy language. */
 public class EasyCompiler {
-  private final boolean verbose = false;
+  private boolean verbose;
   private final Path sourceFilePath;
   private Start ast;
   private ArrayList<String> code;
@@ -41,12 +49,81 @@ public class EasyCompiler {
    * @param sourceFilePath Path to the source file
    */
   public EasyCompiler(String sourceFilePath) {
+    this.verbose = false;
+
     if (!isValidFileName(sourceFilePath)) {
-      System.out.println("Invalid file name.");
+      System.out.println("Invalid file path '%s'.".formatted(sourceFilePath));
       System.exit(0);
     }
-
     this.sourceFilePath = Paths.get(sourceFilePath);
+  }
+
+  /**
+   * Constructor for the EasyCompiler class. Please note that each instance
+   * handles a single source file.
+   *
+   * @param sourceFilePath Path to the source file
+   * @param verbose        Flag indicating if additional logs occur
+   */
+  public EasyCompiler(String sourceFilePath, boolean verbose) {
+    this.verbose = verbose;
+
+    if (!isValidFileName(sourceFilePath)) {
+      System.out.println("Invalid file path '%s'.".formatted(sourceFilePath));
+      System.exit(0);
+    }
+    this.sourceFilePath = Paths.get(sourceFilePath);
+  }
+
+  /* Generates options for the command line interface parser. */
+  private static Options generateCommandLineOptions() {
+    OptionGroup mainCommandGroup = new OptionGroup();
+    mainCommandGroup.setRequired(true);
+    mainCommandGroup.addOption(Option.builder("c")
+        .longOpt("compile")
+        .hasArg(true)
+        .argName("filePath")
+        .desc("Compile the given source file. Includes parsing and type-checking.")
+        .build());
+    mainCommandGroup.addOption(Option.builder("p")
+        .longOpt("parse")
+        .hasArg(true)
+        .argName("filePath")
+        .desc("Parses the source file and checks the syntax.")
+        .build());
+    mainCommandGroup.addOption(Option.builder("t")
+        .longOpt("typeCheck")
+        .hasArg(true)
+        .argName("filePath")
+        .desc("Check types for the source file. Includes parsing.")
+        .build());
+    mainCommandGroup.addOption(Option.builder("l")
+        .longOpt("liveness")
+        .hasArg(true)
+        .argName("filePath")
+        .desc("Liveness analysis for each function in the source file. Includes type checking.")
+        .build());
+    mainCommandGroup.addOption(Option.builder("h")
+        .longOpt("help")
+        .hasArg(false)
+        .desc("Prints available options and commands.")
+        .build());
+
+    Options options = new Options();
+    options.addOptionGroup(mainCommandGroup);
+    options.addOption("v", "verbose", false,
+        "Enables debug outputs.");
+
+    return options;
+  }
+
+  /* Prints the correct usage and available command line options. */
+  private static void printCorrectCall(Options options) {
+    HelpFormatter formatter = new HelpFormatter();
+    final String header = "Compiler and analyzer for the Easy language.";
+
+    formatter.printHelp(80, "EasyCompiler", header,
+        options, "", true);
   }
 
   /**
@@ -55,32 +132,39 @@ public class EasyCompiler {
    * @param args Command line arguments
    */
   public static void main(String[] args) {
-    final String correctCall = "java EasyCompiler -[compile|liveness|typeCheck|parse] <file>.easy";
-    EasyCompiler easyCompiler;
+    Options options = generateCommandLineOptions();
+    CommandLine parsedOptions;
 
-    if (args.length == 2) {
-      easyCompiler = new EasyCompiler(args[1]);
+    try {
+      CommandLineParser cliParser = new DefaultParser();
+      parsedOptions = cliParser.parse(options, args);
 
-      switch (args[0]) {
-        case "-compile":
-          easyCompiler.compile();
-          break;
-        case "-liveness":
-          easyCompiler.liveness();
-          break;
-        case "-typeCheck":
-          easyCompiler.typeCheck();
-          break;
-        case "-parse":
-          easyCompiler.parse();
-          break;
-        default:
-          System.out.println("Unknown Option. Correct call:");
-          System.out.println(correctCall);
+      EasyCompiler easyCompiler;
+      String filePath;
+      boolean verbose = parsedOptions.hasOption("v");
+      if (parsedOptions.hasOption("h")) {
+        printCorrectCall(options);
+      } else if (parsedOptions.hasOption("c")) {
+        filePath = parsedOptions.getOptionValue("c");
+        easyCompiler = new EasyCompiler(filePath, verbose);
+        easyCompiler.compile();
+      } else if (parsedOptions.hasOption("p")) {
+        filePath = parsedOptions.getOptionValue("p");
+        easyCompiler = new EasyCompiler(filePath, verbose);
+        easyCompiler.parse();
+      } else if (parsedOptions.hasOption("t")) {
+        filePath = parsedOptions.getOptionValue("t");
+        easyCompiler = new EasyCompiler(filePath, verbose);
+        easyCompiler.typeCheck();
+      } else if (parsedOptions.hasOption("l")) {
+        filePath = parsedOptions.getOptionValue("l");
+        easyCompiler = new EasyCompiler(filePath, verbose);
+        easyCompiler.liveness();
       }
-    } else {
-      System.out.println("Missing argument. Correct call:");
-      System.out.println(correctCall);
+    } catch (ParseException e) {
+      printCorrectCall(options);
+    } catch (Exception e) {
+      System.out.println("An unexpected error occurred: %s".formatted(e.getMessage()));
     }
   }
 
