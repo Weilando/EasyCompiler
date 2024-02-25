@@ -4,11 +4,17 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 import symboltable.Symbol;
 
+/** Node in an interference graph. */
 public class InterferenceGraphNode {
   private final Symbol symbol;
   private final HashSet<InterferenceGraphNode> neighbors;
   private int color;
 
+  /**
+   * Node in an interference graph.
+   *
+   * @param symbol Related symbol of this node.
+   */
   public InterferenceGraphNode(Symbol symbol) {
     this.symbol = symbol;
     this.color = -1;

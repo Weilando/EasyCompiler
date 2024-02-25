@@ -3,6 +3,7 @@ package livenessanalysis;
 import java.util.HashSet;
 import symboltable.Symbol;
 
+/** Node in a dataflow graph. */
 public class DataflowNode implements Comparable<DataflowNode> {
   private final int number;
   private final String statementType;
@@ -13,6 +14,12 @@ public class DataflowNode implements Comparable<DataflowNode> {
   private final HashSet<Symbol> in;
   private final HashSet<Symbol> out;
 
+  /**
+   * Node in a dataflow graph.
+   *
+   * @param number        Identifier of this node.
+   * @param statementType Related statement of this node.
+   */
   public DataflowNode(int number, String statementType) {
     this.number = number;
     this.statementType = statementType;

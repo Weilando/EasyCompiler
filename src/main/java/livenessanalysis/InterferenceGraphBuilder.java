@@ -6,10 +6,21 @@ import java.util.PriorityQueue;
 import symboltable.Symbol;
 import symboltable.SymbolTable;
 
+/**
+ * Builder for an interference graph. Builds an interference graph based on a
+ * dataflow graph.
+ */
 public class InterferenceGraphBuilder {
   private final HashMap<Symbol, InterferenceGraphNode> nodes;
   private final DataflowNode dataflowStart;
 
+  /**
+   * Builder for an interference graph. Builds an interference graph based on a
+   * dataflow graph.
+   *
+   * @param symbolTable   Filled symbol table.
+   * @param dataflowStart Start node of the dataflow graph.
+   */
   public InterferenceGraphBuilder(SymbolTable symbolTable, DataflowNode dataflowStart) {
     this.dataflowStart = dataflowStart;
     this.nodes = symbolTable.generateInterferenceGraphNodes("main");

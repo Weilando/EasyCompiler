@@ -4,22 +4,28 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import symboltable.Symbol;
 
+/**
+ * Analyzer for an existing dataflow graph. Iterates over the graph and
+ * determines in- and out-sets. Might be used to find unused variables.
+ */
 public class DataflowAnalyzer {
   private final DataflowNode start;
 
+  /**
+   * Analyzer for an existing dataflow graph. Iterates over the graph and
+   * determines in- and out-sets. Might be used to find unused variables.
+   *
+   * @param dataflowGraphBuilder DataflowGraphBuilder with existing graph.
+   */
   public DataflowAnalyzer(DataflowGraphBuilder dataflowGraphBuilder) {
     // analysis should run from the end to start for speedup
     this.start = dataflowGraphBuilder.getCurrent();
-    analyzeGraph();
-  }
-
-  private void analyzeGraph() {
     generateInAndOutSets();
   }
 
   /*
-   * Algorithm 10.4 from Appel, Modern Compiler Impl. in Java. Initial in- and
-   * out-sets are empty.
+   * Analyze the dataflow graph using Algorithm 10.4 from Appel, Modern Compiler
+   * Impl. in Java. Initial in- and out-sets are empty.
    */
   private void generateInAndOutSets() {
     if (start.getPredecessors().isEmpty()) {

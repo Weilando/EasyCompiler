@@ -14,12 +14,22 @@ import node.AWhileStat;
 import symboltable.Symbol;
 import symboltable.SymbolTable;
 
+/**
+ * Builder for a dataflow graph. Performs a backwards analysis of the AST (i.e.,
+ * uses a depth first approach).
+ */
 public class DataflowGraphBuilder extends DepthFirstAdapter {
   private final DataflowNode start;
   private final SymbolTable symbolTable;
   private DataflowNode current;
   private int currentNumber;
 
+  /**
+   * Builder for a dataflow graph. Performs a backwards analysis of the AST (i.e.,
+   * uses a depth first approach).
+   *
+   * @param symbolTable Filled symbol table for the corresponding AST.
+   */
   public DataflowGraphBuilder(SymbolTable symbolTable) {
     this.symbolTable = symbolTable;
     this.start = new DataflowNode(0, "start");
