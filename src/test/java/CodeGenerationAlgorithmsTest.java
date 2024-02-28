@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -78,7 +77,7 @@ public class CodeGenerationAlgorithmsTest {
     setupClassExecutionProcess(testName);
 
     assertEquals(0, classProcess.waitFor());
-    assertEquals("14\ntrue\n3\n4", inputStreamString);
+    assertEquals("true\n14\n3/4", inputStreamString);
   }
 
   @Test

@@ -19,10 +19,12 @@ public class InterferenceGraphAnalyzer {
    *
    * @param symbolTable   Filled symbol table.
    * @param dataflowStart Start node of the dataflow graph.
+   * @param functionName  Name of the function to build the graph for.
    */
-  public InterferenceGraphAnalyzer(SymbolTable symbolTable, DataflowNode dataflowStart) {
+  public InterferenceGraphAnalyzer(
+      SymbolTable symbolTable, DataflowNode dataflowStart, String functionName) {
     InterferenceGraphBuilder graphBuilder = new InterferenceGraphBuilder(
-        symbolTable, dataflowStart);
+        symbolTable, dataflowStart, functionName);
     this.nodes = graphBuilder.getGraphNodeSet();
     this.colors = 0;
     colorGraph();

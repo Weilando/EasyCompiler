@@ -1,4 +1,14 @@
-// reduce fraction
+int <- abs(int number) {
+  if(number < 0) {
+      return -number;
+  } else {
+    return number;
+  }
+}
+
+/* Reduce fraction numerator/denominator.
+  Print false, if gcd could not be calculated.
+  Print true and the reduced fraction, otherwise. */
 none <- main() {
   int a = 42;
   int b = 56;
@@ -9,35 +19,23 @@ none <- main() {
   if(denominator == 0) { // check zero-division
     println(false);
   } else { // reduce fraction
-    // calculate abs(a) and abs(b)
-    if(a<0) {
-      a = -a;
-    }
-    if(b<0) {
-      b = -b;
-    }
+    a = abs(a);
+    b = abs(b);
 
     // use Euclid's algoritm to find gcd(a,b)
     if(a <= 0 || b <= 0) {
-      a = -1;
+      println(false);  // cannot calculate gcd
+      //return;
     } else {
       while(b > 0) {
         c = a % b;
         a = b;
         b = c;
       }
-    }
 
-    println(a); // print result
-    /* Reduce fraction numerator/denominator.
-    Print false, if gcd could not be calculated.
-    Print true and the reduced fraction, otherwise. */
-    if(a == -1) {
-      println(false);
-    } else {
       println(true);
-      println(numerator / a);
-      println(denominator / a);
+      println(a); // gcd
+      println((numerator / a) § "/" § (denominator / a));  // reduced fraction
     }
   }
 }

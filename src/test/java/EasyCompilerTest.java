@@ -52,14 +52,6 @@ public class EasyCompilerTest {
   }
 
   @Test
-  public void callWithLivenessFlagAndFilenameShouldWork() {
-    // Use an incorrect file to avoid any output-files.
-    String[] args = { "-liveness", pathMinimalProgram };
-    EasyCompiler.main(args);
-    assertTrue(outContent.toString().contains("Registers: 0"));
-  }
-
-  @Test
   public void callWithParseFlagAndFilenameShouldWork() {
     String[] args = { "-parse", pathMinimalProgram };
     EasyCompiler.main(args);

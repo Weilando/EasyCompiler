@@ -20,10 +20,12 @@ public class InterferenceGraphBuilder {
    *
    * @param symbolTable   Filled symbol table.
    * @param dataflowStart Start node of the dataflow graph.
+   * @param functionName  Name of the function to build the graph for.
    */
-  public InterferenceGraphBuilder(SymbolTable symbolTable, DataflowNode dataflowStart) {
+  public InterferenceGraphBuilder(
+      SymbolTable symbolTable, DataflowNode dataflowStart, String functionName) {
     this.dataflowStart = dataflowStart;
-    this.nodes = symbolTable.generateInterferenceGraphNodes("main");
+    this.nodes = symbolTable.generateInterferenceGraphNodes(functionName);
     generateEdges();
   }
 

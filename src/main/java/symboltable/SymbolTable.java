@@ -1,5 +1,6 @@
 package symboltable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import livenessanalysis.InterferenceGraphNode;
 import node.AFunc;
@@ -42,6 +43,10 @@ public class SymbolTable {
     int symbolNumber = nextFreeSymbolNumberPerScope.get(scopeName);
     scopeSymbolTable.put(symbolId, new Symbol(symbolType, symbolNumber));
     nextFreeSymbolNumberPerScope.put(scopeName, ++symbolNumber);
+  }
+
+  public ArrayList<String> getScopeNames() {
+    return new ArrayList<>(this.functionReturnTypeTable.keySet());
   }
 
   public boolean containsSymbol(String scopeName, String symbolId) {

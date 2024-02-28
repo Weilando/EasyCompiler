@@ -1,9 +1,9 @@
 import codegeneration.CodeCache;
 import codegeneration.CodeGenerator;
-
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import lexer.Lexer;
 import lexer.LexerException;
 import lineevaluation.LineEvaluator;
@@ -31,6 +31,7 @@ public class EasyCompiler {
   private SymbolTable symbolTable;
   private SymbolTableBuilder symbolTableBuilder;
   private TypeChecker typeChecker;
+  private LivenessAnalyzer livenessAnalyzer;
   private boolean parseErrorOccurred = false;
   public FileHandler fileHandler;
 
@@ -141,7 +142,7 @@ public class EasyCompiler {
       } else if (parsedOptions.hasOption("l")) {
         filePath = parsedOptions.getOptionValue("l");
         easyCompiler = new EasyCompiler(filePath, verbose);
-        easyCompiler.liveness();
+        easyCompiler.getMinimumRegistersPerFunction();
       }
     } catch (ParseException e) {
       printCorrectCall(options);
@@ -235,15 +236,29 @@ public class EasyCompiler {
   // -----------------
   // Liveness-Analysis
   // -----------------
-  void liveness() {
+  boolean liveness() {
     if (parse() && typeCheck()) {
-      LivenessAnalyzer analyzer = new LivenessAnalyzer(ast, this.symbolTable);
-
-      if (verbose) {
-        analyzer.printGraph();
+      if (this.livenessAnalyzer == null) {
+        this.livenessAnalyzer = new LivenessAnalyzer(ast, this.symbolTable);
       }
+      return true;
+    } else {
+      return false;
+    }
+  }
 
-      System.out.println(String.format("Registers: %d", analyzer.getMinimumRegisters()));
+  HashMap<String, Integer> getMinimumRegistersPerFunction() {
+    if (liveness()) {
+      HashMap<String, Integer> minRegs = this.livenessAnalyzer.getMinimumRegistersPerFunction();
+      if (this.verbose) {
+        System.out.println("Liveness analysis");
+
+        minRegs.forEach((function, registerCount) -> System.out
+            .println("Minimum registers for %s: %d".formatted(function, registerCount)));
+      }
+      return minRegs;
+    } else {
+      return new HashMap<>();
     }
   }
 
