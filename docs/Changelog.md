@@ -2,6 +2,15 @@
 
 This changelog lists [semantic versions](https://semver.org/spec/v2.0.0.html) and related changes.
 
+## Unversioned: ? (#?)
+
+- :sparkles: improve CLI
+- :sparkles: implement liveness-analysis per function
+- :sparkles: add unused argument analysis per function
+- :white_check_mark: extend and update tests
+- :memo: improve documentation of liveness-analysis
+- :recycle: improve overall readability and maintainability
+
 ## 0.6.0: 2024-01-31 (#8)
 
 - :sparkles: add functions

@@ -137,7 +137,7 @@ b = true;
 _Easy_ is strictly type save and performs typecasts whenever necessary.
 
 
-## Arrays
+## Arrays (not implemented)
 
 Arrays need to be declared, but not initialized.
 Indices start at `0`.
@@ -247,19 +247,13 @@ low        | `\|\|`      | Disjunction
 - [x] Implementation of floats
 - [x] Implementation of strings
 - [x] Implementation of functions
+- [x] Implementation of liveness-analysis per function (sufficient, as all variables are local)
 - [ ] Implementation of arrays
 - [ ] Implementation of syntactic sugar
-
-### Implementation of arrays
-
-- [ ] extend grammar
-- [ ] extend type-checking
-- [ ] extend code-generation
 
 ### Syntactic sugar and further features
 
 Syntactic sugar may be added as additional features.
-A tick indicates it has been added:
 
 - [ ] Short forms for assignment and arithmetic operators (i.e., `id += expr;` instead of `id = id + expr;`)
 - [ ] Increment and decrement (i.e., `id++;` instead if `id += 1;` and `id--` instead `id -= 1;`)
