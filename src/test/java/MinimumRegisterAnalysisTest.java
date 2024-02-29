@@ -1,16 +1,14 @@
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.HashMap;
 import org.junit.jupiter.api.Test;
 
-public class LivenessAnalysisTest {
+public class MinimumRegisterAnalysisTest {
   private final String pathAlgorithms = "src/test/resources/algorithms/";
   private final String pathTestFilesCorrect = "src/test/resources/correct/";
   private final String pathTestFilesLiveness = "src/test/resources/liveness/";
 
-  // ------------------------
-  // Tests liveness-analysis
-  // ------------------------
   @Test
   public void zeroVariablesNeed0Registers() {
     EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "noVariable.easy");

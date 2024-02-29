@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import lexer.Lexer;
 import lexer.LexerException;
 import lineevaluation.LineEvaluator;
@@ -19,6 +20,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import parser.Parser;
 import parser.ParserException;
+import symboltable.Symbol;
 import symboltable.SymbolTable;
 import symboltable.SymbolTableBuilder;
 import typecheck.TypeChecker;
@@ -95,7 +97,7 @@ public class EasyCompiler {
     Options options = new Options();
     options.addOptionGroup(mainCommandGroup);
     options.addOption("v", "verbose", false,
-        "Enables debug outputs.");
+        "Enables more detailed outputs.");
 
     return options;
   }
@@ -143,6 +145,7 @@ public class EasyCompiler {
         filePath = parsedOptions.getOptionValue("l");
         easyCompiler = new EasyCompiler(filePath, verbose);
         easyCompiler.getMinimumRegistersPerFunction();
+        easyCompiler.getUnusedArgsPerFunction();
       }
     } catch (ParseException e) {
       printCorrectCall(options);
@@ -156,8 +159,10 @@ public class EasyCompiler {
   // -------
 
   boolean parse() {
-    if ((ast == null) && parseErrorOccurred) {
+    if ((this.ast == null) && this.parseErrorOccurred) {
       return false;
+    } else if (this.ast != null) {
+      return true;
     }
 
     try {
@@ -241,6 +246,12 @@ public class EasyCompiler {
       if (this.livenessAnalyzer == null) {
         this.livenessAnalyzer = new LivenessAnalyzer(ast, this.symbolTable);
       }
+      if (this.verbose) {
+        ArrayList<String> functionNames = this.symbolTable.getScopeNames();
+        for (String function : functionNames) {
+          this.livenessAnalyzer.printDataflowGraph(function);
+        }
+      }
       return true;
     } else {
       return false;
@@ -250,13 +261,26 @@ public class EasyCompiler {
   HashMap<String, Integer> getMinimumRegistersPerFunction() {
     if (liveness()) {
       HashMap<String, Integer> minRegs = this.livenessAnalyzer.getMinimumRegistersPerFunction();
-      if (this.verbose) {
-        System.out.println("Liveness analysis");
 
-        minRegs.forEach((function, registerCount) -> System.out
-            .println("Minimum registers for %s: %d".formatted(function, registerCount)));
-      }
+      System.out.println("\nMinimum required registers per function:");
+      minRegs.forEach((function, registerCount) -> System.out
+          .println("Minimum registers for %s: %d".formatted(function, registerCount)));
+
       return minRegs;
+    } else {
+      return new HashMap<>();
+    }
+  }
+
+  HashMap<String, List<Symbol>> getUnusedArgsPerFunction() {
+    if (liveness()) {
+      HashMap<String, List<Symbol>> unusedArgs = this.livenessAnalyzer.getUnusedArgsPerFunction();
+
+      System.out.println("\nUnused arguments per function:");
+      unusedArgs.forEach((function, unusedArguments) -> System.out
+          .println("Unused arguments for %s: %s".formatted(function, unusedArguments)));
+
+      return unusedArgs;
     } else {
       return new HashMap<>();
     }

@@ -1,0 +1,6 @@
+int <- f(int a, boolean b, string s) {
+    int c = 2;
+    return a;
+}
+
+none <- main() {}

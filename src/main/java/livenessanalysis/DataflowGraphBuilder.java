@@ -3,11 +3,14 @@ package livenessanalysis;
 import analysis.DepthFirstAdapter;
 import java.util.PriorityQueue;
 import node.AAssignStat;
+import node.ADeclArg;
 import node.ADeclStat;
+import node.AFunc;
 import node.AIdExpr;
 import node.AIfStat;
 import node.AIfelseStat;
 import node.AInitStat;
+import node.AMain;
 import node.APrintStat;
 import node.APrintlnStat;
 import node.AWhileStat;
@@ -16,25 +19,47 @@ import symboltable.SymbolTable;
 
 /**
  * Builder for a dataflow graph. Performs a backwards analysis of the AST (i.e.,
- * uses a depth first approach).
+ * uses a depth first approach). To build a dataflow graph, apply this class to
+ * a function-related sub-tree of the AST.
  */
 public class DataflowGraphBuilder extends DepthFirstAdapter {
-  private final DataflowNode start;
+  private DataflowNode start;
   private final SymbolTable symbolTable;
   private DataflowNode current;
   private int currentNumber;
 
   /**
    * Builder for a dataflow graph. Performs a backwards analysis of the AST (i.e.,
-   * uses a depth first approach).
+   * uses a depth first approach). To build a dataflow graph, apply this class to
+   * a function-related sub-tree of the AST.
    *
    * @param symbolTable Filled symbol table for the corresponding AST.
    */
   public DataflowGraphBuilder(SymbolTable symbolTable) {
     this.symbolTable = symbolTable;
-    this.start = new DataflowNode(0, "start");
+    this.start = null;
     this.currentNumber = 0;
-    this.current = start;
+    this.current = null;
+  }
+
+  @Override
+  public void inAFunc(AFunc node) {
+    this.start = getNewSymbolNode("function head");
+    this.current = this.start;
+  }
+
+  @Override
+  public void inAMain(AMain node) {
+    this.start = getNewSymbolNode("function head");
+    this.current = this.start;
+  }
+
+  @Override
+  public void inADeclArg(ADeclArg node) {
+    String id = node.getId().getText();
+    String scopeName = symbolTable.determineScope(node);
+    Symbol defSymbol = symbolTable.getSymbol(scopeName, id);
+    current.addDef(defSymbol);
   }
 
   // Statements
@@ -138,10 +163,15 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
     return new DataflowNode(++currentNumber, statementType);
   }
 
-  DataflowNode getCurrent() {
-    return current;
+  DataflowNode getStart() {
+    return this.start;
   }
 
+  DataflowNode getCurrent() {
+    return this.current;
+  }
+
+  /** Print the resulting dataflow graph including relevant sets. */
   public void printGraph() {
     PriorityQueue<DataflowNode> printQueue = new PriorityQueue<>();
     printQueue.add(start);

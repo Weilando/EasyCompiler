@@ -88,7 +88,7 @@ public class DataflowNode implements Comparable<DataflowNode> {
     return number;
   }
 
-  private String getSuccessorNumberSet() {
+  private String getSuccessorNumbers() {
     String returnString = "{";
     for (DataflowNode curr : getSuccessors()) {
       returnString = returnString.concat(String.format("#%d, ", curr.getNumber()));
@@ -100,9 +100,11 @@ public class DataflowNode implements Comparable<DataflowNode> {
     return statementType;
   }
 
+  /** Generate a string representation including all relevant sets. */
   public String toString() {
-    return String.format("#%d\tDef: %s Use: %s, In: %s, Out: %s, Edges to: %s, Statement type: %s",
-        getNumber(), getDef(), getUse(), getIn(), getOut(), getSuccessorNumberSet(), getStatementType());
+    return "#%d\tDef: %s Use: %s, In: %s, Out: %s, Edges to: %s, Statement type: %s".formatted(
+        getNumber(), getDef(), getUse(), getIn(), getOut(),
+        getSuccessorNumbers(), getStatementType());
   }
 
   public int compareTo(DataflowNode node) {
