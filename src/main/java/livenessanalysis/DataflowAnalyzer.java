@@ -9,7 +9,7 @@ import symboltable.Symbol;
  * determines in- and out-sets. Might be used to find unused variables.
  */
 public class DataflowAnalyzer {
-  private final DataflowNode start; // the Analyzer's start is the builder's bottom node
+  private final DataflowNode start; // the Analyzer's start is the builder's end node
 
   /**
    * Analyzer for an existing dataflow graph. Iterates over the graph and

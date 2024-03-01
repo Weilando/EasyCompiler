@@ -245,11 +245,11 @@ public class EasyCompiler {
     if (parse() && typeCheck()) {
       if (this.livenessAnalyzer == null) {
         this.livenessAnalyzer = new LivenessAnalyzer(ast, this.symbolTable);
-      }
-      if (this.verbose) {
-        ArrayList<String> functionNames = this.symbolTable.getScopeNames();
-        for (String function : functionNames) {
-          this.livenessAnalyzer.printDataflowGraph(function);
+        if (this.verbose) {
+          ArrayList<String> functionNames = this.symbolTable.getScopeNames();
+          for (String function : functionNames) {
+            this.livenessAnalyzer.printDataflowGraph(function);
+          }
         }
       }
       return true;

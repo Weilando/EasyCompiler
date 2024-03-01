@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import node.Node;
 import node.Start;
 import symboltable.Symbol;
+import symboltable.SymbolComparator;
 import symboltable.SymbolTable;
 
 /** Analyzer for live variables. */
@@ -110,9 +111,25 @@ public class LivenessAnalyzer {
     DataflowNode startNode = graphBuilder.getStart();
     HashSet<Symbol> definedArguments = startNode.getDef();
     HashSet<Symbol> usedArguments = startNode.getOut();
-    return definedArguments.stream().filter(symbol -> !usedArguments.contains(symbol))
-        .collect(Collectors.toList());
+    return findDefinedButUnusedSymbols(definedArguments, usedArguments);
+  }
 
+  /**
+   * Find symbols that are defined but never read. Sorts the list based on the
+   * variable numbers of the symbols.
+   *
+   * @param definedSymbols Symbols that are declared (and maybe written)
+   * @param usedSymbols    Symbols that are read at least once
+   * @return Sorted list of unused Symbols
+   */
+
+  public static List<Symbol> findDefinedButUnusedSymbols(
+      HashSet<Symbol> definedSymbols, HashSet<Symbol> usedSymbols) {
+    List<Symbol> unusedArguments = definedSymbols.stream()
+        .filter(symbol -> !usedSymbols.contains(symbol))
+        .collect(Collectors.toList());
+    unusedArguments.sort(new SymbolComparator());
+    return unusedArguments;
   }
 
   /**

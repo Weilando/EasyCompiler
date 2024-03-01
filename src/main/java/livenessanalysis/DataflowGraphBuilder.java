@@ -13,6 +13,7 @@ import node.AInitStat;
 import node.AMain;
 import node.APrintStat;
 import node.APrintlnStat;
+import node.AReturnStat;
 import node.AWhileStat;
 import symboltable.Symbol;
 import symboltable.SymbolTable;
@@ -42,6 +43,7 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
     this.current = null;
   }
 
+  // Function heads: define dataflow graph start node
   @Override
   public void inAFunc(AFunc node) {
     this.start = getNewSymbolNode("function head");
@@ -54,6 +56,7 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
     this.current = this.start;
   }
 
+  // Argument definitions: add arguments to the start's def-set
   @Override
   public void inADeclArg(ADeclArg node) {
     String id = node.getId().getText();
@@ -62,10 +65,7 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
     current.addDef(defSymbol);
   }
 
-  // Statements
-  // Create a new Node while going in a statement and add symbol to def-set, if it
-  // is a writing statement
-  // Writing Statements
+  // Writing statements: create new nodes and add symbol to def-set
   @Override
   public void inAInitStat(AInitStat node) {
     String id = node.getId().getText();
@@ -92,7 +92,7 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
     current = successor;
   }
 
-  // Possibly reading statements
+  // Possibly reading statements: create new nodes
   @Override
   public void inADeclStat(ADeclStat node) {
     DataflowNode successor = getNewSymbolNode("declaration");
@@ -149,7 +149,14 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
     current.addEdgeTo(successor);
   }
 
-  // Expressions; add symbols to current DataflowNode's use-set
+  @Override
+  public void inAReturnStat(AReturnStat node) {
+    DataflowNode successor = getNewSymbolNode("return");
+    current.addEdgeTo(successor);
+    current = successor;
+  }
+
+  // Expressions: add symbol to current DataflowNode's use-set ("read" statement)
   @Override
   public void outAIdExpr(AIdExpr node) {
     String id = node.getId().getText();
