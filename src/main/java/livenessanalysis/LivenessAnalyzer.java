@@ -15,8 +15,7 @@ import symboltable.SymbolTable;
 public class LivenessAnalyzer {
   private final SymbolTable symbolTable;
   private final LineEvaluator lineEvaluator;
-  private final HashMap<String, DataflowGraphBuilder> dataflowGraphs;
-  private final HashMap<String, DataflowAnalyzer> dataflowAnalyzers;
+  private final HashMap<String, DataflowGraph> dataflowGraphs;
 
   /**
    * Analyzer for live variables.
@@ -28,7 +27,6 @@ public class LivenessAnalyzer {
     this.symbolTable = symbolTable;
     this.lineEvaluator = lineEvaluator;
     this.dataflowGraphs = createDataflowGraphs(ast);
-    this.dataflowAnalyzers = analyzeDataflowGraphs();
   }
 
   /**
@@ -37,31 +35,18 @@ public class LivenessAnalyzer {
    * @param ast Abstract syntax tree to analyze.
    * @return Map with one dataflow graph per function.
    */
-  HashMap<String, DataflowGraphBuilder> createDataflowGraphs(Start ast) {
-    HashMap<String, DataflowGraphBuilder> dataflowGraphs = new HashMap<>();
+  HashMap<String, DataflowGraph> createDataflowGraphs(Start ast) {
+    HashMap<String, DataflowGraph> dataflowGraphs = new HashMap<>();
     HashMap<String, Node> functionSubTrees = findFunctionSubtrees(ast);
 
     for (String scopeName : symbolTable.getScopeNames()) {
-      DataflowGraphBuilder graphBuilder = new DataflowGraphBuilder(
-          this.symbolTable, this.lineEvaluator);
       Node functionSubTree = functionSubTrees.get(scopeName);
-      functionSubTree.apply(graphBuilder);
-
-      dataflowGraphs.put(scopeName, graphBuilder);
+      DataflowGraph dataflowGraph = new DataflowGraph(
+          this.symbolTable, this.lineEvaluator, functionSubTree);
+      dataflowGraphs.put(scopeName, dataflowGraph);
     }
 
     return dataflowGraphs;
-  }
-
-  HashMap<String, DataflowAnalyzer> analyzeDataflowGraphs() {
-    HashMap<String, DataflowAnalyzer> dataflowAnalyzers = new HashMap<>();
-    for (String functionName : this.dataflowGraphs.keySet()) {
-      DataflowGraphBuilder graphBuilder = this.dataflowGraphs.get(functionName);
-      DataflowAnalyzer graphAnalyzer = new DataflowAnalyzer(graphBuilder);
-      graphAnalyzer.generateInAndOutSets();
-      dataflowAnalyzers.put(functionName, graphAnalyzer);
-    }
-    return dataflowAnalyzers;
   }
 
   private HashMap<String, Node> findFunctionSubtrees(Start ast) {
@@ -71,8 +56,8 @@ public class LivenessAnalyzer {
   }
 
   public void printDataflowGraph(String functionName) {
-    DataflowGraphBuilder graphBuilder = this.dataflowGraphs.get(functionName);
-    graphBuilder.printGraph();
+    DataflowGraph dataflowGraph = this.dataflowGraphs.get(functionName);
+    dataflowGraph.printGraph();
   }
 
   /**
@@ -83,9 +68,9 @@ public class LivenessAnalyzer {
    * @return Minimum number of required registers.
    */
   public int getMinimumRegisters(String functionName) {
-    DataflowAnalyzer dataflowAnalyzer = this.dataflowAnalyzers.get(functionName);
+    DataflowGraph dataflowGraph = this.dataflowGraphs.get(functionName);
     InterferenceGraphAnalyzer interferenceGraphAnalyzer = new InterferenceGraphAnalyzer(
-        symbolTable, dataflowAnalyzer.getDataflowStart(), functionName);
+        symbolTable, dataflowGraph.getEnd(), functionName);
     return interferenceGraphAnalyzer.countColors();
   }
 
@@ -111,8 +96,8 @@ public class LivenessAnalyzer {
    * @return List of unused function arguments.
    */
   public List<Symbol> getUnusedArgs(String functionName) {
-    DataflowGraphBuilder graphBuilder = this.dataflowGraphs.get(functionName);
-    DataflowNode startNode = graphBuilder.getStart();
+    DataflowGraph dataflowGraph = this.dataflowGraphs.get(functionName);
+    DataflowNode startNode = dataflowGraph.getStart();
     HashSet<Symbol> definedArguments = startNode.getDef();
     HashSet<Symbol> usedArguments = startNode.getOut();
     return findDefinedButUnusedSymbols(definedArguments, usedArguments);
