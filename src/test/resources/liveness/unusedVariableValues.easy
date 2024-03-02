@@ -1,0 +1,6 @@
+none <- main() {
+    int used_value = 7;
+    boolean unused_value = true;
+    print(used_value);
+    unused_value = false;
+}

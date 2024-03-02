@@ -266,6 +266,13 @@ public class ParsingTest {
     assertTrue(easyCompiler.parse());
   }
 
+  @Test
+  public void parseunusedVariableValues() {
+    EasyCompiler easyCompiler = new EasyCompiler(
+        pathTestFilesLiveness + "unusedVariableValues.easy");
+    assertTrue(easyCompiler.parse());
+  }
+
   // ----------------------------------------------------
   // Throw parser-errors while parsing files with errors
   // ----------------------------------------------------

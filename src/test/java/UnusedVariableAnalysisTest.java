@@ -1,17 +1,18 @@
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import livenessanalysis.LivenessAnalyzer;
+import livenessanalysis.UnusedVariable;
 import org.junit.jupiter.api.Test;
 import symboltable.Symbol;
 import symboltable.Type;
 
 public class UnusedVariableAnalysisTest {
-  private final String pathAlgorithms = "src/test/resources/algorithms/";
-  private final String pathTestFilesLiveness = "src/test/resources/liveness/";
+  private final String pathTestFiles = "src/test/resources/liveness/";
 
   @Test
   public void findDefinedButUnusedSymbols() {
@@ -34,46 +35,72 @@ public class UnusedVariableAnalysisTest {
   }
 
   @Test
-  public void zeroVariablesAndZeroArguments() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "noVariable.easy");
-    HashMap<String, List<Symbol>> unusedArguments = easyCompiler.getUnusedArgsPerFunction();
-    assertEquals(1, unusedArguments.keySet().size());
-    assertEquals(0, unusedArguments.get("main").size());
-  }
-
-  @Test
-  public void oneVariablesAndZeroArguments() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "oneVariable.easy");
-    HashMap<String, List<Symbol>> unusedArguments = easyCompiler.getUnusedArgsPerFunction();
-    assertEquals(1, unusedArguments.keySet().size());
-    assertEquals(0, unusedArguments.get("main").size());
-  }
-
-  @Test
   public void severalVariablesAndArgumentsButAllUsed() {
+    final String pathAlgorithms = "src/test/resources/algorithms/";
     EasyCompiler easyCompiler = new EasyCompiler(pathAlgorithms + "Euclid.easy");
+
     HashMap<String, List<Symbol>> unusedArguments = easyCompiler.getUnusedArgsPerFunction();
     assertEquals(2, unusedArguments.keySet().size());
     assertEquals(0, unusedArguments.get("main").size());
     assertEquals(0, unusedArguments.get("abs").size());
+
+    HashMap<String, List<UnusedVariable>> unusedValues = easyCompiler
+        .getUnusedVariableValuesPerFunction();
+    assertEquals(2, unusedValues.keySet().size());
+    assertEquals(1, unusedValues.get("main").size()); // limitation in loops
+    assertEquals(0, unusedValues.get("abs").size());
+
+    UnusedVariable unusedVariable = unusedValues.get("main").get(0);
+    assertEquals(33, unusedVariable.getLineNumber());
+    assertEquals("AAssignStat", unusedVariable.getStatementType());
+    Symbol unusedSymbol = unusedVariable.getSymbol();
+    assertEquals(1, unusedSymbol.getVariableNumber());
+    assertEquals(Type.INT, unusedSymbol.getType());
   }
 
   @Test
-  public void twoArgumentsAndOneUnused() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathTestFilesLiveness + "unusedArguments.easy");
+  public void unusedArguments() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFiles + "unusedArguments.easy");
 
     HashMap<String, List<Symbol>> unusedArguments = easyCompiler.getUnusedArgsPerFunction();
 
+    assertTrue(easyCompiler.liveness());
     assertEquals(2, unusedArguments.keySet().size());
     assertEquals(0, unusedArguments.get("main").size());
     assertEquals(2, unusedArguments.get("f").size());
 
     Symbol firstUnusedArgument = unusedArguments.get("f").get(0);
-    assertEquals(firstUnusedArgument.getType(), Type.BOOLEAN);
-    assertEquals(firstUnusedArgument.getVariableNumber(), 1);
+    assertEquals(Type.BOOLEAN, firstUnusedArgument.getType());
+    assertEquals(0, firstUnusedArgument.getVariableNumber());
 
     Symbol secondUnusedArgument = unusedArguments.get("f").get(1);
-    assertEquals(secondUnusedArgument.getType(), Type.STRING);
-    assertEquals(secondUnusedArgument.getVariableNumber(), 2);
+    assertEquals(Type.STRING, secondUnusedArgument.getType());
+    assertEquals(2, secondUnusedArgument.getVariableNumber());
+  }
+
+  @Test
+  public void unusedVariableValues() {
+    EasyCompiler easyCompiler = new EasyCompiler(pathTestFiles + "unusedVariableValues.easy");
+
+    HashMap<String, List<UnusedVariable>> unusedVariableValues = easyCompiler
+        .getUnusedVariableValuesPerFunction();
+
+    assertTrue(easyCompiler.liveness());
+    assertEquals(1, unusedVariableValues.keySet().size());
+    assertEquals(2, unusedVariableValues.get("main").size());
+
+    UnusedVariable firstUnusedVariable = unusedVariableValues.get("main").get(0);
+    assertEquals(3, firstUnusedVariable.getLineNumber());
+    assertEquals("AInitStat", firstUnusedVariable.getStatementType());
+    Symbol firstUnusedSymbol = firstUnusedVariable.getSymbol();
+    assertEquals(1, firstUnusedSymbol.getVariableNumber());
+    assertEquals(Type.BOOLEAN, firstUnusedSymbol.getType());
+
+    UnusedVariable secondUnusedVariable = unusedVariableValues.get("main").get(1);
+    assertEquals(5, secondUnusedVariable.getLineNumber());
+    assertEquals("AAssignStat", secondUnusedVariable.getStatementType());
+    Symbol secondUnusedSymbol = firstUnusedVariable.getSymbol();
+    assertEquals(1, secondUnusedSymbol.getVariableNumber());
+    assertEquals(Type.BOOLEAN, secondUnusedSymbol.getType());
   }
 }

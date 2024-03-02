@@ -8,6 +8,7 @@ import lexer.Lexer;
 import lexer.LexerException;
 import lineevaluation.LineEvaluator;
 import livenessanalysis.LivenessAnalyzer;
+import livenessanalysis.UnusedVariable;
 import node.Start;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -144,8 +145,12 @@ public class EasyCompiler {
       } else if (parsedOptions.hasOption("l")) {
         filePath = parsedOptions.getOptionValue("l");
         easyCompiler = new EasyCompiler(filePath, verbose);
-        easyCompiler.getMinimumRegistersPerFunction();
+        System.out.println("Liveness analysis\n-----------------\n");
         easyCompiler.getUnusedArgsPerFunction();
+        System.out.println();
+        easyCompiler.getUnusedVariableValuesPerFunction();
+        System.out.println();
+        easyCompiler.getMinimumRegistersPerFunction();
       }
     } catch (ParseException e) {
       printCorrectCall(options);
@@ -265,7 +270,6 @@ public class EasyCompiler {
     if (liveness()) {
       HashMap<String, Integer> minRegs = this.livenessAnalyzer.getMinimumRegistersPerFunction();
 
-      System.out.println("Minimum required registers per function:");
       minRegs.forEach((function, registerCount) -> System.out
           .println("Minimum registers for %s: %d".formatted(function, registerCount)));
 
@@ -277,13 +281,31 @@ public class EasyCompiler {
 
   HashMap<String, List<Symbol>> getUnusedArgsPerFunction() {
     if (liveness()) {
-      HashMap<String, List<Symbol>> unusedArgs = this.livenessAnalyzer.getUnusedArgsPerFunction();
+      HashMap<String, List<Symbol>> unusedArgs = this.livenessAnalyzer.getUnusedArgumentsPerFunction();
 
-      System.out.println("\nUnused arguments per function:");
       unusedArgs.forEach((function, unusedArguments) -> System.out
           .println("Unused arguments for %s: %s".formatted(function, unusedArguments)));
 
       return unusedArgs;
+    } else {
+      return new HashMap<>();
+    }
+  }
+
+  HashMap<String, List<UnusedVariable>> getUnusedVariableValuesPerFunction() {
+    if (liveness()) {
+      HashMap<String, List<UnusedVariable>> unusedValues = this.livenessAnalyzer
+          .getUnusedVariableValuesPerFunction();
+
+      for (String functionName : unusedValues.keySet()) {
+        System.err.println("Unused variable values for %s:".formatted(functionName));
+        List<UnusedVariable> currUnusedValues = unusedValues.get(functionName);
+        currUnusedValues.forEach(unusedVariable -> System.out
+            .println("\tLine %d, statement %s: symbol %s".formatted(unusedVariable.getLineNumber(),
+                unusedVariable.getStatementType(), unusedVariable.getSymbol())));
+      }
+
+      return unusedValues;
     } else {
       return new HashMap<>();
     }

@@ -13,7 +13,7 @@ The compiler's output is Jasmin assembler, which can be assembled into Java Byte
 - Calculation and limitation of maximum depth of stack and count of local variables during compilation
 - Type-checking right after parsing
 - Helpful error messages, if applicable with exact line and position in the sourcecode (for parsing- and type-checking-errors)
-- Liveness-analysis
+- Optional liveness-analysis including unused arguments, unused variable values and register counts per function
 
 ## Project Setup
 

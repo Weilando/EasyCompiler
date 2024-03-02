@@ -48,12 +48,10 @@ public class InterferenceGraph {
     HashMap<Symbol, InterferenceGraphNode> nodes = symbolTable
         .generateInterferenceGraphNodes(functionName);
     PriorityQueue<DataflowNode> queue = new PriorityQueue<>();
-    DataflowNode curr;
     queue.add(dataflowStart);
 
     while (queue.peek() != null) {
-      curr = queue.poll();
-      int currNumber = curr.getNumber();
+      DataflowNode curr = queue.poll();
 
       HashSet<Symbol> currOut = curr.getOut();
       for (Symbol currSymbol : currOut) {
@@ -62,7 +60,7 @@ public class InterferenceGraph {
       }
 
       for (DataflowNode predecessor : curr.getPredecessors()) {
-        if (predecessor.getNumber() < currNumber) {
+        if (predecessor.getNumber() < curr.getNumber()) {
           queue.add(predecessor);
         }
       }

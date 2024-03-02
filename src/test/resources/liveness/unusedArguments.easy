@@ -1,6 +1,5 @@
-int <- f(int a, boolean b, string s) {
-    int c = 2;
-    return a;
+boolean <- f(boolean unused_arg1, int used_arg, string unused_arg2) {
+    return used_arg == 2;
 }
 
 none <- main() {}
