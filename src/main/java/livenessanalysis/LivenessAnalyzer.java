@@ -69,7 +69,7 @@ public class LivenessAnalyzer {
    */
   public int getMinimumRegisters(String functionName) {
     DataflowGraph dataflowGraph = this.dataflowGraphs.get(functionName);
-    InterferenceGraphAnalyzer interferenceGraphAnalyzer = new InterferenceGraphAnalyzer(
+    InterferenceGraph interferenceGraphAnalyzer = new InterferenceGraph(
         symbolTable, dataflowGraph.getEnd(), functionName);
     return interferenceGraphAnalyzer.countColors();
   }
