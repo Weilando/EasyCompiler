@@ -3,44 +3,49 @@ package lineevaluation;
 import analysis.ReversedDepthFirstAdapter;
 import java.util.HashMap;
 import node.Node;
-import node.Start;
 import node.Token;
 
 /**
- * Helper that determines the line and position of a node by applying reversed
- * depth first search to the AST.
+ * Helper that determines the line and position of all nodes by applying
+ * reversed depth first search to the AST.
  */
 public class LineEvaluator extends ReversedDepthFirstAdapter {
-  private static final HashMap<Node, Integer> lines = new HashMap<>();
-  private static final HashMap<Node, Integer> positions = new HashMap<>();
-  private static int last_line = -1;
-  private static int last_pos = -1;
+  private final HashMap<Node, Integer> lines;
+  private final HashMap<Node, Integer> positions;
+  private int lastLine;
+  private int lastPos;
 
-  public static void setLines(Start ast) {
-    LineEvaluator lineEvaluator = new LineEvaluator();
-    ast.apply(lineEvaluator);
+  /**
+   * Helper that determines the line and position of all nodes by applying
+   * reversed depth first search to the AST.
+   */
+  public LineEvaluator() {
+    this.lines = new HashMap<>();
+    this.positions = new HashMap<>();
+    this.lastLine = -1;
+    this.lastPos = -1;
   }
 
-  public static int getLine(Node node) {
-    return lines.get(node);
+  public int getLine(Node node) {
+    return this.lines.get(node);
   }
 
-  public static int getPosition(Node node) {
-    return positions.get(node);
+  public int getPosition(Node node) {
+    return this.positions.get(node);
   }
 
-  // All non-token nodes
+  /** Add the last line number and position to a non-token node. */
   public void defaultOut(Node node) {
-    lines.put(node, last_line);
-    positions.put(node, last_pos);
+    this.lines.put(node, this.lastLine);
+    this.positions.put(node, this.lastPos);
   }
 
-  // All tokens
+  /** Create line number and position for a token node. */
   public void defaultCase(Node node) {
     Token token = (Token) node;
-    last_line = token.getLine();
-    last_pos = token.getPos();
-    lines.put(node, last_line);
-    positions.put(node, last_pos);
+    this.lastLine = token.getLine();
+    this.lastPos = token.getPos();
+    this.lines.put(node, this.lastLine);
+    this.positions.put(node, this.lastPos);
   }
 }

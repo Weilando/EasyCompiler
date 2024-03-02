@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+import lineevaluation.LineEvaluator;
 import node.Node;
 import node.Start;
 import symboltable.Symbol;
@@ -13,6 +14,7 @@ import symboltable.SymbolTable;
 /** Analyzer for live variables. */
 public class LivenessAnalyzer {
   private final SymbolTable symbolTable;
+  private final LineEvaluator lineEvaluator;
   private final HashMap<String, DataflowGraphBuilder> dataflowGraphs;
   private final HashMap<String, DataflowAnalyzer> dataflowAnalyzers;
 
@@ -22,8 +24,9 @@ public class LivenessAnalyzer {
    * @param ast         Abstract syntax tree to analyze.
    * @param symbolTable Filled symbol table for the corresponding AST.
    */
-  public LivenessAnalyzer(Start ast, SymbolTable symbolTable) {
+  public LivenessAnalyzer(Start ast, SymbolTable symbolTable, LineEvaluator lineEvaluator) {
     this.symbolTable = symbolTable;
+    this.lineEvaluator = lineEvaluator;
     this.dataflowGraphs = createDataflowGraphs(ast);
     this.dataflowAnalyzers = analyzeDataflowGraphs();
   }
@@ -39,7 +42,8 @@ public class LivenessAnalyzer {
     HashMap<String, Node> functionSubTrees = findFunctionSubtrees(ast);
 
     for (String scopeName : symbolTable.getScopeNames()) {
-      DataflowGraphBuilder graphBuilder = new DataflowGraphBuilder(this.symbolTable);
+      DataflowGraphBuilder graphBuilder = new DataflowGraphBuilder(
+          this.symbolTable, this.lineEvaluator);
       Node functionSubTree = functionSubTrees.get(scopeName);
       functionSubTree.apply(graphBuilder);
 

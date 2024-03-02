@@ -2,6 +2,7 @@ package typecheck;
 
 import analysis.DepthFirstAdapter;
 import java.util.LinkedList;
+import lineevaluation.LineEvaluator;
 import node.AAssignStat;
 import node.AFuncExpr;
 import node.AFuncStat;
@@ -26,8 +27,8 @@ public class TypeChecker extends DepthFirstAdapter {
   private final TypeErrorHandler errorHandler;
   private final SymbolTable symbolTable;
 
-  public TypeChecker(SymbolTable symbolTable) {
-    this.errorHandler = new TypeErrorHandler();
+  public TypeChecker(SymbolTable symbolTable, LineEvaluator lineEvaluator) {
+    this.errorHandler = new TypeErrorHandler(lineEvaluator);
     this.symbolTable = symbolTable;
   }
 

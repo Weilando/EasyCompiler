@@ -116,6 +116,12 @@ public class SymbolTable {
     }
   }
 
+  /**
+   * Generate an interefence graph node for each symbol in the scope.
+   *
+   * @param scopeName Function name to generate the inteference graph for.
+   * @return Map with one interference graph node per symbol.
+   */
   public HashMap<Symbol, InterferenceGraphNode> generateInterferenceGraphNodes(String scopeName) {
     HashMap<String, Symbol> scopeSymbolTable = symbolTablePerScope.get(scopeName);
     HashMap<Symbol, InterferenceGraphNode> nodes = new HashMap<>();

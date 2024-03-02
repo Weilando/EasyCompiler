@@ -11,9 +11,11 @@ import symboltable.Type;
  */
 public class TypeErrorHandler {
   private int errorNumber;
+  LineEvaluator lineEvaluator;
 
-  public TypeErrorHandler() {
-    errorNumber = 0;
+  public TypeErrorHandler(LineEvaluator lineEvaluator) {
+    this.errorNumber = 0;
+    this.lineEvaluator = lineEvaluator;
   }
 
   // Error generators
@@ -108,7 +110,7 @@ public class TypeErrorHandler {
 
   private String generateErrorHeadNode(Node node) {
     return "Type-Error at (%d,%d): ".formatted(
-        LineEvaluator.getLine(node), LineEvaluator.getPosition(node));
+        this.lineEvaluator.getLine(node), this.lineEvaluator.getPosition(node));
   }
 
   private void errorNumberIncrement() {

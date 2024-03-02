@@ -1,4 +1,3 @@
-import codegeneration.CodeCache;
 import codegeneration.CodeGenerator;
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -34,6 +33,7 @@ public class EasyCompiler {
   private SymbolTableBuilder symbolTableBuilder;
   private TypeChecker typeChecker;
   private LivenessAnalyzer livenessAnalyzer;
+  private LineEvaluator lineEvaluator;
   private boolean parseErrorOccurred = false;
   public FileHandler fileHandler;
 
@@ -167,8 +167,11 @@ public class EasyCompiler {
 
     try {
       this.ast = generateAbstractSyntaxTree();
-      printAbstractSyntaxTree();
-      LineEvaluator.setLines(this.ast);
+      if (this.verbose) {
+        printAbstractSyntaxTree();
+      }
+      this.lineEvaluator = new LineEvaluator();
+      this.ast.apply(this.lineEvaluator);
     } catch (IOException e) {
       String filePath = this.fileHandler.getFilePath();
       System.out.println(
@@ -221,7 +224,7 @@ public class EasyCompiler {
       return false;
     } else if (this.typeChecker == null) {
       buildSymbolTable();
-      this.typeChecker = new TypeChecker(this.symbolTable);
+      this.typeChecker = new TypeChecker(this.symbolTable, this.lineEvaluator);
       this.ast.apply(this.typeChecker);
     }
 
@@ -244,7 +247,7 @@ public class EasyCompiler {
   boolean liveness() {
     if (parse() && typeCheck()) {
       if (this.livenessAnalyzer == null) {
-        this.livenessAnalyzer = new LivenessAnalyzer(ast, this.symbolTable);
+        this.livenessAnalyzer = new LivenessAnalyzer(this.ast, this.symbolTable, this.lineEvaluator);
         if (this.verbose) {
           ArrayList<String> functionNames = this.symbolTable.getScopeNames();
           for (String function : functionNames) {
@@ -262,7 +265,7 @@ public class EasyCompiler {
     if (liveness()) {
       HashMap<String, Integer> minRegs = this.livenessAnalyzer.getMinimumRegistersPerFunction();
 
-      System.out.println("\nMinimum required registers per function:");
+      System.out.println("Minimum required registers per function:");
       minRegs.forEach((function, registerCount) -> System.out
           .println("Minimum registers for %s: %d".formatted(function, registerCount)));
 
@@ -297,11 +300,10 @@ public class EasyCompiler {
 
   boolean generateCode() {
     if (parse() && typeCheck()) {
-      CodeCache codeCache = new CodeCache();
       CodeGenerator codeGenerator = new CodeGenerator(
-          codeCache, fileHandler.getProgramName(), this.symbolTable);
+          fileHandler.getProgramName(), this.symbolTable, this.lineEvaluator);
       ast.apply(codeGenerator);
-      this.code = codeCache.getCode();
+      this.code = codeGenerator.getCode();
 
       return true;
     }

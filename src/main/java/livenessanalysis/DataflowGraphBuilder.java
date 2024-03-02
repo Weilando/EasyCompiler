@@ -2,6 +2,7 @@ package livenessanalysis;
 
 import analysis.DepthFirstAdapter;
 import java.util.PriorityQueue;
+import lineevaluation.LineEvaluator;
 import node.AAssignStat;
 import node.ADeclArg;
 import node.ADeclStat;
@@ -15,6 +16,7 @@ import node.APrintStat;
 import node.APrintlnStat;
 import node.AReturnStat;
 import node.AWhileStat;
+import node.Node;
 import symboltable.Symbol;
 import symboltable.SymbolTable;
 
@@ -24,8 +26,9 @@ import symboltable.SymbolTable;
  * a function-related sub-tree of the AST.
  */
 public class DataflowGraphBuilder extends DepthFirstAdapter {
-  private DataflowNode start;
   private final SymbolTable symbolTable;
+  private final LineEvaluator lineEvaluator;
+  private DataflowNode start;
   private DataflowNode current;
   private int currentNumber;
 
@@ -34,10 +37,12 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
    * uses a depth first approach). To build a dataflow graph, apply this class to
    * a function-related sub-tree of the AST.
    *
-   * @param symbolTable Filled symbol table for the corresponding AST.
+   * @param symbolTable   Filled symbol table for the corresponding AST.
+   * @param lineEvaluator Line evaluator that has been applied to the AST.
    */
-  public DataflowGraphBuilder(SymbolTable symbolTable) {
+  public DataflowGraphBuilder(SymbolTable symbolTable, LineEvaluator lineEvaluator) {
     this.symbolTable = symbolTable;
+    this.lineEvaluator = lineEvaluator;
     this.start = null;
     this.currentNumber = 0;
     this.current = null;
@@ -46,13 +51,13 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
   // Function heads: define dataflow graph start node
   @Override
   public void inAFunc(AFunc node) {
-    this.start = getNewSymbolNode("function head");
+    this.start = getNewSymbolNode(node);
     this.current = this.start;
   }
 
   @Override
   public void inAMain(AMain node) {
-    this.start = getNewSymbolNode("function head");
+    this.start = getNewSymbolNode(node);
     this.current = this.start;
   }
 
@@ -72,7 +77,7 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
     String scopeName = symbolTable.determineScope(node);
     Symbol defSymbol = symbolTable.getSymbol(scopeName, id);
 
-    DataflowNode successor = getNewSymbolNode("init");
+    DataflowNode successor = getNewSymbolNode(node);
     successor.addDef(defSymbol);
 
     current.addEdgeTo(successor);
@@ -85,7 +90,7 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
     String scopeName = symbolTable.determineScope(node);
     Symbol defSymbol = symbolTable.getSymbol(scopeName, id);
 
-    DataflowNode successor = getNewSymbolNode("assign");
+    DataflowNode successor = getNewSymbolNode(node);
     successor.addDef(defSymbol);
 
     current.addEdgeTo(successor);
@@ -95,28 +100,28 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
   // Possibly reading statements: create new nodes
   @Override
   public void inADeclStat(ADeclStat node) {
-    DataflowNode successor = getNewSymbolNode("declaration");
+    DataflowNode successor = getNewSymbolNode(node);
     current.addEdgeTo(successor);
     current = successor;
   }
 
   @Override
   public void inAPrintStat(APrintStat node) {
-    DataflowNode successor = getNewSymbolNode("print");
+    DataflowNode successor = getNewSymbolNode(node);
     current.addEdgeTo(successor);
     current = successor;
   }
 
   @Override
   public void inAPrintlnStat(APrintlnStat node) {
-    DataflowNode successor = getNewSymbolNode("println");
+    DataflowNode successor = getNewSymbolNode(node);
     current.addEdgeTo(successor);
     current = successor;
   }
 
   @Override
   public void caseAIfStat(AIfStat node) {
-    DataflowNode successor = getNewSymbolNode("if");
+    DataflowNode successor = getNewSymbolNode(node);
     current.addEdgeTo(successor);
     current = successor;
 
@@ -126,7 +131,7 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
 
   @Override
   public void inAIfelseStat(AIfelseStat node) {
-    DataflowNode successor = getNewSymbolNode("if else");
+    DataflowNode successor = getNewSymbolNode(node);
     current.addEdgeTo(successor);
     current = successor;
 
@@ -137,7 +142,7 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
 
   @Override
   public void inAWhileStat(AWhileStat node) {
-    DataflowNode successor = getNewSymbolNode("while");
+    DataflowNode successor = getNewSymbolNode(node);
     current.addEdgeTo(successor);
     current = successor;
 
@@ -151,7 +156,7 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
 
   @Override
   public void inAReturnStat(AReturnStat node) {
-    DataflowNode successor = getNewSymbolNode("return");
+    DataflowNode successor = getNewSymbolNode(node);
     current.addEdgeTo(successor);
     current = successor;
   }
@@ -166,8 +171,10 @@ public class DataflowGraphBuilder extends DepthFirstAdapter {
   }
 
   // Helpers
-  private DataflowNode getNewSymbolNode(String statementType) {
-    return new DataflowNode(++currentNumber, statementType);
+  private DataflowNode getNewSymbolNode(Node node) {
+    int lineNumber = this.lineEvaluator.getLine(node);
+    String statementType = node.getClass().getSimpleName();
+    return new DataflowNode(++currentNumber, lineNumber, statementType);
   }
 
   DataflowNode getStart() {
