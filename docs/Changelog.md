@@ -2,19 +2,20 @@
 
 This changelog lists [semantic versions](https://semver.org/spec/v2.0.0.html) and related changes.
 
-## Unversioned: ? (#?)
+## 1.0.0: 2024-03-03 (#9)
 
-- :recycle: improve CLI
-  - improve options and add descriptions
-  - improve outputs and the verbosity flag
 - :sparkles: implement liveness-analysis per function
   - determine unused arguments per function
   - determine unused variable declarations per function
   - determine unused variable values per function
   - show register count per function
+- :recycle: improve CLI
+  - improve options and add descriptions
+  - improve outputs and the verbosity flag
+  - improve overall readability and maintainability
+- :heavy_plus_sign: add dependency to _commons-cli_
 - :white_check_mark: extend and update tests
 - :memo: improve documentation
-- :recycle: improve overall readability and maintainability
 
 ## 0.6.0: 2024-01-31 (#8)
 
