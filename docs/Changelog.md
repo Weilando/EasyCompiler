@@ -8,8 +8,10 @@ This changelog lists [semantic versions](https://semver.org/spec/v2.0.0.html) an
   - improve options and add descriptions
   - improve outputs and the verbosity flag
 - :sparkles: implement liveness-analysis per function
-  - show register count per function
   - determine unused arguments per function
+  - determine unused variable declarations per function
+  - determine unused variable values per function
+  - show register count per function
 - :white_check_mark: extend and update tests
 - :memo: improve documentation
 - :recycle: improve overall readability and maintainability

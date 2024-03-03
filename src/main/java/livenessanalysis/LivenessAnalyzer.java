@@ -1,11 +1,11 @@
 package livenessanalysis;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.stream.Collectors;
 import lineevaluation.LineEvaluator;
 import node.Node;
 import node.Start;
@@ -38,7 +38,7 @@ public class LivenessAnalyzer {
    * @param ast Abstract syntax tree to analyze.
    * @return Map with one dataflow graph per function.
    */
-  HashMap<String, DataflowGraph> createDataflowGraphs(Start ast) {
+  private HashMap<String, DataflowGraph> createDataflowGraphs(Start ast) {
     HashMap<String, DataflowGraph> dataflowGraphs = new HashMap<>();
     HashMap<String, Node> functionSubTrees = findFunctionSubtrees(ast);
 
@@ -94,14 +94,30 @@ public class LivenessAnalyzer {
   }
 
   /**
+   * Find declared variables that are never assigned.
+   *
+   * @return List of unused variables per function.
+   */
+  public HashMap<String, List<Symbol>> getUnusedVariableDeclarationssPerFunction() {
+    HashMap<String, List<Symbol>> unusedVarsPerFunction = new HashMap<>();
+    for (String functionName : this.symbolTable.getScopeNames()) {
+      List<Symbol> unusedVariables = getUnusedVariableDeclarations(functionName);
+      unusedVarsPerFunction.put(functionName, unusedVariables);
+    }
+    return unusedVarsPerFunction;
+  }
+
+  /**
    * Find variable values that are assigned but never read.
    *
    * @return List of unused values per function.
    */
-  public HashMap<String, List<UnusedVariable>> getUnusedVariableValuesPerFunction() {
-    HashMap<String, List<UnusedVariable>> unusedValuesPerFunction = new HashMap<>();
+  public HashMap<String, List<UnusedValue>> getUnusedVariableValuesPerFunction() {
+    HashMap<String, List<UnusedValue>> unusedValuesPerFunction = new HashMap<>();
     for (String functionName : this.symbolTable.getScopeNames()) {
-      List<UnusedVariable> unusedValues = getUnusedVariableValues(functionName);
+      DataflowGraph dataflowGraph = this.dataflowGraphs.get(functionName);
+      DataflowNode dataflowGraphStart = dataflowGraph.getStart();
+      List<UnusedValue> unusedValues = getUnusedVariableValues(dataflowGraphStart);
       unusedValuesPerFunction.put(functionName, unusedValues);
     }
     return unusedValuesPerFunction;
@@ -136,17 +152,62 @@ public class LivenessAnalyzer {
   }
 
   /**
-   * Find variable values that are assigned but never read.
+   * Find declared variables that are never assigned.
    *
    * @param functionName Name of the function to analyze.
-   * @return List of unused values.
+   * @return List of unused variables.
    */
-  private List<UnusedVariable> getUnusedVariableValues(String functionName) {
+  private List<Symbol> getUnusedVariableDeclarations(String functionName) {
     DataflowGraph dataflowGraph = this.dataflowGraphs.get(functionName);
-    List<UnusedVariable> unusedVariables = new LinkedList<>();
+    DataflowNode startNode = dataflowGraph.getStart();
+
+    List<Symbol> definedSymbols = this.symbolTable.getNonArgumentSymbols(functionName);
+    List<Symbol> usedSymbols = getAllUsedSymbols(startNode);
+    return findDefinedButUnusedSymbols(definedSymbols, usedSymbols);
+  }
+
+  /**
+   * Join all def-sets from the dataflow graph (for a single function) to
+   * determine all symbols that are written at least once.
+   *
+   * @param dataflowGraphStart Start node of a dataflow graph.
+   * @return List of all used (i.e., written) symbols in the function.
+   */
+  static List<Symbol> getAllUsedSymbols(DataflowNode dataflowGraphStart) {
+    HashSet<Symbol> usedSymbols = new HashSet<>();
 
     PriorityQueue<DataflowNode> queue = new PriorityQueue<>();
-    queue.add(dataflowGraph.getStart());
+    queue.add(dataflowGraphStart);
+
+    while (queue.peek() != null) {
+      final DataflowNode curr = queue.poll();
+
+      HashSet<Symbol> currDef = curr.getDef();
+      usedSymbols.addAll(currDef);
+
+      for (DataflowNode successor : curr.getSuccessors()) {
+        if (successor.getNumber() > curr.getNumber()) {
+          queue.add(successor);
+        }
+      }
+    }
+
+    return usedSymbols.stream()
+        .sorted(new SymbolComparator())
+        .toList();
+  }
+
+  /**
+   * Find variable values that are assigned but never read.
+   *
+   * @param dataflowGraphStart Start node of a dataflow graph.
+   * @return List of unused values.
+   */
+  static List<UnusedValue> getUnusedVariableValues(DataflowNode dataflowGraphStart) {
+    List<UnusedValue> unusedValues = new LinkedList<>();
+
+    PriorityQueue<DataflowNode> queue = new PriorityQueue<>();
+    queue.add(dataflowGraphStart);
 
     while (queue.peek() != null) {
       final DataflowNode curr = queue.poll();
@@ -155,12 +216,12 @@ public class LivenessAnalyzer {
         HashSet<Symbol> currDef = curr.getDef();
         HashSet<Symbol> currOut = curr.getOut();
 
-        List<UnusedVariable> currUnused = findDefinedButUnusedSymbols(currDef, currOut)
+        List<UnusedValue> currUnused = findDefinedButUnusedSymbols(currDef, currOut)
             .stream()
-            .map(symbol -> new UnusedVariable(
+            .map(symbol -> new UnusedValue(
                 curr.getLineNumber(), curr.getStatementType(), symbol))
-            .collect(Collectors.toList());
-        unusedVariables.addAll(currUnused);
+            .toList();
+        unusedValues.addAll(currUnused);
       }
 
       for (DataflowNode successor : curr.getSuccessors()) {
@@ -170,10 +231,10 @@ public class LivenessAnalyzer {
       }
     }
 
-    return unusedVariables;
+    return unusedValues;
   }
 
-  private boolean isWriteStatement(String statementType) {
+  static private boolean isWriteStatement(String statementType) {
     return (statementType.equals("AInitStat")) || (statementType.equals("AAssignStat"));
   }
 
@@ -185,12 +246,11 @@ public class LivenessAnalyzer {
    * @param usedSymbols    Symbols that are read at least once
    * @return Sorted list of unused Symbols
    */
-  public static List<Symbol> findDefinedButUnusedSymbols(
-      HashSet<Symbol> definedSymbols, HashSet<Symbol> usedSymbols) {
-    List<Symbol> unusedArguments = definedSymbols.stream()
+  static List<Symbol> findDefinedButUnusedSymbols(
+      Collection<Symbol> definedSymbols, Collection<Symbol> usedSymbols) {
+    return definedSymbols.stream()
+        .sorted(new SymbolComparator())
         .filter(symbol -> !usedSymbols.contains(symbol))
-        .collect(Collectors.toList());
-    unusedArguments.sort(new SymbolComparator());
-    return unusedArguments;
+        .toList();
   }
 }

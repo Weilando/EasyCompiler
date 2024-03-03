@@ -2,6 +2,7 @@ package symboltable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import livenessanalysis.InterferenceGraphNode;
 import node.AFunc;
 import node.AMain;
@@ -123,10 +124,26 @@ public class SymbolTable {
    * @return Map with one interference graph node per symbol.
    */
   public HashMap<Symbol, InterferenceGraphNode> generateInterferenceGraphNodes(String scopeName) {
-    HashMap<String, Symbol> scopeSymbolTable = symbolTablePerScope.get(scopeName);
+    HashMap<String, Symbol> scopeSymbolTable = this.symbolTablePerScope.get(scopeName);
     HashMap<Symbol, InterferenceGraphNode> nodes = new HashMap<>();
     scopeSymbolTable.forEach(
         (name, symbol) -> nodes.put(symbol, new InterferenceGraphNode(symbol)));
     return nodes;
+  }
+
+  /**
+   * Find all non-argument symbols in the scope.
+   *
+   * @param scopeName Function name to find non-argument symbols for.
+   * @return List with non-argument symbols.
+   */
+  public List<Symbol> getNonArgumentSymbols(String scopeName) {
+    HashMap<String, Symbol> scopeSymbolTable = this.symbolTablePerScope.get(scopeName);
+    FunctionArgumentTypeList argumentTypeList = this.functionArgumentListTable.get(scopeName);
+    final int numberOfArguments = argumentTypeList.getNumberOfArguments();
+    return scopeSymbolTable.values()
+        .stream().sorted(new SymbolComparator())
+        .filter((Symbol symbol) -> (symbol.getVariableNumber() >= numberOfArguments))
+        .toList();
   }
 }

@@ -1,0 +1,6 @@
+none <- main() {
+    int unused_variable;
+    int used_variable;
+    used_variable = 42;
+    print(used_variable);
+}
