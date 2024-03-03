@@ -10,7 +10,8 @@ string <- s() {
   return "abc";
 }
 
-boolean <- b() {
+// return type should be boolean, even if the argument is a string
+boolean <- b(string s) {
   return true;
 }
 
@@ -18,5 +19,5 @@ none <- main() {
   println(i());
   println(f());
   println(s());
-  println(b());
+  println(b("abc"));
 }

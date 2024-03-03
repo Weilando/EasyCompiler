@@ -30,7 +30,7 @@ public class TypeErrorHandler {
     errorNumberIncrement();
     String errorHead = generateErrorHeadId(id);
     String errorMessage = ("cannot be assigned, because the expression type is incompatible."
-        + " Expected \"%s\", but found\"%s\".")
+        + " Expected \"%s\", but found \"%s\".")
         .formatted(varType.toString().toLowerCase(), exprType.toString().toLowerCase());
     System.out.println(errorHead + errorMessage);
   }

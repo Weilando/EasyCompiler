@@ -57,13 +57,13 @@ public class ExpressionTypeEvaluator extends DepthFirstAdapter {
 
   @Override
   public void caseAFuncExpr(AFuncExpr node) {
-    Type returnType = symbolTable.getFunctionReturnType(node.getId().getText());
-    node.setType(returnType);
-    type = returnType;
-
     for (PExpr argExpr : node.getArgs()) {
       argExpr.apply(this);
     }
+
+    Type returnType = symbolTable.getFunctionReturnType(node.getId().getText());
+    node.setType(returnType);
+    type = returnType;
   }
 
   @Override

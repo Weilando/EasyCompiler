@@ -8,6 +8,7 @@ import node.AAssignStat;
 import node.ADeclArg;
 import node.ADeclStat;
 import node.AFunc;
+import node.AFuncStat;
 import node.AIdExpr;
 import node.AIfStat;
 import node.AIfelseStat;
@@ -122,6 +123,13 @@ public class DataflowGraph extends DepthFirstAdapter {
 
   @Override
   public void inAPrintlnStat(APrintlnStat node) {
+    DataflowNode successor = getNewSymbolNode(node);
+    this.current.addEdgeTo(successor);
+    this.current = successor;
+  }
+
+  @Override
+  public void inAFuncStat(AFuncStat node) {
     DataflowNode successor = getNewSymbolNode(node);
     this.current.addEdgeTo(successor);
     this.current = successor;
