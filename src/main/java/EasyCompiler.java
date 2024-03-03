@@ -1,38 +1,42 @@
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-
-import codegeneration.CodeCache;
 import codegeneration.CodeGenerator;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PushbackReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import lexer.Lexer;
 import lexer.LexerException;
 import lineevaluation.LineEvaluator;
 import livenessanalysis.LivenessAnalyzer;
+import livenessanalysis.UnusedValue;
 import node.Start;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import parser.Parser;
 import parser.ParserException;
+import symboltable.Symbol;
 import symboltable.SymbolTable;
 import symboltable.SymbolTableBuilder;
 import typecheck.TypeChecker;
 
 /** Compiler for the Easy language. */
 public class EasyCompiler {
-  private final boolean verbose = false;
-  private final Path sourceFilePath;
+  private boolean verbose;
   private Start ast;
-  private ArrayList<String> code;
+  ArrayList<String> code;
   private SymbolTable symbolTable;
   private SymbolTableBuilder symbolTableBuilder;
   private TypeChecker typeChecker;
+  private LivenessAnalyzer livenessAnalyzer;
+  private LineEvaluator lineEvaluator;
   private boolean parseErrorOccurred = false;
+  public FileHandler fileHandler;
 
   /**
    * Constructor for the EasyCompiler class. Please note that each instance
@@ -41,12 +45,71 @@ public class EasyCompiler {
    * @param sourceFilePath Path to the source file
    */
   public EasyCompiler(String sourceFilePath) {
-    if (!isValidFileName(sourceFilePath)) {
-      System.out.println("Invalid file name.");
-      System.exit(0);
-    }
+    this.verbose = false;
+    this.fileHandler = new FileHandler(sourceFilePath);
+  }
 
-    this.sourceFilePath = Paths.get(sourceFilePath);
+  /**
+   * Constructor for the EasyCompiler class. Please note that each instance
+   * handles a single source file.
+   *
+   * @param sourceFilePath Path to the source file
+   * @param verbose        Flag indicating if additional logs occur
+   */
+  public EasyCompiler(String sourceFilePath, boolean verbose) {
+    this.verbose = verbose;
+    this.fileHandler = new FileHandler(sourceFilePath);
+  }
+
+  /* Generates options for the command line interface parser. */
+  private static Options generateCommandLineOptions() {
+    OptionGroup mainCommandGroup = new OptionGroup();
+    mainCommandGroup.setRequired(true);
+    mainCommandGroup.addOption(Option.builder("c")
+        .longOpt("compile")
+        .hasArg(true)
+        .argName("filePath")
+        .desc("Compile the given source file. Includes parsing and type-checking.")
+        .build());
+    mainCommandGroup.addOption(Option.builder("p")
+        .longOpt("parse")
+        .hasArg(true)
+        .argName("filePath")
+        .desc("Parses the source file and checks the syntax.")
+        .build());
+    mainCommandGroup.addOption(Option.builder("t")
+        .longOpt("typeCheck")
+        .hasArg(true)
+        .argName("filePath")
+        .desc("Check types for the source file. Includes parsing.")
+        .build());
+    mainCommandGroup.addOption(Option.builder("l")
+        .longOpt("liveness")
+        .hasArg(true)
+        .argName("filePath")
+        .desc("Liveness analysis for each function in the source file. Includes type checking.")
+        .build());
+    mainCommandGroup.addOption(Option.builder("h")
+        .longOpt("help")
+        .hasArg(false)
+        .desc("Prints available options and commands.")
+        .build());
+
+    Options options = new Options();
+    options.addOptionGroup(mainCommandGroup);
+    options.addOption("v", "verbose", false,
+        "Enables more detailed outputs.");
+
+    return options;
+  }
+
+  /* Prints the correct usage and available command line options. */
+  private static void printCorrectCall(Options options) {
+    HelpFormatter formatter = new HelpFormatter();
+    final String header = "Compiler and analyzer for the Easy language.";
+
+    formatter.printHelp(80, "EasyCompiler", header,
+        options, "", true);
   }
 
   /**
@@ -55,83 +118,69 @@ public class EasyCompiler {
    * @param args Command line arguments
    */
   public static void main(String[] args) {
-    final String correctCall = "java EasyCompiler -[compile|liveness|typeCheck|parse] <file>.easy";
-    EasyCompiler easyCompiler;
+    Options options = generateCommandLineOptions();
+    CommandLine parsedOptions;
 
-    if (args.length == 2) {
-      easyCompiler = new EasyCompiler(args[1]);
+    try {
+      CommandLineParser cliParser = new DefaultParser();
+      parsedOptions = cliParser.parse(options, args);
 
-      switch (args[0]) {
-        case "-compile":
-          easyCompiler.compile();
-          break;
-        case "-liveness":
-          easyCompiler.liveness();
-          break;
-        case "-typeCheck":
-          easyCompiler.typeCheck();
-          break;
-        case "-parse":
-          easyCompiler.parse();
-          break;
-        default:
-          System.out.println("Unknown Option. Correct call:");
-          System.out.println(correctCall);
+      EasyCompiler easyCompiler;
+      String filePath;
+      boolean verbose = parsedOptions.hasOption("v");
+      if (parsedOptions.hasOption("h")) {
+        printCorrectCall(options);
+      } else if (parsedOptions.hasOption("c")) {
+        filePath = parsedOptions.getOptionValue("c");
+        easyCompiler = new EasyCompiler(filePath, verbose);
+        easyCompiler.compile();
+      } else if (parsedOptions.hasOption("p")) {
+        filePath = parsedOptions.getOptionValue("p");
+        easyCompiler = new EasyCompiler(filePath, verbose);
+        easyCompiler.parse();
+      } else if (parsedOptions.hasOption("t")) {
+        filePath = parsedOptions.getOptionValue("t");
+        easyCompiler = new EasyCompiler(filePath, verbose);
+        easyCompiler.typeCheck();
+      } else if (parsedOptions.hasOption("l")) {
+        filePath = parsedOptions.getOptionValue("l");
+        easyCompiler = new EasyCompiler(filePath, verbose);
+        System.out.println("Liveness analysis\n-----------------\n");
+        easyCompiler.getUnusedArgumentsPerFunction();
+        System.out.println();
+        easyCompiler.getUnusedVariableDeclarationsPerFunction();
+        System.out.println();
+        easyCompiler.getUnusedVariableValuesPerFunction();
+        System.out.println();
+        easyCompiler.getMinimumRegistersPerFunction();
       }
-    } else {
-      System.out.println("Missing argument. Correct call:");
-      System.out.println(correctCall);
+    } catch (ParseException e) {
+      printCorrectCall(options);
+    } catch (Exception e) {
+      System.out.println("An unexpected error occurred: %s".formatted(e.getMessage()));
     }
   }
 
-  // ------------
-  // Compilation
-  // ------------
-  void compile() {
-    if (generateCode() && writeOutputFile()) {
-      System.out.println("Successful!");
-    }
-  }
-
-  boolean generateCode() {
-    if (parse() && typeCheck()) {
-      CodeCache codeCache = new CodeCache();
-      CodeGenerator codeGenerator = new CodeGenerator(
-          codeCache, getProgramName(), this.symbolTable);
-      ast.apply(codeGenerator);
-      this.code = codeCache.getCode();
-
-      return true;
-    }
-    return false;
-  }
-
-  // ---------
-  // Analysis
-  // ---------
-  void liveness() {
-    if (parse() && typeCheck()) {
-      LivenessAnalyzer analyzer = new LivenessAnalyzer(ast, this.symbolTable);
-
-      if (verbose) {
-        analyzer.printGraph();
-      }
-
-      System.out.println(String.format("Registers: %d", analyzer.getMinimumRegisters()));
-    }
-  }
+  // -------
+  // Parsing
+  // -------
 
   boolean parse() {
-    if ((ast == null) && parseErrorOccurred) {
+    if ((this.ast == null) && this.parseErrorOccurred) {
       return false;
+    } else if (this.ast != null) {
+      return true;
     }
 
     try {
       this.ast = generateAbstractSyntaxTree();
-      printAbstractSyntaxTree();
-      LineEvaluator.setLines(this.ast);
+      if (this.verbose) {
+        printAbstractSyntaxTree();
+      }
+      this.lineEvaluator = new LineEvaluator();
+      this.ast.apply(this.lineEvaluator);
     } catch (IOException e) {
-      String filePath = this.sourceFilePath.toString();
+      String filePath = this.fileHandler.getFilePath();
       System.out.println(
           "Input-Error: An error occurred while reading input file \"%s\".".formatted(filePath));
       System.out.println(e.toString());
@@ -148,31 +197,46 @@ public class EasyCompiler {
     return true;
   }
 
+  Start generateAbstractSyntaxTree() throws IOException, LexerException, ParserException {
+    PushbackReader fileReader = this.fileHandler.getPushbackReader();
+    Lexer lexer = new Lexer(fileReader);
+    Parser parser = new Parser(lexer);
+    return parser.parse();
+  }
+
+  private void printAbstractSyntaxTree() {
+    if ((this.ast != null) && verbose) {
+      ASTPrinter printer = new ASTPrinter();
+      this.ast.apply(printer);
+    }
+  }
+
+  // -------------
+  // Type-Checking
+  // -------------
+
   boolean buildSymbolTable() {
     if (!parse()) {
       return false;
-    } else if (this.symbolTableBuilder != null) {
-      return true;
+    } else if (this.symbolTableBuilder == null) {
+      this.symbolTableBuilder = new SymbolTableBuilder();
+      this.ast.apply(symbolTableBuilder);
+      this.symbolTable = symbolTableBuilder.getSymbolTable();
     }
-
-    this.symbolTableBuilder = new SymbolTableBuilder();
-    this.ast.apply(symbolTableBuilder);
-    this.symbolTable = symbolTableBuilder.getSymbolTable();
 
     return !this.symbolTableBuilder.errorsOccurred();
   }
 
   boolean typeCheck() {
-    if (!parse() || !buildSymbolTable()) {
+    if (!parse()) {
       return false;
-    } else if (this.typeChecker != null) {
-      return true;
+    } else if (this.typeChecker == null) {
+      buildSymbolTable();
+      this.typeChecker = new TypeChecker(this.symbolTable, this.lineEvaluator);
+      this.ast.apply(this.typeChecker);
     }
 
-    this.typeChecker = new TypeChecker(this.symbolTable);
-    this.ast.apply(this.typeChecker);
-
-    return !this.typeChecker.errorsOccurred();
+    return !(this.symbolTableBuilder.errorsOccurred() || this.typeChecker.errorsOccurred());
   }
 
   int getSymbolErrorNumber() {
@@ -185,51 +249,107 @@ public class EasyCompiler {
     return this.typeChecker.getErrorNumber();
   }
 
-  // --------
-  // Helpers
-  // --------
-  String getProgramName() {
-    return this.sourceFilePath.getFileName().toString().replaceAll(".easy", "");
-  }
+  // -----------------
+  // Liveness-Analysis
+  // -----------------
 
-  String getJasminFileNameAndPath() {
-    return this.sourceFilePath.toString().replace(".easy", ".j");
-  }
-
-  static boolean isValidFileName(String fileName) {
-    File file = new File(fileName);
-    return file.getName().matches("[a-zA-Z]\\w*\\.easy");
-  }
-
-  Start generateAbstractSyntaxTree() throws IOException, LexerException, ParserException {
-    FileReader fileReader = new FileReader(this.sourceFilePath.toFile());
-    PushbackReader pushbackReader = new PushbackReader(fileReader);
-    Lexer lexer = new Lexer(pushbackReader);
-    Parser parser = new Parser(lexer);
-    return parser.parse();
-  }
-
-  private void printAbstractSyntaxTree() {
-    if ((this.ast != null) && verbose) {
-      ASTPrinter printer = new ASTPrinter();
-      this.ast.apply(printer);
-    }
-  }
-
-  boolean writeOutputFile() {
-    if (this.code == null) {
-      System.out.println("The output file could not be written, because no code was generated.");
+  boolean liveness() {
+    if (parse() && typeCheck()) {
+      if (this.livenessAnalyzer == null) {
+        this.livenessAnalyzer = new LivenessAnalyzer(
+            this.ast, this.symbolTable, this.lineEvaluator);
+        if (this.verbose) {
+          ArrayList<String> functionNames = this.symbolTable.getScopeNames();
+          for (String function : functionNames) {
+            this.livenessAnalyzer.printDataflowGraph(function);
+          }
+        }
+      }
+      return true;
+    } else {
       return false;
     }
+  }
 
-    try {
-      Path jasminFile = Paths.get(getJasminFileNameAndPath());
-      Files.write(jasminFile, this.code, StandardCharsets.UTF_8, CREATE, TRUNCATE_EXISTING);
-    } catch (IOException e) {
-      System.out.println("An error occurred while writing the output file.");
-      e.printStackTrace();
-      return false;
+  HashMap<String, List<Symbol>> getUnusedArgumentsPerFunction() {
+    if (liveness()) {
+      HashMap<String, List<Symbol>> unusedArguments = this.livenessAnalyzer
+          .getUnusedArgumentsPerFunction();
+
+      unusedArguments.forEach((function, currUnusedArguments) -> System.out
+          .println("Unused arguments for %s: %s".formatted(function, currUnusedArguments)));
+
+      return unusedArguments;
+    } else {
+      return new HashMap<>();
     }
-    return true;
+  }
+
+  HashMap<String, List<Symbol>> getUnusedVariableDeclarationsPerFunction() {
+    if (liveness()) {
+      HashMap<String, List<Symbol>> unusedDeclarations = this.livenessAnalyzer
+          .getUnusedVariableDeclarationssPerFunction();
+
+      unusedDeclarations.forEach((function, currUnusedDeclarations) -> System.out
+          .println("Unused variable declarations for %s: %s".formatted(function, currUnusedDeclarations)));
+
+      return unusedDeclarations;
+    } else {
+      return new HashMap<>();
+    }
+  }
+
+  HashMap<String, List<UnusedValue>> getUnusedVariableValuesPerFunction() {
+    if (liveness()) {
+      HashMap<String, List<UnusedValue>> unusedValues = this.livenessAnalyzer
+          .getUnusedVariableValuesPerFunction();
+
+      for (String functionName : unusedValues.keySet()) {
+        System.err.println("Potentially unused variable values for %s:".formatted(functionName));
+        List<UnusedValue> currUnusedValues = unusedValues.get(functionName);
+        currUnusedValues.forEach(unusedVariable -> System.out
+            .println("\tLine %d, statement %s: symbol %s".formatted(unusedVariable.getLineNumber(),
+                unusedVariable.getStatementType(), unusedVariable.getSymbol())));
+      }
+
+      return unusedValues;
+    } else {
+      return new HashMap<>();
+    }
+  }
+
+  HashMap<String, Integer> getMinimumRegistersPerFunction() {
+    if (liveness()) {
+      HashMap<String, Integer> minRegs = this.livenessAnalyzer.getMinimumRegistersPerFunction();
+
+      minRegs.forEach((function, registerCount) -> System.out
+          .println("Minimum registers for %s: %d".formatted(function, registerCount)));
+
+      return minRegs;
+    } else {
+      return new HashMap<>();
+    }
+  }
+
+  // ------------
+  // Compilation
+  // ------------
+
+  void compile() {
+    if (generateCode() && fileHandler.writeOutputFile(this.code)) {
+      System.out.println("Successful!");
+    }
+  }
+
+  boolean generateCode() {
+    if (parse() && typeCheck()) {
+      CodeGenerator codeGenerator = new CodeGenerator(
+          fileHandler.getProgramName(), this.symbolTable, this.lineEvaluator);
+      ast.apply(codeGenerator);
+      this.code = codeGenerator.getCode();
+
+      return true;
+    }
+    return false;
   }
 }

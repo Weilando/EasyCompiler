@@ -1,6 +1,7 @@
 package codegeneration;
 
 import analysis.DepthFirstAdapter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lineevaluation.LineEvaluator;
@@ -53,22 +54,25 @@ public class CodeGenerator extends DepthFirstAdapter {
   private final CodeCache cache;
   private final String programName;
   private final SymbolTable symbolTable;
+  private final LineEvaluator lineEvaluator;
   private int lastContinueLabel;
   private int lastHeadLabel;
   private int lastTrueLabel;
 
   /**
-   * The CodeGenerator walks the AST using Depth First Search and emit Jasmin
+   * The CodeGenerator walks the AST using Depth First Search and emits Jasmin
    * assembly code.
    *
-   * @param cache       Code cache
-   * @param programName Name of the program, used for source and class name
-   * @param symbolTable Symbol table
+   * @param programName   Name of the program, used for source and class name
+   * @param symbolTable   Filled symbol table
+   * @param lineEvaluator Line evaluator that was applied to the AST
    */
-  public CodeGenerator(CodeCache cache, String programName, SymbolTable symbolTable) {
-    this.cache = cache;
+  public CodeGenerator(
+      String programName, SymbolTable symbolTable, LineEvaluator lineEvaluator) {
+    this.cache = new CodeCache();
     this.programName = programName;
     this.symbolTable = symbolTable;
+    this.lineEvaluator = lineEvaluator;
     this.lastContinueLabel = 0;
     this.lastHeadLabel = 0;
     this.lastTrueLabel = 0;
@@ -634,6 +638,10 @@ public class CodeGenerator extends DepthFirstAdapter {
   }
 
   void addLineNumber(Node node, String description) {
-    cache.addIndentedLine(String.format(".line %d ; %s", LineEvaluator.getLine(node), description));
+    cache.addIndentedLine(".line %d ; %s".formatted(this.lineEvaluator.getLine(node), description));
+  }
+
+  public ArrayList<String> getCode() {
+    return this.cache.getCode();
   }
 }

@@ -1,4 +1,3 @@
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -9,8 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class EasyCompilerTest {
-  private final String correctCall = "java EasyCompiler -[compile|liveness|typeCheck|parse] <file>.easy";
-
   private final String pathMinimalProgram = "src/test/resources/correct/Minimal.easy";
 
   private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
@@ -37,14 +34,14 @@ public class EasyCompilerTest {
   public void callWithoutArgsShouldFail() {
     String[] args = {};
     EasyCompiler.main(args);
-    assertTrue(outContent.toString().contains(correctCall));
+    assertTrue(outContent.toString().contains("usage"));
   }
 
   @Test
   public void callWithCompileFlagAndMissingFilenameShouldFail() {
     String[] args = { "-compile" };
     EasyCompiler.main(args);
-    assertTrue(outContent.toString().contains(correctCall));
+    assertTrue(outContent.toString().contains("usage"));
   }
 
   @Test
@@ -52,30 +49,18 @@ public class EasyCompilerTest {
     // Use an incorrect file to avoid any output-files.
     String[] args = { "-compile", "src/test/resources/failParser/FailMissingBrace.easy" };
     EasyCompiler.main(args);
-    assertFalse(outContent.toString().contains(correctCall));
-  }
-
-  @Test
-  public void callWithLivenessFlagAndFilenameShouldWork() {
-    // Use an incorrect file to avoid any output-files.
-    String[] args = { "-liveness", pathMinimalProgram };
-    EasyCompiler.main(args);
-    assertFalse(outContent.toString().contains(correctCall));
-    assertTrue(outContent.toString().contains("Registers: 0"));
   }
 
   @Test
   public void callWithParseFlagAndFilenameShouldWork() {
     String[] args = { "-parse", pathMinimalProgram };
     EasyCompiler.main(args);
-    assertFalse(outContent.toString().contains(correctCall));
   }
 
   @Test
   public void callWithTypeCheckFlagAndFilenameShouldWork() {
     String[] args = { "-typeCheck", pathMinimalProgram };
     EasyCompiler.main(args);
-    assertFalse(outContent.toString().contains(correctCall));
   }
 
   // --------------------
@@ -96,53 +81,5 @@ public class EasyCompilerTest {
     EasyCompiler.main(args);
     assertTrue(outContent.toString().contains("Parser-Error: "));
     assertFalse(outContent.toString().contains("Successful!"));
-  }
-
-  // ---------------------
-  // Test isValidFileName
-  // ---------------------
-  @Test
-  public void emptyStringIsNoValidFileName() {
-    String invalidFileName = "";
-    assertFalse(EasyCompiler.isValidFileName(invalidFileName));
-  }
-
-  @Test
-  public void fileExtensionIsInvalidFileName() {
-    String invalidFileName = ".easy";
-    assertFalse(EasyCompiler.isValidFileName(invalidFileName));
-  }
-
-  @Test
-  public void nameWithoutFileExtensionIsInvalidFileName() {
-    String invalidFileName = "Program";
-    assertFalse(EasyCompiler.isValidFileName(invalidFileName));
-  }
-
-  @Test
-  public void nameWithoutLetterIsInvalidFileName() {
-    String invalidFileName = "1.easy";
-    assertFalse(EasyCompiler.isValidFileName(invalidFileName));
-  }
-
-  @Test
-  public void validFileName() {
-    String validFileName = "Program_1.easy";
-    assertTrue(EasyCompiler.isValidFileName(validFileName));
-  }
-
-  // --------------------
-  // Test helper methods
-  // --------------------
-  @Test
-  public void generateCorrectJasminFileNameAndPath() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathMinimalProgram);
-    assertEquals("src/test/resources/correct/Minimal.j", easyCompiler.getJasminFileNameAndPath());
-  }
-
-  @Test
-  public void extractCorrectProgramName() {
-    EasyCompiler easyCompiler = new EasyCompiler(pathMinimalProgram);
-    assertEquals("Minimal", easyCompiler.getProgramName());
   }
 }

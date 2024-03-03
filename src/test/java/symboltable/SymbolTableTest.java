@@ -2,6 +2,8 @@ package symboltable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class SymbolTableTest {
@@ -29,6 +31,7 @@ public class SymbolTableTest {
     assertEquals(1, symbolTable.getVariableNumber("newScope", "symbol1"));
     assertEquals(Type.INT, symbolTable.getSymbolType("newScope", "symbol0"));
     assertEquals(Type.STRING, symbolTable.getSymbolType("newScope", "symbol1"));
+    assertEquals(new ArrayList<String>(List.of("newScope")), symbolTable.getScopeNames());
   }
 
   @Test
@@ -60,5 +63,26 @@ public class SymbolTableTest {
     assertEquals(Type.INT, symbolTable.getSymbolType("scopeA", "symbol0"));
     assertEquals(Type.INT, symbolTable.getSymbolType("scopeA", "symbol1"));
     assertEquals(Type.FLOAT, symbolTable.getSymbolType("scopeB", "symbol"));
+    assertEquals(new ArrayList<String>(List.of("scopeA", "scopeB")), symbolTable.getScopeNames());
+  }
+
+  @Test
+  public void getNonArgumentSymbols() {
+    SymbolTable symbolTable = new SymbolTable();
+    symbolTable.addNewScope("f", Type.INT);
+    symbolTable.addFunctionArgumentType("f", Type.INT);
+    symbolTable.addSymbolToScope("f", "argumentName", Type.INT);
+    symbolTable.addSymbolToScope("f", "symbolA", Type.INT);
+    symbolTable.addSymbolToScope("f", "symbolB", Type.INT);
+
+    List<Symbol> nonArgumentSymbols = symbolTable.getNonArgumentSymbols("f");
+
+    assertEquals(3, symbolTable.countSymbolsInScope("f"));
+    assertEquals(1, symbolTable.getNumberOfArguments("f"));
+    assertEquals(2, nonArgumentSymbols.size());
+    assertEquals(1, symbolTable.getVariableNumber("f", "symbolA"));
+    assertEquals(2, symbolTable.getVariableNumber("f", "symbolB"));
+    assertEquals(Type.INT, symbolTable.getSymbolType("f", "symbolA"));
+    assertEquals(Type.INT, symbolTable.getSymbolType("f", "symbolB"));
   }
 }

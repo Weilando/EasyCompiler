@@ -3,8 +3,10 @@ package livenessanalysis;
 import java.util.HashSet;
 import symboltable.Symbol;
 
+/** Node in a dataflow graph. */
 public class DataflowNode implements Comparable<DataflowNode> {
   private final int number;
+  private final int lineNumber;
   private final String statementType;
   private final HashSet<DataflowNode> predecessors;
   private final HashSet<DataflowNode> successors;
@@ -13,8 +15,15 @@ public class DataflowNode implements Comparable<DataflowNode> {
   private final HashSet<Symbol> in;
   private final HashSet<Symbol> out;
 
-  public DataflowNode(int number, String statementType) {
+  /**
+   * Node in a dataflow graph.
+   *
+   * @param number        Identifier of this node.
+   * @param statementType Related statement of this node.
+   */
+  public DataflowNode(int number, int lineNumber, String statementType) {
     this.number = number;
+    this.lineNumber = lineNumber;
     this.statementType = statementType;
     this.predecessors = new HashSet<>();
     this.successors = new HashSet<>();
@@ -25,19 +34,19 @@ public class DataflowNode implements Comparable<DataflowNode> {
   }
 
   private void addSuccessor(DataflowNode node) {
-    successors.add(node);
+    this.successors.add(node);
   }
 
   private void addPredecessor(DataflowNode node) {
-    predecessors.add(node);
+    this.predecessors.add(node);
   }
 
   HashSet<DataflowNode> getSuccessors() {
-    return successors;
+    return this.successors;
   }
 
   HashSet<DataflowNode> getPredecessors() {
-    return predecessors;
+    return this.predecessors;
   }
 
   void addEdgeTo(DataflowNode node) {
@@ -46,23 +55,23 @@ public class DataflowNode implements Comparable<DataflowNode> {
   }
 
   void addDef(Symbol symbol) {
-    def.add(symbol);
+    this.def.add(symbol);
   }
 
   public HashSet<Symbol> getDef() {
-    return def;
+    return this.def;
   }
 
   void addUse(Symbol symbol) {
-    use.add(symbol);
+    this.use.add(symbol);
   }
 
   public HashSet<Symbol> getUse() {
-    return use;
+    return this.use;
   }
 
   void addIn(HashSet<Symbol> symbols) {
-    in.addAll(symbols);
+    this.in.addAll(symbols);
   }
 
   HashSet<Symbol> getIn() {
@@ -70,18 +79,22 @@ public class DataflowNode implements Comparable<DataflowNode> {
   }
 
   void addOut(HashSet<Symbol> symbols) {
-    out.addAll(symbols);
+    this.out.addAll(symbols);
   }
 
   public HashSet<Symbol> getOut() {
-    return out;
+    return this.out;
   }
 
   public int getNumber() {
-    return number;
+    return this.number;
   }
 
-  private String getSuccessorNumberSet() {
+  public int getLineNumber() {
+    return this.lineNumber;
+  }
+
+  private String getSuccessorNumbers() {
     String returnString = "{";
     for (DataflowNode curr : getSuccessors()) {
       returnString = returnString.concat(String.format("#%d, ", curr.getNumber()));
@@ -93,9 +106,11 @@ public class DataflowNode implements Comparable<DataflowNode> {
     return statementType;
   }
 
+  /** Generate a string representation including all relevant sets. */
   public String toString() {
-    return String.format("#%d\tDef: %s Use: %s, In: %s, Out: %s, Edges to: %s, Statement type: %s",
-        getNumber(), getDef(), getUse(), getIn(), getOut(), getSuccessorNumberSet(), getStatementType());
+    return "#%d, %s on line %d:\tDef: %s Use: %s, In: %s, Out: %s, Edges to: %s".formatted(
+        getNumber(), getStatementType(), getLineNumber(),
+        getDef(), getUse(), getIn(), getOut(), getSuccessorNumbers());
   }
 
   public int compareTo(DataflowNode node) {
